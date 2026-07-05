@@ -23,9 +23,8 @@
           @click="selectSystem('VAMPIRE')"
           class="bg-surface border-2 border-gray-800 rounded-xl overflow-hidden cursor-pointer group hover:border-red-600 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-red-900/40 flex flex-col"
         >
-          <div class="h-48 bg-gradient-to-b from-red-900/40 to-surface flex items-center justify-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-[url('https://www.worldofdarkness.com/images/brands/vampire-logo.svg')] bg-no-repeat bg-center bg-contain opacity-10 group-hover:opacity-20 transition-opacity"></div>
-            <span class="text-6xl group-hover:scale-110 transition-transform">🦇</span>
+          <div class="h-48 relative overflow-hidden bg-black">
+            <div class="absolute inset-0 bg-[url('/images/vampire.png')] bg-cover bg-center opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"></div>
           </div>
           <div class="p-6 flex-grow flex flex-col">
             <h3 class="text-2xl font-headline font-bold text-gray-100 group-hover:text-red-500 transition-colors mb-2">Vampiro</h3>
@@ -41,9 +40,8 @@
           @click="selectSystem('WEREWOLF')"
           class="bg-surface border-2 border-gray-800 rounded-xl overflow-hidden cursor-pointer group hover:border-green-600 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-900/40 flex flex-col"
         >
-          <div class="h-48 bg-gradient-to-b from-green-900/40 to-surface flex items-center justify-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-[url('https://www.worldofdarkness.com/images/brands/werewolf-logo.svg')] bg-no-repeat bg-center bg-contain opacity-10 group-hover:opacity-20 transition-opacity"></div>
-            <span class="text-6xl group-hover:scale-110 transition-transform">🐺</span>
+          <div class="h-48 relative overflow-hidden bg-black">
+            <div class="absolute inset-0 bg-[url('/images/werewolf.png')] bg-cover bg-center opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"></div>
           </div>
           <div class="p-6 flex-grow flex flex-col">
             <h3 class="text-2xl font-headline font-bold text-gray-100 group-hover:text-green-500 transition-colors mb-2">Lobisomem</h3>
@@ -59,9 +57,8 @@
           @click="selectSystem('MAGE')"
           class="bg-surface border-2 border-gray-800 rounded-xl overflow-hidden cursor-pointer group hover:border-purple-600 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-900/40 flex flex-col"
         >
-          <div class="h-48 bg-gradient-to-b from-purple-900/40 to-surface flex items-center justify-center relative overflow-hidden">
-             <div class="absolute inset-0 bg-no-repeat bg-center bg-contain opacity-10 group-hover:opacity-20 transition-opacity"></div>
-            <span class="text-6xl group-hover:scale-110 transition-transform">👁️</span>
+          <div class="h-48 relative overflow-hidden bg-black">
+            <div class="absolute inset-0 bg-[url('/images/mage.png')] bg-cover bg-center opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"></div>
           </div>
           <div class="p-6 flex-grow flex flex-col">
             <h3 class="text-2xl font-headline font-bold text-gray-100 group-hover:text-purple-500 transition-colors mb-2">Mago</h3>
@@ -77,9 +74,8 @@
           @click="selectSystem('HUNTER')"
           class="bg-surface border-2 border-gray-800 rounded-xl overflow-hidden cursor-pointer group hover:border-orange-600 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-orange-900/40 flex flex-col"
         >
-          <div class="h-48 bg-gradient-to-b from-orange-900/40 to-surface flex items-center justify-center relative overflow-hidden">
-             <div class="absolute inset-0 bg-no-repeat bg-center bg-contain opacity-10 group-hover:opacity-20 transition-opacity"></div>
-            <span class="text-6xl group-hover:scale-110 transition-transform">🏹</span>
+          <div class="h-48 relative overflow-hidden bg-black">
+            <div class="absolute inset-0 bg-[url('/images/hunter.png')] bg-cover bg-center opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"></div>
           </div>
           <div class="p-6 flex-grow flex flex-col">
             <h3 class="text-2xl font-headline font-bold text-gray-100 group-hover:text-orange-500 transition-colors mb-2">Caçador</h3>
