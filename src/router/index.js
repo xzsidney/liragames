@@ -24,37 +24,35 @@ const routes = [
     component: () => import('../views/Mestre/Aventura.vue'),
     meta: { requiresAuth: true, role: 'MESTRE' } 
   },
-  // Rotas de Jogador
+  // Rotas de Jogador (Silos por Sistema)
   { 
     path: '/jogador', 
     name: 'JogadorDashboard', 
-    component: () => import('../views/Jogador/Dashboard.vue'),
+    component: () => import('../views/Jogador/Dashboard.vue'), // Hub de Sistemas
     meta: { requiresAuth: true, role: 'JOGADOR' }
   },
+  
+  // --- VAMPIRO ---
   { 
-    path: '/jogador/personagem/novo/sistema', 
-    name: 'SystemSelection', 
-    component: () => import('../views/Jogador/SystemSelection.vue'),
+    path: '/jogador/vampire', 
+    name: 'VampireDashboard', 
+    component: () => import('../views/Jogador/Vampiro/VampireDashboard.vue'),
     meta: { requiresAuth: true, role: 'JOGADOR' } 
   },
   { 
-    path: '/jogador/personagem/novo', 
-    name: 'CriarPersonagem', 
-    component: () => import('../views/Jogador/NovoPersonagem.vue'),
+    path: '/jogador/vampire/novo', 
+    name: 'VampireCreation', 
+    component: () => import('../views/Jogador/Vampiro/VampireCreation.vue'),
     meta: { requiresAuth: true, role: 'JOGADOR' } 
   },
   { 
-    path: '/jogador/personagem/:id', 
-    name: 'CharacterDashboard', 
-    component: () => import('../views/Jogador/CharacterDashboard.vue'),
+    path: '/jogador/vampire/personagem/:id', 
+    name: 'VampireEdit', 
+    component: () => import('../views/Jogador/Vampiro/VampireEdit.vue'),
     meta: { requiresAuth: true, role: 'JOGADOR' } 
   },
-  { 
-    path: '/jogador/personagem/:id/editar', 
-    name: 'EditCharacter', 
-    component: () => import('../views/Jogador/EditCharacter.vue'),
-    meta: { requiresAuth: true, role: 'JOGADOR' } 
-  },
+  
+  // Loja e Aventura genéricas (se existirem)
   { 
     path: '/jogador/loja', 
     name: 'Loja', 
