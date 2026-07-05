@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "npm run build",
+    "start": "node server.js"
   },
   "dependencies": {
     "@iconify/vue": "^5.0.1",
     "axios": "^1.18.1",
+    "express": "^4.19.2",
     "page-flip": "^2.0.7",
     "pinia": "^3.0.4",
     "vue": "^3.5.39",
