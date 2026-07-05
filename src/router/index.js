@@ -32,6 +32,12 @@ const routes = [
     meta: { requiresAuth: true, role: 'JOGADOR' }
   },
   { 
+    path: '/jogador/personagem/novo/sistema', 
+    name: 'SystemSelection', 
+    component: () => import('../views/Jogador/SystemSelection.vue'),
+    meta: { requiresAuth: true, role: 'JOGADOR' } 
+  },
+  { 
     path: '/jogador/personagem/novo', 
     name: 'CriarPersonagem', 
     component: () => import('../views/Jogador/NovoPersonagem.vue'),
@@ -39,8 +45,14 @@ const routes = [
   },
   { 
     path: '/jogador/personagem/:id', 
-    name: 'FichaPersonagem', 
-    component: () => import('../views/Jogador/Ficha.vue'),
+    name: 'CharacterDashboard', 
+    component: () => import('../views/Jogador/CharacterDashboard.vue'),
+    meta: { requiresAuth: true, role: 'JOGADOR' } 
+  },
+  { 
+    path: '/jogador/personagem/:id/editar', 
+    name: 'EditCharacter', 
+    component: () => import('../views/Jogador/EditCharacter.vue'),
     meta: { requiresAuth: true, role: 'JOGADOR' } 
   },
   { 
