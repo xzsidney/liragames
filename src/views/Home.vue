@@ -10,10 +10,18 @@
           <a href="#estatisticas" class="hover:text-vampire transition-colors">Comunidade</a>
         </nav>
         <div class="flex items-center space-x-4">
-          <router-link to="/login" class="hover:text-vampire transition-colors">Entrar</router-link>
-          <router-link to="/cadastro" class="bg-vampire hover:bg-red-900 text-white px-6 py-2 rounded-md font-semibold transition-all shadow-[0_0_15px_rgba(139,0,0,0.4)] hover:shadow-[0_0_25px_rgba(139,0,0,0.6)]">
-            Cadastrar-se
-          </router-link>
+          <template v-if="authStore.isAuthenticated">
+            <button @click="goToHub" class="hover:text-vampire transition-colors">Hub</button>
+            <button @click="handleLogout" class="bg-vampire hover:bg-red-900 text-white px-6 py-2 rounded-md font-semibold transition-all shadow-[0_0_15px_rgba(139,0,0,0.4)] hover:shadow-[0_0_25px_rgba(139,0,0,0.6)]">
+              Sair
+            </button>
+          </template>
+          <template v-else>
+            <router-link to="/login" class="hover:text-vampire transition-colors">Entrar</router-link>
+            <router-link to="/cadastro" class="bg-vampire hover:bg-red-900 text-white px-6 py-2 rounded-md font-semibold transition-all shadow-[0_0_15px_rgba(139,0,0,0.4)] hover:shadow-[0_0_25px_rgba(139,0,0,0.6)]">
+              Cadastrar-se
+            </router-link>
+          </template>
         </div>
       </div>
     </header>
@@ -35,9 +43,16 @@
       </p>
       
       <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 z-10">
-        <router-link to="/login" class="bg-vampire hover:bg-red-900 text-white px-8 py-3 rounded-md font-semibold text-lg transition-all shadow-[0_0_15px_rgba(139,0,0,0.4)] flex items-center justify-center">
-          Começar Agora <span class="ml-2">→</span>
-        </router-link>
+        <template v-if="authStore.isAuthenticated">
+          <button @click="goToHub" class="bg-vampire hover:bg-red-900 text-white px-8 py-3 rounded-md font-semibold text-lg transition-all shadow-[0_0_15px_rgba(139,0,0,0.4)] flex items-center justify-center">
+            Ir para o Hub <span class="ml-2">→</span>
+          </button>
+        </template>
+        <template v-else>
+          <router-link to="/login" class="bg-vampire hover:bg-red-900 text-white px-8 py-3 rounded-md font-semibold text-lg transition-all shadow-[0_0_15px_rgba(139,0,0,0.4)] flex items-center justify-center">
+            Começar Agora <span class="ml-2">→</span>
+          </router-link>
+        </template>
         <a href="#sistemas" class="border border-gray-600 hover:border-gray-400 text-gray-200 px-8 py-3 rounded-md font-semibold text-lg transition-all flex items-center justify-center bg-surface/30">
           Explorar Sistemas
         </a>
@@ -222,4 +237,21 @@
 </template>
 
 <script setup>
+import { useAuthStore } from '../stores/authStore';
+import { useRouter } from 'vue-router';
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+const handleLogout = () => {
+  authStore.logout();
+  router.push('/login');
+};
+
+const goToHub = () => {
+  const role = authStore.userRole;
+  if (role === 'ADMIN') router.push('/admin');
+  else if (role === 'MESTRE') router.push('/mestre');
+  else router.push('/jogador');
+};
 </script>

@@ -15,6 +15,9 @@
           </div>
           <span class="text-3xl text-[#bab8b7]">👤</span>
         </div>
+        <button @click="handleLogout" class="text-sm font-bold uppercase tracking-widest text-[#ffb4a8] hover:text-white transition-colors">
+          Sair
+        </button>
       </div>
     </header>
 
@@ -141,8 +144,15 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../../stores/authStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
+
+const handleLogout = () => {
+  authStore.logout();
+  router.push('/login');
+};
 
 const selectSystem = (systemCode) => {
   if (systemCode === 'VAMPIRE') {
