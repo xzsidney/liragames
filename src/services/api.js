@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api', // Endereço configurável
+  baseURL: import.meta.env.VITE_API_URL || 'https://api.liragames.com.br/api', // Conectando direto na produção
   timeout: 10000,
 });
 

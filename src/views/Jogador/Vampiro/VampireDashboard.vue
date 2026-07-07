@@ -1,131 +1,109 @@
 <template>
-  <div class="font-body-md selection:bg-primary-container selection:text-white bg-[#000000] text-[#e2e2e2] min-h-screen overflow-x-hidden">
-    <div class="grain-overlay"></div>
+  <div class="min-h-screen font-body flex flex-col" style="background-color: var(--bg-deep); color: var(--text-main); background-image: radial-gradient(ellipse at 20% 10%, rgba(139,0,0,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 90%, rgba(42,26,92,0.1) 0%, transparent 60%);">
     
-    <!-- Top Navigation Shell -->
-    <header class="fixed top-0 left-0 w-full z-50 border-b border-[#5a403c] bg-[#131313]/95 backdrop-blur-sm flex justify-between items-center px-6 py-4">
-      <div class="flex items-center gap-4">
-        <button @click="router.push('/jogador')" class="text-[#ffb4a8] cursor-pointer hover:opacity-70 transition-opacity flex items-center gap-2">
-          <span>←</span>
-        </button>
-        <h1 class="font-serif text-3xl uppercase tracking-widest text-[#ffb4a8]">Vampiro: A Máscara</h1>
-      </div>
-      <div class="flex items-center gap-6">
-        <div class="hidden md:flex gap-8">
-          <a class="text-[#ffb4a8] font-bold text-xs tracking-widest transition-colors duration-300" href="#">COTERIE</a>
-          <a class="text-[#e3beb8] hover:text-[#ffb4a8] text-xs tracking-widest transition-colors duration-300" href="#">CHRONICLE</a>
-          <a class="text-[#e3beb8] hover:text-[#ffb4a8] text-xs tracking-widest transition-colors duration-300" href="#">LORE</a>
+    <!-- PARTICLES -->
+    <div id="particles" aria-hidden="true" class="pointer-events-none fixed inset-0 z-0"></div>
+
+    <header id="main-header">
+      <div class="header-inner">
+        <div class="header-logo" @click="router.push('/jogador')" style="cursor: pointer;">
+          <span class="logo-symbol">⚜</span>
+          <div class="logo-text">
+            <span class="logo-title">Camarilla</span>
+            <span class="logo-sub">de São Paulo</span>
+          </div>
         </div>
-        <div class="flex items-center gap-4">
-          <span class="text-[#ffb4a8] text-2xl cursor-pointer hover:scale-110 transition-transform">🩸</span>
-          <span class="text-[#ffb4a8] text-2xl cursor-pointer hover:scale-110 transition-transform" @click="handleLogout">👤</span>
+        <nav class="header-nav hidden md:flex items-center">
+          <a @click.prevent="router.push('/jogador')" class="header-home-link" style="cursor: pointer;">⚜ Mundo das Trevas</a>
+          <span class="nav-sep">|</span>
+          <a href="#" class="header-home-link cursor-not-allowed">🗺️ Mapa da Cidade</a>
+          <span class="nav-sep">|</span>
+          <span class="text-[var(--blood-bright)] font-bold">Vampiro: A Máscara</span>
+        </nav>
+        <div class="flex items-center gap-4 z-10">
+          <button @click="handleLogout" class="header-home-link" style="cursor: pointer;">
+            Sair
+          </button>
         </div>
       </div>
+      <div class="header-bar"></div>
     </header>
 
-    <!-- Side Navigation (Desktop Only Anchor) -->
-    <aside class="hidden lg:flex flex-col h-screen w-72 fixed left-0 top-0 z-40 border-r border-[#5a403c] bg-[#1b1b1b] pt-24 pb-8">
-      <div class="px-6 mb-10">
-        <div class="flex items-center gap-4 mb-4">
-          <div class="w-12 h-12 bg-[#8b0000] flex items-center justify-center border border-[#5a403c]">
-            <span class="text-[#ff907f] text-2xl">💀</span>
-          </div>
-          <div>
-            <p class="font-serif text-lg text-[#e2e2e2]">Julian Giovanni</p>
-            <p class="text-xs text-[#e3beb8]">Clan: Hecata | Gen: 9th</p>
-          </div>
-        </div>
-        <button class="w-full bg-[#8b0000] text-white py-3 text-xs tracking-widest hover:bg-[#690000] transition-all active:scale-95">HUNT FOR BLOOD</button>
-      </div>
-      <nav class="flex-grow flex flex-col gap-1">
-        <a class="bg-[#8b0000]/20 text-[#ff907f] font-bold border-l-4 border-[#ffb4a8] px-6 py-4 flex items-center gap-4 transition-all" href="#">
-          <span>👥</span> COTERIE
-        </a>
-        <a class="text-[#e3beb8] hover:bg-[#353535] hover:text-[#e2e2e2] px-6 py-4 flex items-center gap-4 transition-all" href="#">
-          <span>📖</span> CHRONICLE
-        </a>
-        <a class="text-[#e3beb8] hover:bg-[#353535] hover:text-[#e2e2e2] px-6 py-4 flex items-center gap-4 transition-all" href="#">
-          <span>✨</span> DISCIPLINES
-        </a>
-        <a class="text-[#e3beb8] hover:bg-[#353535] hover:text-[#e2e2e2] px-6 py-4 flex items-center gap-4 mt-auto transition-all" href="#">
-          <span>⚙️</span> SETTINGS
-        </a>
-      </nav>
-    </aside>
-
-    <!-- Main Canvas -->
-    <main class="lg:ml-72 pt-24 pb-32 px-6 min-h-screen">
-      <div class="max-w-6xl mx-auto">
-        <!-- Header Section -->
-        <div class="flex flex-col md:flex-row justify-between items-end mb-8 border-b border-[#5a403c] pb-4">
-          <div>
-            <h2 class="font-serif text-5xl text-[#e2e2e2] mb-2 font-bold tracking-tight">Seus Personagens</h2>
-            <p class="text-[#e3beb8] text-base max-w-xl">Mantenha a Máscara. O sangue clama por aqueles que caminham na noite. Gerencie seus vampiros e suas crônicas.</p>
-          </div>
-          <div class="mt-4 md:mt-0 flex gap-4">
-            <button class="bg-[#353535] border border-[#5a403c] px-6 py-3 text-xs tracking-widest hover:bg-[#393939] transition-colors flex items-center gap-2 text-[#e2e2e2]">
-              <span>🔍</span> FILTRAR
-            </button>
-            <button @click="router.push('/jogador/vampire/novo')" class="bg-[#8b0000] px-6 py-3 text-xs tracking-widest text-white hover:bg-[#690000] transition-all flex items-center gap-2 shadow-lg">
-              <span>➕</span> NOVO PERSONAGEM
-            </button>
+    <main class="flex-grow pt-16 pb-24 relative z-10">
+      
+      <section id="gallery-view" class="view active">
+        <div class="gallery-hero">
+          <h1 class="gallery-title">Os Filhos da Noite</h1>
+          <p class="gallery-subtitle">Treze almas condenadas habitam as sombras de São Paulo. Escolha um, se ousar conhecê-lo.</p>
+          <div class="gallery-divider">
+            <span class="divider-line"></span>
+            <span class="divider-icon" style="color: var(--blood-bright);">🩸</span>
+            <span class="divider-line"></span>
           </div>
         </div>
 
-        <!-- Loading State -->
+        <div class="filter-bar">
+          <button @click="setFilter('all')" :class="['filter-btn', { active: activeFilter === 'all' }]">Todos</button>
+          <button @click="setFilter('Ventrue')" :class="['filter-btn', { active: activeFilter === 'Ventrue' }]">👑 Ventrue</button>
+          <button @click="setFilter('Gangrel')" :class="['filter-btn', { active: activeFilter === 'Gangrel' }]">🐺 Gangrel</button>
+          <button @click="setFilter('Toreador')" :class="['filter-btn', { active: activeFilter === 'Toreador' }]">🌹 Toreador</button>
+          <button @click="setFilter('Nosferatu')" :class="['filter-btn', { active: activeFilter === 'Nosferatu' }]">🦇 Nosferatu</button>
+          <button @click="setFilter('Brujah')" :class="['filter-btn', { active: activeFilter === 'Brujah' }]">✊ Brujah</button>
+          <button @click="setFilter('Tremere')" :class="['filter-btn', { active: activeFilter === 'Tremere' }]">🔮 Tremere</button>
+        </div>
+
         <div v-if="loading" class="flex justify-center items-center py-20">
-          <p class="text-[#ffb4a8] text-xl animate-pulse font-serif italic">Despertando as sombras...</p>
+          <p class="text-[var(--blood-bright)] text-xl animate-pulse font-title italic">Despertando as sombras...</p>
         </div>
 
-        <!-- Character Grid -->
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          
-          <!-- Loop através dos personagens de VAMPIRE -->
+        <div v-else class="card-grid">
           <article 
-            v-for="char in characters" 
+            v-for="(char, idx) in filteredCharacters" 
             :key="char.id"
             @click="router.push(`/jogador/vampire/personagem/${char.id}`)"
-            class="vampire-card bg-[#0e0e0e] overflow-hidden flex flex-col h-full cursor-pointer"
+            class="char-card card-loading"
+            :style="getCardStyle(char, idx)"
           >
-            <div class="relative h-72 overflow-hidden border-b border-[#5a403c]/30">
-              <img class="card-img w-full h-full object-cover" :src="char.avatarUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDa3dN6ra7trV_8BC_vI122eGjBoNIObgEa08L3pCQ7ZYGP_gCb86wHjSaQr1dbdJAaMJiPcKMmhFpc7DnfmZWqE6DV6a44ZpaO8FAW_Vc1Suf0yvaGI_4Ow5qkOAAHYyZruZsGaGE9EdbESnhjzr01LDx4YSDP1i8uSFxYCBL07I1KlAEpxtZuMwjyMqO1PC9fR0W0LIEKNmg_03c2iyiEIWVa3iSgBmbw8WiK3HNbZslAidf0iv-9'"/>
-              <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
-              <div class="absolute top-4 right-4">
-                <span class="bg-black/80 border border-[#ffb4a8] text-[#ffb4a8] px-3 py-1 text-xs tracking-tighter">{{ getAttribute(char, 'generation') || '13' }}ª Geração</span>
+            <div class="card-img-wrap">
+              <img class="card-img" :src="getAvatarUrl(char)" :alt="char.name" loading="lazy" />
+              <div class="card-img-overlay"></div>
+              
+              <!-- Humanidade dots -->
+              <div class="card-humanidade" :title="'Humanidade: ' + (getAttribute(char, 'humanity') || 7) + '/10'">
+                 <span v-for="i in 10" :key="i" :class="['hum-dot', { 'empty': i > (getAttribute(char, 'humanity') || 7) }]"></span>
+              </div>
+              
+              <div class="card-body">
+                <div class="card-cla-badge" :style="getBadgeStyle(char)">
+                  {{ getClanIcon(char) }} {{ getAttribute(char, 'clan') || 'Desconhecido' }}
+                </div>
+                <h2 class="card-nome">{{ char.name }}</h2>
+                <p class="card-conceito">{{ char.concept || 'Membro da Camarilla' }}</p>
               </div>
             </div>
-            <div class="p-4 flex flex-col flex-grow">
-              <h3 class="font-serif text-3xl text-[#e2e2e2] mb-2">{{ char.name }}</h3>
-              <p class="text-[#e3beb8] text-base mb-6 leading-relaxed">
-                A Máscara (V5). Horror pessoal e intriga política. Lide com a Fome e a Besta interior.
-              </p>
-              <div class="mt-auto flex items-center justify-between border-t border-[#5a403c]/20 pt-4">
-                <span class="text-xs text-[#aa8984] tracking-widest uppercase">CLÃ {{ getAttribute(char, 'clan') || 'DESCONHECIDO' }}</span>
-                <button class="blood-btn text-xs text-[#ffb4a8] tracking-widest uppercase py-2 font-bold">ABRAÇAR A ESCURIDÃO</button>
-              </div>
-            </div>
+            <div class="card-hover-cta">Acessar Ficha →</div>
           </article>
 
-          <!-- Empty State / New Card Slot -->
-          <div @click="router.push('/jogador/vampire/novo')" class="border-2 border-dashed border-[#5a403c] flex flex-col items-center justify-center p-8 text-center opacity-60 hover:opacity-100 hover:border-[#ffb4a8] transition-all cursor-pointer min-h-[400px]">
-            <span class="text-4xl mb-4 text-[#ffb4a8]">➕</span>
-            <h3 class="font-serif text-2xl text-[#e2e2e2] mb-2">Despertar um Novo</h3>
-            <p class="text-[#e3beb8] text-base">Sua linhagem aguarda uma nova adição às sombras.</p>
-          </div>
-
+          <!-- Botão de Novo Personagem (Estilizado como card) -->
+          <article 
+            @click="router.push('/jogador/vampire/novo')"
+            class="char-card card-loading hover:border-[var(--gold)] hover:shadow-[0_0_20px_rgba(201,168,76,0.3)]"
+            style="display: flex; flex-direction: column; align-items: center; justify-content: center; border-style: dashed; border-width: 2px; border-color: var(--border-mid); background: rgba(201,168,76,0.03); min-height: 400px; animation-delay: 0.5s;"
+          >
+            <span style="font-size: 3rem; color: var(--gold); margin-bottom: 16px;">➕</span>
+            <h2 class="card-nome" style="color: var(--gold-bright);">Novo Membro</h2>
+            <p class="card-conceito text-center px-8" style="color: var(--parchment-dim);">Sua linhagem aguarda uma nova adição às sombras de São Paulo.</p>
+          </article>
         </div>
-      </div>
+      </section>
+
     </main>
 
-    <!-- Floating Action Button -->
-    <button @click="router.push('/jogador/vampire/novo')" class="fab-blood fixed bottom-8 right-8 w-16 h-16 bg-[#8b0000] text-white rounded-full flex items-center justify-center z-50 transition-transform active:scale-90 lg:w-20 lg:h-20" title="Criar Personagem">
-      <span class="text-3xl">➕</span>
-    </button>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../../stores/authStore';
 import api from '../../../services/api';
@@ -133,14 +111,28 @@ import api from '../../../services/api';
 const router = useRouter();
 const authStore = useAuthStore();
 const characters = ref([]);
+const attributeDefs = ref({});
 const loading = ref(true);
+const activeFilter = ref('all');
 
 const fetchVampires = async () => {
   loading.value = true;
   try {
-    const response = await api.get('/characters');
-    // Filtra apenas personagens do sistema VAMPIRE
-    characters.value = response.data.filter(c => c.gameStyle === 'VAMPIRE');
+    const [charRes, defRes] = await Promise.all([
+      api.get('/characters'),
+      api.get('/attribute-definitions')
+    ]);
+    
+    // Map definitions
+    const defs = {};
+    if (defRes.data && Array.isArray(defRes.data)) {
+      defRes.data.forEach(d => {
+        defs[d.id] = d.name;
+      });
+    }
+    attributeDefs.value = defs;
+    
+    characters.value = charRes.data.filter(c => c.gameStyle === 'VAMPIRE');
   } catch (error) {
     console.error("Erro ao buscar vampiros:", error);
   } finally {
@@ -152,69 +144,86 @@ onMounted(() => {
   fetchVampires();
 });
 
+const getAvatarUrl = (char) => {
+  if (!char.avatarUrl) return '/images/vampire.png';
+  if (char.avatarUrl.startsWith('http')) return char.avatarUrl;
+  return `${api.defaults.baseURL.replace('/api', '')}${char.avatarUrl}`;
+};
+
 const getAttribute = (char, attrName) => {
   if (!char.attributes) return null;
-  const attr = char.attributes.find(a => a.name.toLowerCase() === attrName.toLowerCase());
-  return attr ? attr.value : null;
+  const attr = char.attributes.find(a => {
+    const name = a.attribute?.name || a.name || attributeDefs.value[a.attributeId] || '';
+    return name.toLowerCase() === attrName.toLowerCase();
+  });
+  // For text attributes, we used the 'description' field in our SQL script for things like clan, concept, etc.
+  if (attr) {
+    if (attr.description) return attr.description;
+    return attr.value;
+  }
+  return null;
 };
+
+const setFilter = (clan) => {
+  activeFilter.value = clan;
+};
+
+const filteredCharacters = computed(() => {
+  if (activeFilter.value === 'all') return characters.value;
+  return characters.value.filter(char => {
+    const clan = getAttribute(char, 'clan');
+    return clan && clan.toLowerCase() === activeFilter.value.toLowerCase();
+  });
+});
 
 const handleLogout = () => {
   authStore.logout();
   router.push('/login');
 };
+
+// Configurações e Cores baseadas no protótipo original
+const clanConfigs = {
+  'Ventrue': { cor: '#1a3a5c', corTexto: '#6fa8dc', icone: '👑' },
+  'Gangrel': { cor: '#3d2b1f', corTexto: '#c4894a', icone: '🐺' },
+  'Toreador': { cor: '#5c1a3a', corTexto: '#e07aad', icone: '🌹' },
+  'Nosferatu': { cor: '#1a2a1a', corTexto: '#6abf69', icone: '🦇' },
+  'Brujah': { cor: '#5c1a1a', corTexto: '#e07070', icone: '✊' },
+  'Tremere': { cor: '#2a1a5c', corTexto: '#9a7ae0', icone: '🔮' },
+};
+
+const getClanConfig = (char) => {
+  const clan = getAttribute(char, 'clan');
+  if (clan) {
+    const found = Object.keys(clanConfigs).find(k => k.toLowerCase() === clan.toLowerCase());
+    if (found) return clanConfigs[found];
+  }
+  return { cor: '#3a3a3a', corTexto: '#aaaaaa', icone: '●' };
+};
+
+const getClanIcon = (char) => {
+  return getClanConfig(char).icone;
+};
+
+const getCardStyle = (char, idx) => {
+  const cfg = getClanConfig(char);
+  return {
+    'animation-delay': `${idx * 0.05}s`,
+    '--card-glow-color': cfg.corTexto,
+    '--card-glow-shadow': cfg.cor + 'aa'
+  };
+};
+
+const getBadgeStyle = (char) => {
+  const cfg = getClanConfig(char);
+  return {
+    background: cfg.cor + '33',
+    color: cfg.corTexto,
+    borderColor: cfg.corTexto + '55'
+  };
+};
 </script>
 
 <style scoped>
-.grain-overlay {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-.vampire-card {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid #2a2a2a;
-}
-.vampire-card:hover {
-  border-color: #8b0000;
-  transform: translateY(-4px);
-  box-shadow: 0 10px 30px -10px rgba(139, 0, 0, 0.3);
-}
-.vampire-card:hover .card-img {
-  filter: grayscale(0%) contrast(1.1);
-  scale: 1.05;
-}
-.card-img {
-  transition: all 0.6s ease;
-  filter: grayscale(30%);
-}
-.blood-btn {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-.blood-btn::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; width: 100%; height: 2px;
-  background: #8b0000;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.3s ease;
-}
-.blood-btn:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
-.fab-blood {
-  box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
-  animation: pulse-blood 3s infinite;
-}
-@keyframes pulse-blood {
-  0% { box-shadow: 0 0 0 0 rgba(139, 0, 0, 0.7); }
-  70% { box-shadow: 0 0 0 15px rgba(139, 0, 0, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(139, 0, 0, 0); }
-}
+/* A maioria do CSS já está no style.css global que adaptamos! */
+/* Os efeitos de hover, as bolinhas de humanidade e as fontes são herdadas. */
 </style>

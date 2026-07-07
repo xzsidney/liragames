@@ -1,31 +1,44 @@
 <template>
-  <div class="min-h-screen bg-[#131313] text-[#e2e2e2] font-body flex flex-col">
-    <div class="fixed top-0 left-0 w-full h-full pointer-events-none z-[9999] opacity-5 bg-[url('https://lh3.googleusercontent.com/aida-public/AB6AXuA3IQweR8TYJK9r_umNc7OyIfEVHD517wZFaAR9W8KqymrZ_G3aHDYxD4qbEuhh3lwwVHClvV9bfRIiUUpmHhQW5wZ5Eh7sZdifJPIwNwnIedxYA00aU-uS1PvmeRcYu8CYRBDFA9waDnXK9JFf-ySdr1ZGitkaQwgIqOZs214mhVtQRND9ChZ0M-o9I8619TZ4U-YGr6JJph-bwNtAFVFKbXtPBfzYTGdAvc9Zf_NduJ16Y0MPLz3g')]"></div>
+  <div class="min-h-screen font-body flex flex-col" style="background-color: var(--bg-deep); color: var(--text-main); background-image: radial-gradient(ellipse at 20% 10%, rgba(139,0,0,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 90%, rgba(42,26,92,0.1) 0%, transparent 60%);">
     
-    <header class="bg-[#131313]/95 backdrop-blur-sm border-b border-[#5a403c] fixed top-0 w-full z-[100] px-6 py-4 flex justify-between items-center">
-      <div class="flex items-center gap-4">
-        <!-- Logo Text -->
-        <h1 class="font-serif text-xl uppercase tracking-widest leading-none text-[#ffb4a8]">LiraRPG: Hub Central</h1>
-      </div>
-      <div class="flex items-center gap-6">
-        <div class="flex items-center gap-3 pr-6 border-r border-[#5a403c]">
-          <div class="text-right hidden sm:block">
-            <p class="text-xs text-[#e2e2e2] uppercase tracking-tighter font-bold">LiraRPG</p>
-            <p class="text-[10px] text-[#ffb4a8]/70 uppercase">Jogador</p>
+    <!-- PARTICLES (Opicional) -->
+    <div id="particles" aria-hidden="true" class="pointer-events-none fixed inset-0 z-0"></div>
+
+    <header id="main-header">
+      <div class="header-inner">
+        <div class="header-logo">
+          <span class="logo-symbol">⚜</span>
+          <div class="logo-text">
+            <span class="logo-title">LiraRPG</span>
+            <span class="logo-sub">Portal</span>
           </div>
-          <span class="text-3xl text-[#bab8b7]">👤</span>
         </div>
-        <button @click="handleLogout" class="text-sm font-bold uppercase tracking-widest text-[#ffb4a8] hover:text-white transition-colors">
-          Sair
-        </button>
+        <div class="flex items-center gap-6 z-10">
+          <div class="flex items-center gap-3 pr-6 border-r" style="border-color: var(--gold-dim);">
+            <div class="text-right hidden sm:block">
+              <p class="text-xs uppercase font-bold" style="color: var(--parchment); font-family: var(--font-title); letter-spacing: 2px;">JOGADOR</p>
+              <p class="text-[10px] uppercase" style="color: var(--gold-dim); font-family: var(--font-title); letter-spacing: 2px;">Conectado</p>
+            </div>
+            <span class="text-2xl" style="filter: drop-shadow(0 0 5px var(--gold-dim));">👤</span>
+          </div>
+          <button @click="handleLogout" class="header-home-link z-10 relative" style="cursor: pointer;">
+            Sair
+          </button>
+        </div>
       </div>
+      <div class="header-bar"></div>
     </header>
 
-    <main class="flex-grow pt-32 pb-24 px-6 max-w-[1400px] mx-auto w-full">
+    <main class="flex-grow pt-24 pb-24 px-6 max-w-[1400px] mx-auto w-full relative z-10">
       
-      <div class="mb-8">
-        <h2 class="text-5xl font-serif text-[#e2e2e2] mb-4 italic">Mundo das Trevas</h2>
-        <p class="text-base text-[#e3beb8] max-w-2xl border-l-2 border-[#8b0000] pl-4">
+      <div class="mb-12 text-center">
+        <h2 class="gallery-title" style="margin-bottom: 24px;">Os Filhos da Noite</h2>
+        <div class="gallery-divider" style="margin-bottom: 24px;">
+          <span class="divider-line"></span>
+          <span class="divider-icon" style="color: var(--blood-bright);">🩸</span>
+          <span class="divider-line"></span>
+        </div>
+        <p class="gallery-subtitle">
           Selecione sua crônica. O destino da humanidade e dos monstros está em suas mãos. Entre na escuridão e molde a narrativa do horror pessoal.
         </p>
       </div>

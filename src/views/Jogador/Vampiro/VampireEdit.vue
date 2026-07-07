@@ -1,229 +1,230 @@
 <template>
-  <div class="min-h-screen bg-black text-[#e2e2e2] overflow-x-hidden">
-    <div class="grain-overlay"></div>
+  <div class="min-h-screen font-body flex flex-col" style="background-color: var(--bg-deep); color: var(--text-main); background-image: radial-gradient(ellipse at 20% 10%, rgba(139,0,0,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 90%, rgba(42,26,92,0.1) 0%, transparent 60%);">
+    
+    <!-- PARTICLES -->
+    <div id="particles" aria-hidden="true" class="pointer-events-none fixed inset-0 z-0"></div>
 
     <!-- Loading inicial -->
-    <div v-if="loading" class="fixed inset-0 flex items-center justify-center bg-black z-[200]">
-      <p class="font-serif text-2xl text-[#ffb4a8] animate-pulse">Convocando as sombras...</p>
+    <div v-if="loading" class="fixed inset-0 flex items-center justify-center bg-[#06000a] z-[200]">
+      <p class="font-title text-xl text-[var(--blood-bright)] animate-pulse italic">Despertando as sombras...</p>
     </div>
 
-    <!-- Top App Bar -->
-    <header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 border-b border-[#5a403c] bg-black/95 backdrop-blur-sm">
-      <div class="flex items-center gap-4">
-        <button @click="router.push('/jogador/vampire')" class="text-[#ffb4a8] hover:opacity-70 transition-opacity">←</button>
-        <h1 class="font-serif text-2xl uppercase tracking-widest text-[#ffb4a8]">Vampiro: A Máscara</h1>
+    <header id="main-header">
+      <div class="header-inner">
+        <div class="header-logo" @click="router.push('/jogador')" style="cursor: pointer;">
+          <span class="logo-symbol">⚜</span>
+          <div class="logo-text">
+            <span class="logo-title">Camarilla</span>
+            <span class="logo-sub">de São Paulo</span>
+          </div>
+        </div>
+        <nav class="header-nav hidden md:flex items-center">
+          <a @click.prevent="router.push('/jogador')" class="header-home-link" style="cursor: pointer;">⚜ Mundo das Trevas</a>
+          <span class="nav-sep">|</span>
+          <a href="#" class="header-home-link cursor-not-allowed">🗺️ Mapa da Cidade</a>
+          <span class="nav-sep">|</span>
+          <span class="text-[var(--blood-bright)] font-bold cursor-pointer" @click="router.push('/jogador/vampire')">Vampiro: A Máscara</span>
+        </nav>
       </div>
-      <nav class="hidden md:flex gap-6 items-center font-bold text-sm">
-        <span class="text-[#ffb4a8]">Personagem</span>
-        <a class="text-[#e3beb8] hover:text-[#ffb4a8] transition-colors">Coterie</a>
-        <a class="text-[#e3beb8] hover:text-[#ffb4a8] transition-colors">Crônica</a>
-        <a class="text-[#e3beb8] hover:text-[#ffb4a8] transition-colors">Configurações</a>
-      </nav>
-      <div class="flex items-center gap-4">
-        <span class="text-[#ffb4a8] text-xl">🩸</span>
-        <span class="text-[#ffb4a8] text-xl">👤</span>
-      </div>
+      <div class="header-bar"></div>
     </header>
 
-    <!-- Side Nav (Desktop) -->
-    <aside class="hidden lg:flex flex-col h-screen w-64 fixed left-0 top-0 z-40 pt-20 border-r border-[#5a403c] bg-[#0e0e0e]">
-      <div class="px-6 mb-8">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-10 h-10 bg-[#8b0000] border border-[#ffb4a8] flex items-center justify-center">
-            <span class="text-white text-sm">💀</span>
-          </div>
-          <div>
-            <h3 class="font-bold text-[#e2e2e2] text-sm">{{ form.name || 'Carregando...' }}</h3>
-            <p class="text-xs text-[#e3beb8]">{{ form.clan || 'Clã desconhecido' }}</p>
-          </div>
-        </div>
-        <button @click="handleSave" :disabled="saving" class="w-full bg-[#8b0000] text-white py-2 font-bold uppercase tracking-widest text-xs hover:bg-[#690000] transition-all active:scale-95 disabled:opacity-50">
-          {{ saving ? 'SALVANDO...' : 'SALVAR ALTERAÇÕES' }}
-        </button>
-      </div>
-      <nav class="flex-1">
-        <a class="bg-[#8b0000]/20 text-[#ff907f] font-bold border-l-4 border-[#ffb4a8] px-6 py-3 flex items-center gap-3 text-sm">👥 Coterie</a>
-        <a class="text-[#e3beb8] hover:bg-[#353535] px-6 py-3 flex items-center gap-3 text-sm transition-all" href="#">📖 Crônica</a>
-        <a class="text-[#e3beb8] hover:bg-[#353535] px-6 py-3 flex items-center gap-3 text-sm transition-all" href="#">✨ Disciplinas</a>
-        <a class="text-[#e3beb8] hover:bg-[#353535] px-6 py-3 flex items-center gap-3 text-sm transition-all" href="#">📚 Lore</a>
-        <a class="text-[#e3beb8] hover:bg-[#353535] px-6 py-3 flex items-center gap-3 text-sm transition-all" href="#">⚙️ Configurações</a>
-      </nav>
-      <div class="p-6 border-t border-[#5a403c]">
-        <button @click="router.push('/jogador/vampire')" class="text-[#e3beb8] hover:text-[#ffb4ab] flex items-center gap-3 text-sm">← Voltar</button>
-      </div>
-    </aside>
+    <main class="flex-grow pb-24 relative z-10" v-if="!loading">
+      
+      <button class="back-btn" @click="router.push('/jogador/vampire')">
+        <span class="back-arrow">←</span> Voltar à Galeria
+      </button>
 
-    <main class="lg:ml-64 pt-20 pb-24 px-4 md:px-6 max-w-[1200px] mx-auto" v-if="!loading">
+      <div class="detail-container">
+        <!-- Notificações -->
+        <div v-if="errorMsg" class="mb-4 mt-4 bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 text-sm rounded">{{ errorMsg }}</div>
+        <div v-if="successMsg" class="mb-4 mt-4 bg-green-900/50 border border-green-700 text-green-200 px-4 py-3 text-sm rounded">{{ successMsg }}</div>
 
-      <!-- Error/Success Alerts -->
-      <div v-if="errorMsg" class="mb-4 bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 text-sm">{{ errorMsg }}</div>
-      <div v-if="successMsg" class="mb-4 bg-green-900/50 border border-green-700 text-green-200 px-4 py-3 text-sm">{{ successMsg }}</div>
-
-      <!-- Header Info -->
-      <div class="bg-[#1f1f1f] p-6 border border-[#5a403c] mb-6 relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-1 bg-[#8b0000]"></div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-[#ffb4a8] mb-1">Nome</label>
-            <input v-model="form.name" class="input-ledger font-serif text-xl" type="text" />
-          </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-[#ffb4a8] mb-1">Conceito</label>
-            <input v-model="form.concept" class="input-ledger" type="text" placeholder="Ex: Historiador Macabro" />
-          </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-[#ffb4a8] mb-1">Predador</label>
-            <input v-model="form.predatorType" class="input-ledger" type="text" />
-          </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-[#ffb4a8] mb-1">Crônica</label>
-            <input v-model="form.chronicle" class="input-ledger" type="text" />
-          </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-[#ffb4a8] mb-1">Ambição</label>
-            <input v-model="form.ambition" class="input-ledger" type="text" />
-          </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-[#ffb4a8] mb-1">Clã</label>
-            <input v-model="form.clan" class="input-ledger" type="text" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Main Stats Grid -->
-      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-
-        <!-- Column 1: Attributes & Skills -->
-        <div class="xl:col-span-8 space-y-6">
-
-          <!-- Attributes -->
-          <section class="bg-[#1f1f1f] border border-[#5a403c] p-6">
-            <h2 class="font-serif text-3xl border-b border-[#ffb4a8] mb-6 italic text-[#e2e2e2]">Atributos</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div class="space-y-4">
-                <h3 class="text-xs uppercase tracking-widest text-[#aa8984] border-b border-[#5a403c] pb-1 mb-4 italic text-center">Físicos</h3>
-                <PipRow label="Força" v-model="attrs.forca" />
-                <PipRow label="Destreza" v-model="attrs.destreza" />
-                <PipRow label="Vigor" v-model="attrs.vigor" />
+        <div class="detail-grid mt-6">
+          
+          <!-- LEFT COLUMN -->
+          <div class="detail-portrait-col">
+            <div class="detail-portrait-wrap" :style="`--detail-glow: ${getClanConfig().cor}88;`" @click="triggerAvatarUpload">
+              <input type="file" ref="avatarInput" hidden @change="handleAvatarChange" accept="image/*" />
+              <img :src="form.avatarUrl || '/images/vampire.png'" alt="Retrato do Personagem" class="min-h-[400px] object-cover" />
+              <div class="detail-portrait-overlay"></div>
+              <div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/50 cursor-pointer">
+                <span class="text-white text-3xl">📸</span>
               </div>
-              <div class="space-y-4">
-                <h3 class="text-xs uppercase tracking-widest text-[#aa8984] border-b border-[#5a403c] pb-1 mb-4 italic text-center">Sociais</h3>
-                <PipRow label="Carisma" v-model="attrs.carisma" />
-                <PipRow label="Manipulação" v-model="attrs.manipulacao" />
-                <PipRow label="Autocontrole" v-model="attrs.autocontrole" />
-              </div>
-              <div class="space-y-4">
-                <h3 class="text-xs uppercase tracking-widest text-[#aa8984] border-b border-[#5a403c] pb-1 mb-4 italic text-center">Mentais</h3>
-                <PipRow label="Inteligência" v-model="attrs.inteligencia" />
-                <PipRow label="Raciocínio" v-model="attrs.raciocinio" />
-                <PipRow label="Determinação" v-model="attrs.determinacao" />
-              </div>
-            </div>
-          </section>
-
-          <!-- Habilidades -->
-          <section class="bg-[#1f1f1f] border border-[#5a403c] p-6">
-            <h2 class="font-serif text-3xl border-b border-[#ffb4a8] mb-6 italic text-[#e2e2e2]">Habilidades</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-3">
-              <div class="space-y-2">
-                <h3 class="text-xs uppercase tracking-widest text-[#aa8984] border-b border-[#5a403c] pb-1 mb-3 italic text-center">Físicas</h3>
-                <PipRow v-for="sk in physicalSkills" :key="sk.key" :label="sk.label" v-model="skills[sk.key]" :size="3" />
-              </div>
-              <div class="space-y-2">
-                <h3 class="text-xs uppercase tracking-widest text-[#aa8984] border-b border-[#5a403c] pb-1 mb-3 italic text-center">Sociais</h3>
-                <PipRow v-for="sk in socialSkills" :key="sk.key" :label="sk.label" v-model="skills[sk.key]" :size="3" />
-              </div>
-              <div class="space-y-2">
-                <h3 class="text-xs uppercase tracking-widest text-[#aa8984] border-b border-[#5a403c] pb-1 mb-3 italic text-center">Mentais</h3>
-                <PipRow v-for="sk in mentalSkills" :key="sk.key" :label="sk.label" v-model="skills[sk.key]" :size="3" />
-              </div>
-            </div>
-          </section>
-
-          <!-- Disciplinas -->
-          <section class="bg-[#1f1f1f] border border-[#5a403c] p-6">
-            <h2 class="font-serif text-3xl border-b border-[#ffb4a8] mb-6 italic text-[#e2e2e2]">Disciplinas</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div v-for="(disc, idx) in disciplines" :key="idx" class="border border-[#5a403c] border-l-4 border-l-[#8b0000] p-4">
-                <div class="flex justify-between items-center mb-3">
-                  <input v-model="disc.name" class="input-ledger font-bold text-[#ffb4a8] uppercase text-sm w-1/2" placeholder="Disciplina" />
-                  <PipRow v-model="disc.level" :size="3" />
+              <div class="detail-portrait-info">
+                <div class="detail-hum-label">Humanidade</div>
+                <div class="detail-humanidade flex gap-1 cursor-pointer">
+                  <span v-for="i in 10" :key="i" @click="traits.humanity = i" :class="['detail-hum-dot', { 'empty': i > traits.humanity }]"></span>
                 </div>
-                <textarea v-model="disc.powers" class="w-full bg-transparent border-none text-[#e3beb8] text-xs h-16 focus:ring-0 leading-relaxed resize-none" placeholder="• Poder 1&#10;• Poder 2"></textarea>
               </div>
             </div>
-          </section>
 
-          <!-- Aparência e História -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <section class="bg-[#1f1f1f] border border-[#5a403c] p-6">
-              <h2 class="font-serif text-2xl border-b border-[#ffb4a8] mb-4 italic text-[#e2e2e2]">Aparência</h2>
-              <textarea v-model="form.appearance" class="w-full bg-transparent border-none text-[#e3beb8] text-sm h-32 focus:ring-0 leading-relaxed resize-none" placeholder="Descreva a aparência..."></textarea>
-            </section>
-            <section class="bg-[#1f1f1f] border border-[#5a403c] p-6">
-              <h2 class="font-serif text-2xl border-b border-[#ffb4a8] mb-4 italic text-[#e2e2e2]">História</h2>
-              <textarea v-model="form.history" class="w-full bg-transparent border-none text-[#e3beb8] text-sm h-32 focus:ring-0 leading-relaxed resize-none" placeholder="Trajetória do personagem..."></textarea>
-            </section>
+            <!-- Stats -->
+            <div class="detail-stat-row" style="margin-top:18px;">
+              <div class="detail-stat cursor-pointer hover:border-[var(--gold)]" @click="increaseStat('wp')">
+                <span class="stat-label">F. Vontade</span>
+                <span class="stat-value" :style="`color: ${getClanConfig().corTexto};`">{{ wpMax }}</span>
+              </div>
+              <div class="detail-stat cursor-pointer hover:border-[var(--blood-bright)]" @click="traits.humanity = traits.humanity >= 10 ? 1 : traits.humanity + 1">
+                <span class="stat-label">Humanidade</span>
+                <span class="stat-value" style="color:var(--blood-bright);">{{ traits.humanity }}</span>
+              </div>
+              <div class="detail-stat cursor-pointer hover:border-[var(--blood-bright)]" @click="traits.bloodPotency = traits.bloodPotency >= 10 ? 1 : traits.bloodPotency + 1">
+                <span class="stat-label">P. Sangue</span>
+                <span class="stat-value" style="color:var(--blood-bright);">{{ traits.bloodPotency }}</span>
+              </div>
+            </div>
+
+            <!-- Badges -->
+            <div class="detail-badges" style="margin-top:18px;">
+              <div class="detail-badge-row">
+                <span class="detail-badge flex items-center" :style="`background:${getClanConfig().cor}44; color:${getClanConfig().corTexto}; border-color:${getClanConfig().corTexto}55;`">
+                  <span class="mr-1">{{ getClanConfig().icone }}</span>
+                  <input v-model="form.clan" class="bg-transparent border-b border-transparent hover:border-[#aaa] focus:border-white focus:outline-none ml-1 w-24 uppercase font-title" placeholder="Clã" />
+                  — SANGUE AZUL
+                </span>
+              </div>
+              <div class="detail-badge-row">
+                <span class="detail-badge flex items-center" style="color:var(--parchment-dim);border-color:var(--border-dark);">
+                  <input v-model="form.predatorType" class="bg-transparent border-b border-transparent hover:border-[#aaa] focus:border-white focus:outline-none w-20 text-center uppercase font-title text-[9px]" placeholder="Natureza" />
+                </span>
+                <span class="detail-badge flex items-center" style="color:var(--parchment-dim);border-color:var(--border-dark);">
+                  <input v-model="form.ambition" class="bg-transparent border-b border-transparent hover:border-[#aaa] focus:border-white focus:outline-none w-24 text-center uppercase font-title text-[9px]" placeholder="Comportamento" />
+                </span>
+              </div>
+            </div>
+
           </div>
-        </div>
 
-        <!-- Column 2: Trilhas -->
-        <div class="xl:col-span-4 space-y-6">
-          <section class="bg-[#1f1f1f] border border-[#5a403c] p-6 space-y-6">
-            <div>
-              <div class="flex justify-between items-end mb-2">
-                <h2 class="text-xs uppercase tracking-widest text-[#ffb4a8] italic">Vitalidade</h2>
-                <span class="text-[10px] text-[#aa8984]">Vigor + 3</span>
+          <!-- RIGHT COLUMN -->
+          <div class="detail-info-col">
+            <div class="detail-header-block" :style="`border-left: 3px solid ${getClanConfig().corTexto};`">
+              <div class="detail-cla-badge" :style="`background:${getClanConfig().cor}44; color:${getClanConfig().corTexto}; border-color:${getClanConfig().corTexto}55;`">
+                 {{ getClanConfig().icone }} {{ form.clan || 'Desconhecido' }}
               </div>
-              <div class="flex flex-wrap gap-2">
-                <DamageBox v-for="i in healthMax" :key="'hp-'+i" v-model="health[i-1]" />
+              
+              <button @click="handleSave" :disabled="saving" class="btn-missions" style="float: right; cursor: pointer;">
+                <span v-if="saving">SALVANDO...</span>
+                <span v-else>💾 SALVAR FICHA</span>
+              </button>
+              
+              <input v-model="form.name" class="bg-transparent border-none w-full detail-nome focus:outline-none focus:ring-0 mb-1" placeholder="Nome do Personagem" />
+              
+              <div class="flex items-center mb-2">
+                <span class="detail-pseudonimo mr-1" style="margin-bottom:0;">Conceito:</span>
+                <input v-model="form.concept" class="bg-transparent border-none w-full detail-pseudonimo focus:outline-none" style="margin-bottom:0;" placeholder="Ex: Historiador Macabro" />
               </div>
+              
+              <textarea v-model="form.chronicle" class="w-full bg-transparent border-none detail-descricao-cla focus:outline-none resize-none mt-2 h-16" placeholder="Descrição rápida ou Crônica atual..."></textarea>
             </div>
-            <div>
-              <div class="flex justify-between items-end mb-2">
-                <h2 class="text-xs uppercase tracking-widest text-[#ffb4a8] italic">Força de Vontade</h2>
-                <span class="text-[10px] text-[#aa8984]">Compostura + Det.</span>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <DamageBox v-for="i in wpMax" :key="'wp-'+i" v-model="willpower[i-1]" />
-              </div>
-            </div>
-          </section>
 
-          <section class="bg-[#1f1f1f] border border-[#5a403c] p-6 space-y-6">
-            <div>
-              <h2 class="text-xs uppercase tracking-widest text-[#ffb4a8] italic mb-3">Potência de Sangue</h2>
-              <PipRow v-model="traits.bloodPotency" :max="10" />
+            <!-- TABS NAV -->
+            <div class="tabs-nav" role="tablist">
+              <button :class="['tab-btn', { active: activeTab === 'atributos' }]" @click="activeTab = 'atributos'">Atributos</button>
+              <button :class="['tab-btn', { active: activeTab === 'habilidades' }]" @click="activeTab = 'habilidades'">Habilidades</button>
+              <button :class="['tab-btn', { active: activeTab === 'disciplinas' }]" @click="activeTab = 'disciplinas'">Disciplinas</button>
+              <button :class="['tab-btn', { active: activeTab === 'historico' }]" @click="activeTab = 'historico'">Histórico</button>
             </div>
-            <div>
-              <h2 class="text-xs uppercase tracking-widest text-[#ffb4a8] italic mb-2">Humanidade</h2>
-              <PipRow v-model="traits.humanity" :max="10" />
-            </div>
-            <div>
-              <h2 class="text-xs uppercase tracking-widest text-[#ffb4a8] italic mb-2">Fome</h2>
-              <PipRow v-model="traits.hunger" :max="5" color="#8b0000" />
-            </div>
-          </section>
 
-          <!-- Vantagens & Defeitos -->
-          <section class="bg-[#1f1f1f] border border-[#5a403c] p-6">
-            <h2 class="text-xs uppercase tracking-widest text-[#ffb4a8] italic mb-4">Vantagens & Defeitos</h2>
-            <div class="space-y-3">
-              <div v-for="(mf, idx) in meritsFlaws" :key="idx" class="flex justify-between items-center border-b border-[#5a403c]/30 pb-2">
-                <span class="text-sm text-[#e2e2e2]">{{ mf.name }}</span>
-                <PipRow v-model="mf.level" :size="3" />
+            <!-- TAB: ATRIBUTOS -->
+            <div class="tab-panel" :class="{ active: activeTab === 'atributos' }">
+              
+              <div class="attr-group">
+                <p class="section-title">Físicos</p>
+                <div class="attr-row"><span class="attr-name">Força</span><PipRow v-model="attrs.forca" :max="5" /></div>
+                <div class="attr-row"><span class="attr-name">Destreza</span><PipRow v-model="attrs.destreza" :max="5" /></div>
+                <div class="attr-row"><span class="attr-name">Vigor</span><PipRow v-model="attrs.vigor" :max="5" /></div>
+              </div>
+              
+              <div class="attr-group">
+                <p class="section-title">Sociais</p>
+                <div class="attr-row"><span class="attr-name">Carisma</span><PipRow v-model="attrs.carisma" :max="5" /></div>
+                <div class="attr-row"><span class="attr-name">Manipulação</span><PipRow v-model="attrs.manipulacao" :max="5" /></div>
+                <div class="attr-row"><span class="attr-name">Autocontrole</span><PipRow v-model="attrs.autocontrole" :max="5" /></div>
+              </div>
+
+              <div class="attr-group">
+                <p class="section-title">Mentais</p>
+                <div class="attr-row"><span class="attr-name">Inteligência</span><PipRow v-model="attrs.inteligencia" :max="5" /></div>
+                <div class="attr-row"><span class="attr-name">Raciocínio</span><PipRow v-model="attrs.raciocinio" :max="5" /></div>
+                <div class="attr-row"><span class="attr-name">Determinação</span><PipRow v-model="attrs.determinacao" :max="5" /></div>
+              </div>
+              
+              <p class="section-title">Fome</p>
+              <div class="attr-row">
+                 <span class="attr-name">Nível de Fome</span>
+                 <PipRow v-model="traits.hunger" :max="5" color="var(--blood-bright)" />
+              </div>
+
+            </div>
+
+            <!-- TAB: HABILIDADES -->
+            <div class="tab-panel" :class="{ active: activeTab === 'habilidades' }">
+               <p class="section-title">Físicas (Talentos)</p>
+               <div class="skill-grid">
+                  <div class="skill-item" v-for="sk in physicalSkills" :key="sk.key">
+                    <span class="skill-name">{{ sk.label }}</span><PipRow v-model="skills[sk.key]" :max="5" isSkill />
+                  </div>
+               </div>
+               
+               <p class="section-title">Sociais (Perícias)</p>
+               <div class="skill-grid">
+                  <div class="skill-item" v-for="sk in socialSkills" :key="sk.key">
+                    <span class="skill-name">{{ sk.label }}</span><PipRow v-model="skills[sk.key]" :max="5" isSkill />
+                  </div>
+               </div>
+               
+               <p class="section-title">Mentais (Conhecimentos)</p>
+               <div class="skill-grid">
+                  <div class="skill-item" v-for="sk in mentalSkills" :key="sk.key">
+                    <span class="skill-name">{{ sk.label }}</span><PipRow v-model="skills[sk.key]" :max="5" isSkill />
+                  </div>
+               </div>
+            </div>
+
+            <!-- TAB: DISCIPLINAS -->
+            <div class="tab-panel" :class="{ active: activeTab === 'disciplinas' }">
+              <p class="section-title">Poderes Sobrenaturais</p>
+              <div class="disc-grid">
+                <div class="disc-item" v-for="(disc, idx) in disciplines" :key="idx" :style="`border-left: 2px solid ${getClanConfig().corTexto};`">
+                  <div style="flex:1; display:flex; flex-direction:column;">
+                    <input v-model="disc.name" class="bg-transparent border-none text-[var(--parchment)] font-title text-[13px] tracking-[1px] uppercase focus:outline-none w-full" placeholder="Nome da Disciplina" />
+                    <textarea v-model="disc.powers" class="bg-transparent border-none text-[var(--text-dim)] text-[12px] font-body italic resize-none w-full mt-2 focus:outline-none" rows="2" placeholder="Poder 1, Poder 2..."></textarea>
+                  </div>
+                  <div class="disc-bar" style="margin-left: 16px;">
+                    <PipRow v-model="disc.level" :max="5" :color="getClanConfig().corTexto" />
+                  </div>
+                </div>
+                
+                <button @click="addDiscipline" class="filter-btn mt-4 text-center mx-auto block" style="width: 200px;">
+                  + Adicionar Disciplina
+                </button>
               </div>
             </div>
-          </section>
+
+            <!-- TAB: HISTÓRICO -->
+            <div class="tab-panel" :class="{ active: activeTab === 'historico' }">
+              <p class="section-title">História Completa</p>
+              <textarea v-model="form.history" class="w-full bg-[rgba(201,168,76,0.03)] text-[var(--text-main)] border border-[var(--border-dark)] rounded-[var(--radius-lg)] p-6 mb-5 font-body leading-relaxed focus:outline-none resize-none min-h-[250px]" placeholder="Escreva a trajetória do personagem..."></textarea>
+
+              <p class="section-title">Aparência</p>
+              <textarea v-model="form.appearance" class="w-full bg-[rgba(201,168,76,0.03)] text-[var(--text-main)] border border-[var(--border-dark)] rounded-[var(--radius-lg)] p-6 mb-5 font-body leading-relaxed focus:outline-none resize-none min-h-[150px]" placeholder="Descreva os traços físicos e roupas..."></textarea>
+
+              <p class="section-title">Vantagens & Defeitos</p>
+              <div class="dicas-block">
+                <div v-for="(mf, idx) in meritsFlaws" :key="idx" class="flex justify-between items-center mb-3 border-b border-[var(--border-dark)] pb-3">
+                  <input v-model="mf.name" class="bg-transparent text-[13px] text-[var(--parchment-dim)] border-none focus:outline-none flex-1 font-title uppercase tracking-wider" placeholder="Nome da Vantagem/Defeito" />
+                  <PipRow v-model="mf.level" :max="5" />
+                </div>
+                <button @click="addMerit" class="text-[var(--gold-dim)] hover:text-[var(--gold)] text-xs font-title uppercase tracking-widest mt-2">+ Adicionar Nova</button>
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </div>
 
-      <!-- Botão Salvar -->
-      <div class="fixed bottom-8 right-8 z-50">
-        <button @click="handleSave" :disabled="saving" class="bg-[#8b0000] text-white font-bold px-8 py-4 uppercase tracking-widest shadow-2xl hover:bg-[#690000] transition-all active:scale-95 flex items-center gap-3 disabled:opacity-50">
-          <span>💾</span> {{ saving ? 'Salvando...' : 'Salvar Alterações' }}
-        </button>
-      </div>
     </main>
   </div>
 </template>
@@ -241,48 +242,81 @@ const loading = ref(true);
 const saving = ref(false);
 const errorMsg = ref('');
 const successMsg = ref('');
+const activeTab = ref('atributos');
 
-// ─── Componente Pip Reativo ────────────────────────────────
+// ─── Componente Pip Reativo adaptado para a UI Gothic Dark ────────────────
 const PipRow = defineComponent({
-  props: { modelValue: { type: Number, default: 0 }, label: String, max: { type: Number, default: 5 }, size: { type: Number, default: 4 }, color: { type: String, default: '#8b0000' } },
+  props: { 
+    modelValue: { type: Number, default: 0 }, 
+    max: { type: Number, default: 5 }, 
+    color: { type: String, default: 'var(--gold)' }, 
+    isSkill: { type: Boolean, default: false } 
+  },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
     const pips = computed(() => Array.from({ length: props.max }, (_, i) => i < props.modelValue));
     const setPip = (i) => emit('update:modelValue', props.modelValue === i + 1 ? 0 : i + 1);
-    return () => h('div', { class: 'flex justify-between items-center' }, [
-      props.label ? h('span', { class: 'text-sm text-[#e2e2e2]' }, props.label) : null,
-      h('div', { class: 'flex gap-1' }, pips.value.map((filled, i) =>
-        h('button', {
-          style: filled ? `background-color: ${props.color}; border-color: ${props.color};` : 'border-color: #aa8984;',
-          class: 'w-4 h-4 rounded-full border transition-all duration-200 hover:border-[#ffb4a8]',
-          onClick: () => setPip(i)
-        })
-      ))
-    ]);
-  }
-});
-
-const DamageBox = defineComponent({
-  props: { modelValue: { type: String, default: '' } },
-  emits: ['update:modelValue'],
-  setup(props, { emit }) {
-    const states = ['', '/', 'X'];
-    const cycle = () => emit('update:modelValue', states[(states.indexOf(props.modelValue) + 1) % states.length]);
-    return () => h('button', { class: 'w-6 h-6 border border-[#aa8984] flex items-center justify-center text-[#ffb4a8] font-mono text-xs hover:border-[#8b0000] transition-colors', onClick: cycle }, props.modelValue);
+    
+    return () => h('div', { class: props.isSkill ? 'skill-dots' : 'attr-dots' }, pips.value.map((filled, i) => {
+      // Estilo do pip dependendo do tipo (skill ou attr/disciplina)
+      const dotClass = props.isSkill ? 'skill-dot' : 'dot';
+      let styleObj = {};
+      if (filled) {
+         if (props.isSkill) {
+            styleObj = { backgroundColor: 'var(--gold-dim)', borderColor: 'var(--gold-dim)' };
+         } else {
+            styleObj = { backgroundColor: props.color, borderColor: props.color, boxShadow: `0 0 6px ${props.color}88` };
+         }
+      }
+      return h('span', {
+        style: styleObj,
+        class: `${dotClass} cursor-pointer hover:border-[#fff] transition-all`,
+        onClick: () => setPip(i)
+      });
+    }));
   }
 });
 
 // ─── Estado ────────────────────────────────
-const form = ref({ name: '', concept: '', predatorType: '', chronicle: '', ambition: '', clan: '', appearance: '', history: '' });
+const form = ref({ name: '', concept: '', predatorType: '', chronicle: '', ambition: '', clan: '', appearance: '', history: '', avatarUrl: '' });
 const attrs = ref({ forca: 1, destreza: 1, vigor: 1, carisma: 1, manipulacao: 1, autocontrole: 1, inteligencia: 1, raciocinio: 1, determinacao: 1 });
 const skills = ref({ armasBrancas: 0, armasDeFogo: 0, atletismo: 0, briga: 0, conducao: 0, furtividade: 0, ladroagem: 0, oficios: 0, sobrevivencia: 0, empatiaAnimal: 0, etiqueta: 0, intimidacao: 0, lideranca: 0, manha: 0, performance: 0, persuasao: 0, sagacidade: 0, subferfugio: 0, ciencia: 0, erudicao: 0, financas: 0, investigacao: 0, medicina: 0, ocultismo: 0, percepcao: 0, politica: 0, tecnologia: 0 });
 const traits = ref({ bloodPotency: 1, humanity: 7, hunger: 1 });
-const health = ref(Array(10).fill(''));
-const willpower = ref(Array(10).fill(''));
-const healthMax = computed(() => attrs.value.vigor + 3);
+
 const wpMax = computed(() => attrs.value.autocontrole + attrs.value.determinacao);
 const disciplines = ref([]);
 const meritsFlaws = ref([]);
+
+// ─── Upload de Avatar ─────────────────────────
+const avatarInput = ref(null);
+const triggerAvatarUpload = () => {
+  if (charId === 'novo') {
+    errorMsg.value = 'Salve o personagem primeiro antes de enviar uma foto.';
+    return;
+  }
+  avatarInput.value.click();
+};
+
+const handleAvatarChange = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('avatar', file);
+
+  try {
+    const res = await api.post(`/characters/${charId}/avatar`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    successMsg.value = 'Foto atualizada com sucesso!';
+    form.value.avatarUrl = res.data.avatarUrl.startsWith('http') 
+      ? res.data.avatarUrl 
+      : `${api.defaults.baseURL.replace('/api', '')}${res.data.avatarUrl}`;
+  } catch (err) {
+    console.error('Erro no upload da foto:', err);
+    errorMsg.value = err.response?.data?.error || 'Erro ao enviar a foto.';
+  }
+};
 
 const physicalSkills = [
   { key: 'armasBrancas', label: 'Armas Brancas' }, { key: 'armasDeFogo', label: 'Armas de Fogo' },
@@ -306,20 +340,82 @@ const mentalSkills = [
   { key: 'tecnologia', label: 'Tecnologia' }
 ];
 
+const increaseStat = (type) => {
+   // Apenas um exemplo visual se houver interação nos stats laterais
+   console.log('Clicked', type);
+};
+
+const addDiscipline = () => {
+   disciplines.value.push({ name: '', level: 1, powers: '' });
+};
+
+const addMerit = () => {
+   meritsFlaws.value.push({ name: '', level: 1, type: 'MERIT' });
+};
+
+// Cores baseadas no protótipo original
+const clanConfigs = {
+  'Ventrue': { cor: '#1a3a5c', corTexto: '#6fa8dc', icone: '👑' },
+  'Gangrel': { cor: '#3d2b1f', corTexto: '#c4894a', icone: '🐺' },
+  'Toreador': { cor: '#5c1a3a', corTexto: '#e07aad', icone: '🌹' },
+  'Nosferatu': { cor: '#1a2a1a', corTexto: '#6abf69', icone: '🦇' },
+  'Brujah': { cor: '#5c1a1a', corTexto: '#e07070', icone: '✊' },
+  'Tremere': { cor: '#2a1a5c', corTexto: '#9a7ae0', icone: '🔮' },
+};
+
+const getClanConfig = () => {
+  const clan = form.value.clan;
+  if (clan) {
+    const found = Object.keys(clanConfigs).find(k => k.toLowerCase() === clan.toLowerCase());
+    if (found) return clanConfigs[found];
+  }
+  return { cor: '#3a3a3a', corTexto: '#c9a84c', icone: '●' };
+};
+
+const attributeDefs = ref([]);
+const skillDefs = ref([]);
+const powerDefs = ref([]);
+const mfDefs = ref([]);
+
 // ─── Carregar dados do personagem ────────────────────────────────
 const loadCharacter = async () => {
   try {
-    const [charRes, attrRes, skillRes, powerRes, mfRes] = await Promise.all([
+    if (charId === 'novo') {
+       loading.value = false;
+       return;
+    }
+
+    const [charRes, attrRes, skillRes, powerRes, mfRes, statusRes, attrDefRes, skillDefRes, powerDefRes, mfDefRes] = await Promise.all([
       api.get(`/characters/${charId}`),
       api.get(`/characters/${charId}/attributes`),
       api.get(`/characters/${charId}/skills`),
       api.get(`/characters/${charId}/powers`),
-      api.get(`/characters/${charId}/merits-flaws`)
+      api.get(`/characters/${charId}/merits-flaws`),
+      api.get(`/characters/${charId}/statuses`).catch(() => ({ data: [] })),
+      api.get(`/attribute-definitions`).catch(() => ({ data: [] })),
+      api.get(`/skill-definitions`).catch(() => ({ data: [] })),
+      api.get(`/power-definitions`).catch(() => ({ data: [] })),
+      api.get(`/merit-flaw-definitions`).catch(() => ({ data: [] }))
     ]);
 
-    form.value.name = charRes.data.name || '';
+    attributeDefs.value = attrDefRes.data || [];
+    skillDefs.value = skillDefRes.data || [];
+    powerDefs.value = powerDefRes.data || [];
+    mfDefs.value = mfDefRes.data || [];
 
-    // Mapear atributos do backend
+    form.value.name = charRes.data.name || '';
+    if (charRes.data.avatarUrl) {
+      form.value.avatarUrl = charRes.data.avatarUrl.startsWith('http') 
+        ? charRes.data.avatarUrl 
+        : `${api.defaults.baseURL.replace('/api', '')}${charRes.data.avatarUrl}`;
+    }
+
+    const getDefName = (list, id) => {
+      if (!list || !Array.isArray(list)) return '';
+      const item = list.find(d => d.id === id);
+      return item ? item.name : '';
+    };
+
     const attrNames = {
       'Força': 'forca', 'Destreza': 'destreza', 'Vigor': 'vigor',
       'Carisma': 'carisma', 'Manipulação': 'manipulacao', 'Autocontrole': 'autocontrole',
@@ -330,40 +426,39 @@ const loadCharacter = async () => {
     };
 
     attrRes.data.forEach(attr => {
-      const key = attrNames[attr.attributeDefinition?.name || attr.name];
+      const realName = attr.attributeDefinition?.name || attr.name || getDefName(attributeDefs.value, attr.attributeId);
+      const key = attrNames[realName];
       if (!key) return;
+
       const numericKeys = ['forca','destreza','vigor','carisma','manipulacao','autocontrole','inteligencia','raciocinio','determinacao','bloodPotency','humanity','hunger'];
       if (numericKeys.includes(key)) {
         if (['bloodPotency','humanity','hunger'].includes(key)) traits.value[key] = Number(attr.value);
         else attrs.value[key] = Number(attr.value);
       } else {
-        form.value[key] = attr.value;
+        form.value[key] = attr.description || attr.value || '';
       }
     });
 
-    // Mapear habilidades
     skillRes.data.forEach(sk => {
-      const key = sk.skillDefinition?.name || sk.name;
-      if (skills.value[key] !== undefined) skills.value[key] = Number(sk.value);
+      const realName = sk.skillDefinition?.name || sk.name || getDefName(skillDefs.value, sk.skillId);
+      if (skills.value[realName] !== undefined) skills.value[realName] = Number(sk.value);
     });
 
-    // Mapear disciplinas (powers)
     if (powerRes.data?.length) {
       disciplines.value = powerRes.data.map(p => ({
         id: p.id,
-        name: p.powerDefinition?.name || p.name || '',
-        level: Number(p.value) || 0,
+        name: p.powerDefinition?.name || p.name || getDefName(powerDefs.value, p.powerDefinitionId) || '',
+        level: Number(p.level || p.value) || 0,
         powers: p.description || ''
       }));
     }
 
-    // Mapear vantagens/defeitos
     if (mfRes.data?.length) {
       meritsFlaws.value = mfRes.data.map(mf => ({
         id: mf.id,
-        name: mf.meritFlawDefinition?.name || mf.name || '',
-        type: mf.type || 'MERIT',
-        level: Number(mf.value) || 0
+        name: mf.meritFlawDefinition?.name || mf.name || getDefName(mfDefs.value, mf.meritFlawId) || 'Desconhecido',
+        type: mf.type || mf.meritFlawDefinition?.type || 'MERIT',
+        level: Number(mf.points || mf.value) || 0
       }));
     }
 
@@ -383,32 +478,77 @@ const handleSave = async () => {
   errorMsg.value = '';
   successMsg.value = '';
   try {
-    // Atualizar nome do personagem
-    await api.put(`/characters/${charId}`, { name: form.value.name });
+    const getDefId = (list, name) => {
+      const item = list.find(d => d.name.toLowerCase() === name.toLowerCase());
+      return item ? item.id : null;
+    };
 
-    // Atualizar atributos via upsert (POST cria ou atualiza)
+    // Montar Atributos
+    const payloadAttributes = [];
     const attrMap = [
-      { name: 'Força', value: attrs.value.forca }, { name: 'Destreza', value: attrs.value.destreza },
-      { name: 'Vigor', value: attrs.value.vigor }, { name: 'Carisma', value: attrs.value.carisma },
-      { name: 'Manipulação', value: attrs.value.manipulacao }, { name: 'Autocontrole', value: attrs.value.autocontrole },
-      { name: 'Inteligência', value: attrs.value.inteligencia }, { name: 'Raciocínio', value: attrs.value.raciocinio },
-      { name: 'Determinação', value: attrs.value.determinacao },
-      { name: 'clan', value: form.value.clan }, { name: 'concept', value: form.value.concept },
-      { name: 'chronicle', value: form.value.chronicle }, { name: 'predatorType', value: form.value.predatorType },
-      { name: 'ambition', value: form.value.ambition }, { name: 'appearance', value: form.value.appearance },
-      { name: 'history', value: form.value.history },
-      { name: 'bloodPotency', value: traits.value.bloodPotency }, { name: 'humanity', value: traits.value.humanity },
-      { name: 'hunger', value: traits.value.hunger },
+      { name: 'Força', value: attrs.value.forca, type: 'number' }, { name: 'Destreza', value: attrs.value.destreza, type: 'number' },
+      { name: 'Vigor', value: attrs.value.vigor, type: 'number' }, { name: 'Carisma', value: attrs.value.carisma, type: 'number' },
+      { name: 'Manipulação', value: attrs.value.manipulacao, type: 'number' }, { name: 'Autocontrole', value: attrs.value.autocontrole, type: 'number' },
+      { name: 'Inteligência', value: attrs.value.inteligencia, type: 'number' }, { name: 'Raciocínio', value: attrs.value.raciocinio, type: 'number' },
+      { name: 'Determinação', value: attrs.value.determinacao, type: 'number' },
+      { name: 'clan', value: form.value.clan, type: 'string' }, { name: 'concept', value: form.value.concept, type: 'string' },
+      { name: 'chronicle', value: form.value.chronicle, type: 'string' }, { name: 'predatorType', value: form.value.predatorType, type: 'string' },
+      { name: 'ambition', value: form.value.ambition, type: 'string' }, { name: 'appearance', value: form.value.appearance, type: 'string' },
+      { name: 'history', value: form.value.history, type: 'string' },
+      { name: 'bloodPotency', value: traits.value.bloodPotency, type: 'number' }, { name: 'humanity', value: traits.value.humanity, type: 'number' },
+      { name: 'hunger', value: traits.value.hunger, type: 'number' },
     ];
-    await Promise.all(attrMap.filter(a => a.value !== undefined && a.value !== '').map(a =>
-      api.post(`/characters/${charId}/attributes`, { name: a.name, value: String(a.value) }).catch(() => {})
-    ));
 
-    successMsg.value = 'Alterações salvas com sucesso!';
-    setTimeout(() => { successMsg.value = ''; }, 3000);
+    for (const a of attrMap) {
+      if (a.value !== undefined && a.value !== '') {
+        const id = getDefId(attributeDefs.value, a.name);
+        if (id) {
+          if (a.type === 'string') {
+             payloadAttributes.push({ attributeId: id, value: 1, description: String(a.value) });
+          } else {
+             payloadAttributes.push({ attributeId: id, value: Number(a.value) });
+          }
+        }
+      }
+    }
+
+    // Montar Habilidades
+    const payloadSkills = [];
+    for (const [sName, sValue] of Object.entries(skills.value)) {
+       if (sValue > 0) {
+         const id = getDefId(skillDefs.value, sName);
+         if (id) payloadSkills.push({ skillId: id, value: Number(sValue) });
+       }
+    }
+
+    // Montar Disciplinas (simplificado para nível)
+    const payloadPowers = [];
+    for (const d of disciplines.value) {
+      if (d.name && d.level > 0) {
+        const id = getDefId(powerDefs.value, d.name);
+        if (id) payloadPowers.push({ powerDefinitionId: id, level: Number(d.level) });
+      }
+    }
+
+    const payload = {
+      name: form.value.name,
+      gameStyle: 'VAMPIRE',
+      attributes: payloadAttributes,
+      skills: payloadSkills,
+      powers: payloadPowers
+    };
+
+    if (charId === 'novo') {
+       const res = await api.post('/characters', payload);
+       successMsg.value = 'Personagem criado com sucesso!';
+       setTimeout(() => router.push(`/jogador/vampire/personagem/${res.data.id}`), 1500);
+    } else {
+       await api.put(`/characters/${charId}`, payload);
+       successMsg.value = 'Ficha salva com sucesso!';
+    }
   } catch (err) {
-    console.error(err);
-    errorMsg.value = err.response?.data?.message || 'Erro ao salvar. Tente novamente.';
+    console.error('Erro ao salvar ficha:', err);
+    errorMsg.value = err.response?.data?.error || 'Erro ao salvar ficha. Verifique sua conexão.';
   } finally {
     saving.value = false;
   }
@@ -416,15 +556,5 @@ const handleSave = async () => {
 </script>
 
 <style scoped>
-.grain-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  pointer-events: none; z-index: 9999; opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-.input-ledger {
-  background: transparent; border: none;
-  border-bottom: 1px solid #474646; color: #e2e2e2;
-  padding: 4px 0; width: 100%; transition: border-color 0.3s ease; font-size: 16px;
-}
-.input-ledger:focus { outline: none; border-bottom-color: #8b0000; }
+/* O layout principal está no src/style.css, herda automaticamente as classes de .detail-container, .tabs-nav, etc. */
 </style>
