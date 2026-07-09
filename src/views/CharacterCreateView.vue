@@ -33,12 +33,12 @@ const theme = computed(() => {
   }
 })
 
-const currentStep = ref(1)
-const steps = [
-  { id: 1, name: 'Identidade' },
-  { id: 2, name: 'Atributos' },
-  { id: 3, name: 'Habilidades' },
-  { id: 4, name: 'Revisão' }
+const activeTab = ref('identidade')
+const tabs = [
+  { id: 'identidade', label: 'IDENTIDADE' },
+  { id: 'atributos', label: 'ATRIBUTOS' },
+  { id: 'habilidades', label: 'HABILIDADES' },
+  { id: 'revisao', label: 'FORJAR' }
 ]
 
 const form = ref({
@@ -68,7 +68,7 @@ onMounted(async () => {
   try {
     const headers = { Authorization: `Bearer ${token}` }
     
-    // Clans se for Vampiro
+    // Clans
     if (sysUpper === 'VAMPIRE') {
       const res = await axios.get('https://api.liragames.com.br/api/vampire-clas', { headers })
       clans.value = res.data
@@ -78,14 +78,11 @@ onMounted(async () => {
     const resAttr = await axios.get('https://api.liragames.com.br/api/attribute-definitions', { headers })
     attributesDef.value = resAttr.data.filter((a: any) => {
       if (!a.gameStyle) return true
-      // Verifica se é array ou string parseavel
       try {
         const gs = typeof a.gameStyle === 'string' ? JSON.parse(a.gameStyle) : a.gameStyle
         return gs.includes(sysUpper) || gs.includes('UNIVERSAL')
       } catch(e) { return true }
     })
-    
-    // Inicializar Atributos com 1 (mínimo humano)
     form.value.attributes = attributesDef.value.map(a => ({ attributeId: a.id, value: 1 }))
 
     // Habilidades
@@ -97,19 +94,17 @@ onMounted(async () => {
         return gs.includes(sysUpper) || gs.includes('UNIVERSAL')
       } catch(e) { return true }
     })
-
-    // Inicializar Habilidades com 0
     form.value.skills = skillsDef.value.map(s => ({ skillId: s.id, value: 0 }))
 
   } catch (err) {
     console.error(err)
-    errorMsg.value = 'Erro ao carregar banco de regras do sistema.'
+    errorMsg.value = 'Erro ao carregar banco de regras do sistema. Certifique-se que o backend está atualizado.'
   } finally {
     loading.value = false
   }
 })
 
-// Helpers Visuais e de Controle
+// Helpers Visuais
 const getAttrsByType = (type: string) => attributesDef.value.filter(a => a.type === type)
 const getSkillsByType = (type: string) => skillsDef.value.filter(s => s.type === type)
 
@@ -123,13 +118,11 @@ const getSkillVal = (id: string) => form.value.skills.find(s => s.skillId === id
 const setSkillVal = (id: string, val: number) => {
   const s = form.value.skills.find(x => x.skillId === id)
   if (s) {
-    if (s.value === val && s.value > 0) s.value = val - 1 // Clicou no mesmo, desmarca
+    if (s.value === val && s.value > 0) s.value = val - 1
     else s.value = val
   }
 }
 
-const nextStep = () => { if (currentStep.value < 4) currentStep.value++ }
-const prevStep = () => { if (currentStep.value > 1) currentStep.value-- }
 const goBack = () => router.push(`/characters/${systemParam.toLowerCase()}`)
 
 const submit = async () => {
@@ -151,7 +144,7 @@ const submit = async () => {
       demeanor: form.value.demeanor,
       vampireClaId: form.value.vampireClaId || undefined,
       attributes: form.value.attributes,
-      skills: form.value.skills.filter(s => s.value > 0) // Envia só as marcadas
+      skills: form.value.skills.filter(s => s.value > 0)
     }
 
     await axios.post('https://api.liragames.com.br/api/characters', payload, {
@@ -171,7 +164,7 @@ const submit = async () => {
 <template>
   <main :class="['min-h-screen font-sans overflow-x-hidden text-parchment pb-20 relative', theme.bgClass]">
     <!-- Background Gradient -->
-    <div class="fixed inset-0 pointer-events-none z-0" :style="{ background: `radial-gradient(ellipse at 50% -10%, ${theme.glow.replace('0.5', '0.2')} 0%, transparent 60%)` }"></div>
+    <div class="fixed inset-0 pointer-events-none z-0" :style="{ background: `radial-gradient(ellipse at 50% 0%, ${theme.glow.replace('0.5', '0.15')} 0%, transparent 80%)` }"></div>
 
     <!-- Header / Navbar Mínima -->
     <header class="relative z-50 flex items-center justify-between px-6 py-4 border-b border-white/5 bg-black/40 backdrop-blur-md sticky top-0">
@@ -186,165 +179,176 @@ const submit = async () => {
       </div>
     </header>
 
-    <div class="relative z-10 max-w-[900px] mx-auto px-6 pt-10">
-      <!-- WIZARD PROGRESS -->
-      <div class="flex items-center justify-between mb-12 border-b border-white/10 pb-6">
-        <div v-for="step in steps" :key="step.id" class="flex flex-col items-center flex-1 relative">
-          <div :class="[
-            'w-8 h-8 rounded-full border-2 flex items-center justify-center font-serif text-[12px] z-10 transition-all duration-500',
-            currentStep >= step.id ? `bg-black ${theme.borderClass} ${theme.textClass} shadow-[0_0_15px_${theme.glow}]` : 'bg-black border-white/20 text-white/30'
-          ]">
-            {{ step.id }}
-          </div>
-          <span :class="['mt-3 font-serif text-[10px] tracking-[2px] uppercase transition-all duration-500', currentStep >= step.id ? 'text-parchment' : 'text-white/30']">
-            {{ step.name }}
-          </span>
-          <!-- Linha conectora -->
-          <div v-if="step.id < steps.length" class="absolute top-4 left-[50%] w-full h-[2px] bg-white/5 -z-0">
-            <div class="h-full transition-all duration-700" :style="{ width: currentStep > step.id ? '100%' : '0%', backgroundColor: theme.c1 }"></div>
-          </div>
-        </div>
-      </div>
-
+    <div class="relative z-10 max-w-[1300px] mx-auto px-6 md:px-12 pt-12">
       <!-- LOADING -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-20 space-y-4">
         <div class="w-12 h-12 border-4 border-t-gold border-r-gold border-b-white/10 border-l-white/10 rounded-full animate-spin"></div>
-        <p class="font-serif text-[10px] tracking-[3px] uppercase text-gold-dim">Preparando Fornalha...</p>
+        <p class="font-serif text-[10px] tracking-[3px] uppercase text-gold-dim">Acessando Banco de Regras...</p>
       </div>
 
-      <!-- ERROR MSG -->
-      <div v-if="errorMsg" class="mb-6 bg-red-900/30 border border-red-500/50 p-4 rounded-xl text-center backdrop-blur-sm">
-        <p class="font-serif text-red-400 tracking-widest uppercase text-xs">{{ errorMsg }}</p>
-      </div>
-
-      <!-- FORMS -->
-      <div v-if="!loading" class="bg-black/60 border border-white/10 rounded-2xl p-8 backdrop-blur shadow-2xl min-h-[500px] flex flex-col">
+      <!-- MAIN LAYOUT 2 COLUMNS -->
+      <div v-else class="flex flex-col lg:flex-row gap-8 lg:gap-16">
         
-        <!-- PASSO 1: IDENTIDADE -->
-        <div v-show="currentStep === 1" class="animate-fade-in flex-1">
-          <h2 class="font-deco text-3xl text-gold mb-8 text-center drop-shadow-md">Quem é você na escuridão?</h2>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="space-y-2">
-              <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Nome do Personagem</label>
-              <input v-model="form.name" type="text" placeholder="Ex: Jean-Luc" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+        <!-- LEFT COLUMN: PORTRAIT & SUMMARY -->
+        <div class="w-full lg:w-[320px] shrink-0 space-y-6">
+          <div class="bg-black/60 border border-white/10 rounded-xl overflow-hidden shadow-2xl relative group">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 pointer-events-none"></div>
+            
+            <img src="/images/adventure.png" class="w-full aspect-[3/4] object-cover saturate-[0.6] opacity-60" />
+            
+            <div class="absolute inset-x-0 bottom-0 p-6 z-20 flex flex-col items-center justify-end">
+              <span class="font-serif text-[10px] tracking-[3px] uppercase text-gold-dim mb-2 text-center drop-shadow-md">NOVA LENDA</span>
             </div>
+            
+            <span :class="['absolute top-3 left-3 w-4 h-4 border-t border-l rounded-tl-sm opacity-50 z-20', theme.borderClass]"></span>
+            <span :class="['absolute top-3 right-3 w-4 h-4 border-t border-r rounded-tr-sm opacity-50 z-20', theme.borderClass]"></span>
+            <span :class="['absolute bottom-3 left-3 w-4 h-4 border-b border-l rounded-bl-sm opacity-50 z-20', theme.borderClass]"></span>
+            <span :class="['absolute bottom-3 right-3 w-4 h-4 border-b border-r rounded-br-sm opacity-50 z-20', theme.borderClass]"></span>
+          </div>
 
-            <div class="space-y-2">
-              <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Conceito</label>
-              <input v-model="form.concept" type="text" placeholder="Ex: Detetive Arruinado" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+          <!-- Basic Data Summary Panel -->
+          <div class="bg-black/40 border border-white/10 rounded-xl p-5 space-y-4 shadow-xl">
+            <div class="flex justify-between items-center border-b border-white/5 pb-2">
+              <span class="font-serif text-[9px] tracking-[2px] uppercase text-text-dim">Clã / Tribo</span>
+              <span :class="['font-serif text-[10px] tracking-[1px] uppercase', theme.textClass]">{{ clans.find(c => c.id === form.vampireClaId)?.name || 'Desconhecido' }}</span>
             </div>
-
-            <div class="space-y-2" v-if="sysUpper === 'VAMPIRE'">
-              <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Clã</label>
-              <select v-model="form.vampireClaId" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans appearance-none">
-                <option value="">-- Selecione o Clã --</option>
-                <option v-for="c in clans" :key="c.id" :value="c.id">{{ c.name }}</option>
-              </select>
+            <div class="flex justify-between items-center border-b border-white/5 pb-2">
+              <span class="font-serif text-[9px] tracking-[2px] uppercase text-text-dim">Natureza</span>
+              <span class="font-sans text-xs text-parchment-dim">{{ form.nature || '---' }}</span>
             </div>
-
-            <div class="space-y-2">
-              <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Natureza</label>
-              <input v-model="form.nature" type="text" placeholder="Ex: Sobrevivente" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
-            </div>
-
-            <div class="space-y-2">
-              <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Comportamento</label>
-              <input v-model="form.demeanor" type="text" placeholder="Ex: Galante" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+            <div class="flex justify-between items-center pb-2">
+              <span class="font-serif text-[9px] tracking-[2px] uppercase text-text-dim">Comportamento</span>
+              <span class="font-sans text-xs text-parchment-dim">{{ form.demeanor || '---' }}</span>
             </div>
           </div>
         </div>
 
-        <!-- PASSO 2: ATRIBUTOS -->
-        <div v-show="currentStep === 2" class="animate-fade-in flex-1">
-          <h2 class="font-deco text-3xl text-gold mb-2 text-center drop-shadow-md">Atributos Primordiais</h2>
-          <p class="font-sans italic text-sm text-text-dim text-center mb-8">Distribua seus pontos nas categorias Físico, Social e Mental.</p>
+        <!-- RIGHT COLUMN: NAME & TABS -->
+        <div class="flex-1 flex flex-col min-w-0">
+          
+          <!-- NAME HEADER -->
+          <div class="mb-8 relative border-l-2 pl-6" :class="theme.borderClass">
+            <div v-if="sysUpper === 'VAMPIRE' && form.vampireClaId" :class="['inline-flex items-center justify-center gap-2 font-serif text-[10px] tracking-[2px] uppercase px-3 py-1 rounded-full border mb-4 bg-black/50', theme.textClass, theme.borderClass]">
+              {{ theme.icon }} {{ clans.find(c => c.id === form.vampireClaId)?.name }}
+            </div>
+            <h1 class="font-deco text-4xl sm:text-5xl lg:text-6xl text-gold leading-none tracking-wide drop-shadow-[0_2px_10px_rgba(201,168,76,0.3)] mb-2 uppercase break-words">
+              {{ form.name || 'SEM NOME' }}
+            </h1>
+            <p class="font-sans italic text-sm md:text-base text-parchment-dim">
+              {{ form.concept || 'Qual é o seu conceito?' }}
+            </p>
+          </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div v-for="type in ['FÍSICO', 'SOCIAL', 'MENTAL']" :key="type">
-              <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 border-b border-white/10 pb-2">{{ type }}</h3>
-              
-              <div class="space-y-4">
-                <div v-for="attr in getAttrsByType(type)" :key="attr.id" class="flex items-center justify-between group">
-                  <span class="font-serif text-[13px] tracking-[1px] text-parchment group-hover:text-white transition-colors" :title="attr.description || ''">{{ attr.name }}</span>
-                  <div class="flex gap-1.5 cursor-pointer">
-                    <div v-for="i in 5" :key="i" 
-                         @click="setAttrVal(attr.id, i)"
-                         :class="[
-                           'w-3.5 h-3.5 rounded-full border transition-all duration-300', 
-                           i <= getAttrVal(attr.id) ? `bg-gold border-gold shadow-[0_0_8px_rgba(201,168,76,0.6)]` : 'border-white/20 bg-transparent hover:border-white/50'
-                         ]">
+          <div v-if="errorMsg" class="mb-6 bg-red-900/30 border border-red-500/50 p-4 rounded-xl text-center backdrop-blur-sm">
+            <p class="font-serif text-red-400 tracking-widest uppercase text-xs">{{ errorMsg }}</p>
+          </div>
+
+          <!-- TABS -->
+          <div class="flex items-center gap-8 border-b border-white/10 mb-8 overflow-x-auto hide-scrollbar">
+            <button v-for="tab in tabs" :key="tab.id"
+                    @click="activeTab = tab.id"
+                    :class="[
+                      'pb-4 font-serif text-[11px] tracking-[3px] uppercase whitespace-nowrap transition-all duration-300 relative',
+                      activeTab === tab.id ? `text-gold` : 'text-text-dim hover:text-parchment'
+                    ]">
+              {{ tab.label }}
+              <!-- Active Indicator -->
+              <span v-if="activeTab === tab.id" 
+                    :class="['absolute bottom-0 left-0 w-full h-[2px] shadow-[0_0_10px_currentColor]', theme.c1Class]"></span>
+            </button>
+          </div>
+
+          <!-- TAB CONTENT -->
+          <div class="bg-black/30 border border-white/5 rounded-xl p-6 lg:p-10 shadow-xl min-h-[400px]">
+            
+            <!-- IDENTIDADE -->
+            <div v-show="activeTab === 'identidade'" class="animate-fade-in space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Nome do Personagem</label>
+                  <input v-model="form.name" type="text" placeholder="Nome Verdadeiro ou Alcunha" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+                </div>
+                <div class="space-y-2">
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Conceito</label>
+                  <input v-model="form.concept" type="text" placeholder="Ex: Detetive Arruinado" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+                </div>
+                <div class="space-y-2" v-if="sysUpper === 'VAMPIRE'">
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Clã</label>
+                  <select v-model="form.vampireClaId" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans appearance-none">
+                    <option value="">-- Selecione o Clã --</option>
+                    <option v-for="c in clans" :key="c.id" :value="c.id">{{ c.name }}</option>
+                  </select>
+                </div>
+                <div class="space-y-2">
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Natureza</label>
+                  <input v-model="form.nature" type="text" placeholder="Ex: Sobrevivente" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+                </div>
+                <div class="space-y-2">
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Comportamento</label>
+                  <input v-model="form.demeanor" type="text" placeholder="Ex: Galante" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+                </div>
+              </div>
+            </div>
+
+            <!-- ATRIBUTOS -->
+            <div v-show="activeTab === 'atributos'" class="animate-fade-in space-y-8">
+              <div v-for="type in ['FÍSICO', 'SOCIAL', 'MENTAL']" :key="type">
+                <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 border-b border-white/10 pb-2">{{ type }}</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div v-for="attr in getAttrsByType(type)" :key="attr.id" class="flex items-center justify-between group">
+                    <span class="font-serif text-[13px] tracking-[1px] text-parchment group-hover:text-white transition-colors">{{ attr.name }}</span>
+                    <div class="flex gap-1.5 cursor-pointer">
+                      <div v-for="i in 5" :key="i" 
+                           @click="setAttrVal(attr.id, i)"
+                           :class="[
+                             'w-3.5 h-3.5 rounded-full border transition-all duration-300', 
+                             i <= getAttrVal(attr.id) ? `bg-gold border-gold shadow-[0_0_8px_rgba(201,168,76,0.6)]` : 'border-white/20 bg-transparent hover:border-white/50'
+                           ]">
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- PASSO 3: HABILIDADES -->
-        <div v-show="currentStep === 3" class="animate-fade-in flex-1">
-          <h2 class="font-deco text-3xl text-gold mb-2 text-center drop-shadow-md">Habilidades e Perícias</h2>
-          <p class="font-sans italic text-sm text-text-dim text-center mb-8">O que você aprendeu durante sua vida mortal?</p>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div v-for="type in ['FÍSICO', 'SOCIAL', 'MENTAL']" :key="type">
-              <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 border-b border-white/10 pb-2">{{ type }}</h3>
-              
-              <div class="space-y-3">
-                <div v-for="skill in getSkillsByType(type)" :key="skill.id" class="flex items-center justify-between group">
-                  <span class="font-serif text-[11px] tracking-[0.5px] text-parchment group-hover:text-white transition-colors line-clamp-1 mr-2" :title="skill.description || ''">{{ skill.name }}</span>
-                  <div class="flex gap-1 cursor-pointer shrink-0">
-                    <div v-for="i in 5" :key="i" 
-                         @click="setSkillVal(skill.id, i)"
-                         :class="[
-                           'w-2.5 h-2.5 rounded-full border transition-all duration-300', 
-                           i <= getSkillVal(skill.id) ? `bg-gold border-gold shadow-[0_0_5px_rgba(201,168,76,0.5)]` : 'border-white/20 bg-transparent hover:border-white/50'
-                         ]">
+            <!-- HABILIDADES -->
+            <div v-show="activeTab === 'habilidades'" class="animate-fade-in space-y-8">
+              <div v-for="type in ['TALENTOS', 'PERICIAS', 'CONHECIMENTOS', 'FÍSICO', 'SOCIAL', 'MENTAL', 'NIVEL_1', 'NIVEL_2', 'NIVEL_3']" :key="type">
+                <div v-if="getSkillsByType(type).length > 0">
+                  <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 border-b border-white/10 pb-2">{{ type }}</h3>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
+                    <div v-for="skill in getSkillsByType(type)" :key="skill.id" class="flex items-center justify-between group">
+                      <span class="font-serif text-[11px] tracking-[0.5px] text-parchment group-hover:text-white transition-colors line-clamp-1 mr-2">{{ skill.name }}</span>
+                      <div class="flex gap-1 cursor-pointer shrink-0">
+                        <div v-for="i in 5" :key="i" 
+                             @click="setSkillVal(skill.id, i)"
+                             :class="[
+                               'w-2.5 h-2.5 rounded-full border transition-all duration-300', 
+                               i <= getSkillVal(skill.id) ? `bg-gold border-gold shadow-[0_0_5px_rgba(201,168,76,0.5)]` : 'border-white/20 bg-transparent hover:border-white/50'
+                             ]">
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- PASSO 4: REVISÃO -->
-        <div v-show="currentStep === 4" class="animate-fade-in flex-1">
-          <h2 class="font-deco text-3xl text-gold mb-6 text-center drop-shadow-md">Revisão do Pacto</h2>
-          
-          <div class="bg-black/50 border border-white/5 rounded-xl p-6 text-center mb-6 max-w-xl mx-auto">
-            <h3 class="font-serif text-2xl text-parchment mb-2 uppercase tracking-widest">{{ form.name || 'Sem Nome' }}</h3>
-            <p class="font-sans text-sm text-text-dim italic mb-4">"{{ form.concept || 'Sem Conceito' }}"</p>
-            <div v-if="sysUpper === 'VAMPIRE' && form.vampireClaId" class="mt-4">
-              <span class="inline-flex items-center gap-2 font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1.5 rounded-full border border-vamp-c1 text-vamp-c2 bg-black">
-                🩸 {{ clans.find(c => c.id === form.vampireClaId)?.name }}
-              </span>
+            <!-- FORJAR / REVISÃO -->
+            <div v-show="activeTab === 'revisao'" class="animate-fade-in flex flex-col items-center justify-center text-center py-10">
+              <h2 class="font-deco text-3xl text-gold mb-6 drop-shadow-md">Revisão do Pacto</h2>
+              <p class="font-sans text-sm text-parchment-dim max-w-xl mb-10 leading-relaxed">
+                Toda criação exige um sacrifício. Certifique-se que seus atributos e habilidades refletem sua verdadeira natureza antes de finalizar o processo. Uma vez forjado, o destino estará traçado.
+              </p>
+              
+              <button @click="submit" :disabled="saving" :class="['relative group overflow-hidden font-serif text-[14px] tracking-[3px] uppercase px-12 py-4 rounded bg-white text-black font-bold transition-all hover:text-white shadow-[0_0_30px_rgba(255,255,255,0.2)] disabled:opacity-50', theme.hoverBorder]">
+                <div class="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+                <span class="relative z-10">{{ saving ? 'Forjando nas Trevas...' : 'Forjar Personagem' }}</span>
+              </button>
             </div>
+
           </div>
-
-          <p class="font-sans text-center text-sm text-parchment-dim leading-relaxed max-w-xl mx-auto">
-            Verifique se os pontos de atributos e habilidades estão distribuídos corretamente. 
-            Ao clicar em Forjar Personagem, o registro será gravado definitivamente nos anais da noite.
-          </p>
         </div>
-
-        <!-- CONTROLS -->
-        <div class="flex items-center justify-between mt-10 pt-6 border-t border-white/10">
-          <button v-if="currentStep > 1" @click="prevStep" class="font-serif text-[11px] tracking-[2px] uppercase text-text-dim hover:text-white transition-colors px-4 py-2">
-            ← Retornar
-          </button>
-          <div v-else></div> <!-- Spacer -->
-
-          <button v-if="currentStep < 4" @click="nextStep" :class="['font-serif text-[11px] tracking-[2px] uppercase px-6 py-2.5 rounded border transition-all hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]', theme.borderClass, theme.textClass]">
-            Avançar →
-          </button>
-          
-          <button v-if="currentStep === 4" @click="submit" :disabled="saving" class="relative group overflow-hidden font-serif text-[12px] tracking-[2px] uppercase px-8 py-3 rounded bg-white text-black font-bold transition-all hover:bg-gold hover:text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] disabled:opacity-50">
-            <span class="relative z-10">{{ saving ? 'Forjando...' : 'Forjar Personagem' }}</span>
-          </button>
-        </div>
-
       </div>
     </div>
   </main>
@@ -357,5 +361,12 @@ const submit = async () => {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>
