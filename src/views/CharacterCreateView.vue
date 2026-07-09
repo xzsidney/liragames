@@ -77,37 +77,35 @@ onMounted(async () => {
       clans.value = res.data
     }
 
+    // Helper to filter by gameStyle robustly
+    const filterByGameStyle = (item: any) => {
+      if (!item.gameStyle) return true;
+      try {
+        let gs: string[];
+        if (typeof item.gameStyle === 'string') {
+          gs = item.gameStyle.startsWith('[') ? JSON.parse(item.gameStyle) : [item.gameStyle];
+        } else {
+          gs = item.gameStyle;
+        }
+        return gs.includes(sysUpper) || gs.includes('UNIVERSAL');
+      } catch (e) {
+        return item.gameStyle === sysUpper || item.gameStyle === 'UNIVERSAL';
+      }
+    };
+
     // Atributos
     const resAttr = await axios.get('https://api.liragames.com.br/api/attribute-definitions', { headers })
-    attributesDef.value = resAttr.data.filter((a: any) => {
-      if (!a.gameStyle) return true
-      try {
-        const gs = typeof a.gameStyle === 'string' ? JSON.parse(a.gameStyle) : a.gameStyle
-        return gs.includes(sysUpper) || gs.includes('UNIVERSAL')
-      } catch(e) { return true }
-    })
+    attributesDef.value = resAttr.data.filter(filterByGameStyle)
     form.value.attributes = attributesDef.value.map(a => ({ attributeId: a.id, value: 1 }))
 
     // Habilidades
     const resSkill = await axios.get('https://api.liragames.com.br/api/skill-definitions', { headers })
-    skillsDef.value = resSkill.data.filter((s: any) => {
-      if (!s.gameStyle) return true
-      try {
-        const gs = typeof s.gameStyle === 'string' ? JSON.parse(s.gameStyle) : s.gameStyle
-        return gs.includes(sysUpper) || gs.includes('UNIVERSAL')
-      } catch(e) { return true }
-    })
+    skillsDef.value = resSkill.data.filter(filterByGameStyle)
     form.value.skills = skillsDef.value.map(s => ({ skillId: s.id, value: 0 }))
 
     // Poderes / Vantagens
     const resPower = await axios.get('https://api.liragames.com.br/api/power-definitions', { headers })
-    powersDef.value = resPower.data.filter((p: any) => {
-      if (!p.gameStyle) return true
-      try {
-        const gs = typeof p.gameStyle === 'string' ? JSON.parse(p.gameStyle) : p.gameStyle
-        return gs.includes(sysUpper) || gs.includes('UNIVERSAL')
-      } catch(e) { return true }
-    })
+    powersDef.value = resPower.data.filter(filterByGameStyle)
     form.value.powers = powersDef.value.map(p => ({ powerId: p.id, value: 0 }))
 
   } catch (err) {
