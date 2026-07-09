@@ -51,6 +51,7 @@ const form = ref({
   demeanor: '',
   vampireClaId: '',
   vampirePredatorId: '',
+  vampireResonanceId: '',
   vampireGeneration: 13,
   attributes: [] as { attributeId: string, value: number }[],
   skills: [] as { skillId: string, value: number }[],
@@ -61,6 +62,7 @@ const form = ref({
 
 const clans = ref<any[]>([])
 const predatorsDef = ref<any[]>([])
+const resonancesDef = ref<any[]>([])
 const attributesDef = ref<any[]>([])
 const skillsDef = ref<any[]>([])
 const powersDef = ref<any[]>([])
@@ -80,13 +82,16 @@ onMounted(async () => {
   try {
     const headers = { Authorization: `Bearer ${token}` }
     
-    // Clans and Predators
+    // Clans, Predators and Resonances
     if (sysUpper === 'VAMPIRE') {
       const res = await axios.get('https://api.liragames.com.br/api/vampire-clas', { headers })
       clans.value = res.data
 
       const resPred = await axios.get('https://api.liragames.com.br/api/vampire-predators', { headers })
       predatorsDef.value = resPred.data
+
+      const resResonances = await axios.get('https://api.liragames.com.br/api/vampire-resonances', { headers })
+      resonancesDef.value = resResonances.data
     }
 
     // Helper to filter by gameStyle robustly
@@ -205,6 +210,7 @@ const submit = async () => {
       demeanor: form.value.demeanor,
       vampireClaId: form.value.vampireClaId || undefined,
       vampirePredatorId: form.value.vampirePredatorId || undefined,
+      vampireResonanceId: form.value.vampireResonanceId || undefined,
       vampireGeneration: form.value.vampireGeneration || 13,
       attributes: form.value.attributes,
       skills: form.value.skills.filter(s => s.value > 0),
@@ -339,7 +345,7 @@ const submit = async () => {
                   <input v-model="form.concept" type="text" placeholder="Ex: Detetive Arruinado" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
                 </div>
                 <!-- VAMPIRE SPECIFIC -->
-                <div v-if="sysUpper === 'VAMPIRE'" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div v-if="sysUpper === 'VAMPIRE'" class="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div>
                     <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Clã</label>
                     <select v-model="form.vampireClaId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
@@ -358,6 +364,13 @@ const submit = async () => {
                     <select v-model="form.vampirePredatorId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
                       <option value="" disabled>Selecione...</option>
                       <option v-for="p in predatorsDef" :key="p.id" :value="p.id">{{ p.nome }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Ressonância</label>
+                    <select v-model="form.vampireResonanceId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
+                      <option value="" disabled>Selecione...</option>
+                      <option v-for="r in resonancesDef" :key="r.id" :value="r.id">{{ r.nome }}</option>
                     </select>
                   </div>
                 </div>
