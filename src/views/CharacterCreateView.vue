@@ -40,8 +40,7 @@ const tabs = computed(() => [
   { id: 'habilidades', label: 'HABILIDADES' },
   { id: 'vantagens', label: sysUpper === 'VAMPIRE' ? 'DISCIPLINAS' : 'VANTAGENS' },
   { id: 'antecedentes', label: 'ANTECEDENTES' },
-  { id: 'tracos', label: 'QUALIDADES & DEFEITOS' },
-  { id: 'revisao', label: 'FORJAR' }
+  { id: 'tracos', label: 'QUALIDADES & DEFEITOS' }
 ])
 
 const form = ref({
@@ -384,11 +383,11 @@ const submit = async () => {
           </div>
 
           <!-- TABS -->
-          <div class="flex flex-wrap items-center gap-x-8 gap-y-4 border-b border-white/10 mb-8">
+          <div class="flex items-center gap-8 border-b border-white/10 mb-8 overflow-x-auto hide-scrollbar">
             <button v-for="tab in tabs" :key="tab.id"
                     @click="activeTab = tab.id"
                     :class="[
-                      'pb-2 font-serif text-[11px] tracking-[3px] uppercase whitespace-nowrap transition-all duration-300 relative',
+                      'pb-4 font-serif text-[11px] tracking-[3px] uppercase whitespace-nowrap transition-all duration-300 relative',
                       activeTab === tab.id ? `text-gold` : 'text-text-dim hover:text-parchment'
                     ]">
               {{ tab.label }}
@@ -602,19 +601,6 @@ const submit = async () => {
                   </div>
                 </div>
               </div>
-            </div>
-
-            <!-- FORJAR / REVISÃO -->
-            <div v-show="activeTab === 'revisao'" class="animate-fade-in flex flex-col items-center justify-center text-center py-10">
-              <h2 class="font-deco text-3xl text-gold mb-6 drop-shadow-md">Revisão do Pacto</h2>
-              <p class="font-sans text-sm text-parchment-dim max-w-xl mb-10 leading-relaxed">
-                Toda criação exige um sacrifício. Certifique-se que seus atributos e habilidades refletem sua verdadeira natureza antes de finalizar o processo. Uma vez forjado, o destino estará traçado.
-              </p>
-              
-              <button @click="submit" :disabled="saving" :class="['relative group overflow-hidden font-serif text-[14px] tracking-[3px] uppercase px-12 py-4 rounded bg-white text-black font-bold transition-all hover:text-white shadow-[0_0_30px_rgba(255,255,255,0.2)] disabled:opacity-50', theme.hoverBorder]">
-                <div class="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
-                <span class="relative z-10">{{ saving ? 'Forjando nas Trevas...' : 'Forjar Personagem' }}</span>
-              </button>
             </div>
 
           </div>
