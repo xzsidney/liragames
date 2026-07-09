@@ -187,11 +187,11 @@ const submit = async () => {
       </div>
 
       <!-- MAIN LAYOUT 2 COLUMNS -->
-      <div v-else class="flex flex-col lg:flex-row gap-8 lg:gap-16">
+      <div v-else class="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-10 items-start">
         
         <!-- LEFT COLUMN: PORTRAIT & SUMMARY -->
-        <div class="w-full lg:w-[320px] shrink-0 space-y-6">
-          <div class="bg-black/60 border border-white/10 rounded-xl overflow-hidden shadow-2xl relative group">
+        <div class="sticky top-[90px] flex flex-col gap-5">
+          <div class="relative rounded-2xl overflow-hidden border border-gold-dim/35 shadow-[0_8px_40px_rgba(0,0,0,0.8)]" :style="{ boxShadow: `0 8px 40px rgba(0,0,0,0.8), 0 0 30px ${theme.glow}` }">
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 pointer-events-none"></div>
             
             <img src="/images/adventure.png" class="w-full aspect-[3/4] object-cover saturate-[0.6] opacity-60" />
