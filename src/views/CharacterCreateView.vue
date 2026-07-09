@@ -39,7 +39,8 @@ const tabs = computed(() => [
   { id: 'atributos', label: 'ATRIBUTOS' },
   { id: 'habilidades', label: 'HABILIDADES' },
   { id: 'vantagens', label: sysUpper === 'VAMPIRE' ? 'DISCIPLINAS' : 'VANTAGENS' },
-  { id: 'historico', label: 'HISTÓRICO' },
+  { id: 'antecedentes', label: 'ANTECEDENTES' },
+  { id: 'tracos', label: 'QUALIDADES & DEFEITOS' },
   { id: 'revisao', label: 'FORJAR' }
 ])
 
@@ -414,29 +415,27 @@ const submit = async () => {
               </div>
             </div>
 
-            <!-- HISTÓRICO -->
-            <div v-show="activeTab === 'historico'" class="animate-fade-in space-y-12">
-              
-              <!-- ANTECEDENTES -->
-              <div>
-                <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-6 border-b border-white/10 pb-2">ANTECEDENTES</h3>
-                <div class="columns-1 md:columns-2 lg:columns-3 gap-x-12">
-                  <div v-for="bg in backgroundsDef" :key="bg.id" class="flex items-center justify-between group break-inside-avoid mb-5">
-                    <span class="font-serif text-[12px] tracking-[0.5px] text-parchment group-hover:text-white transition-colors line-clamp-1 mr-2">{{ bg.name }}</span>
-                    <div class="flex gap-1 cursor-pointer shrink-0">
-                      <div v-for="i in 5" :key="i" 
-                           @click="setBgVal(bg.id, i)"
-                           :class="[
-                             'w-2.5 h-2.5 rounded-full border transition-all duration-300', 
-                             i <= getBgVal(bg.id) ? `bg-gold border-gold shadow-[0_0_5px_rgba(201,168,76,0.5)]` : 'border-white/20 bg-transparent hover:border-white/50'
-                           ]">
-                      </div>
+            <!-- ANTECEDENTES -->
+            <div v-show="activeTab === 'antecedentes'" class="animate-fade-in">
+              <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-6 border-b border-white/10 pb-2">ANTECEDENTES</h3>
+              <div class="columns-1 md:columns-2 lg:columns-3 gap-x-12">
+                <div v-for="bg in backgroundsDef" :key="bg.id" class="flex items-center justify-between group break-inside-avoid mb-5">
+                  <span class="font-serif text-[12px] tracking-[0.5px] text-parchment group-hover:text-white transition-colors line-clamp-1 mr-2">{{ bg.name }}</span>
+                  <div class="flex gap-1 cursor-pointer shrink-0">
+                    <div v-for="i in 5" :key="i" 
+                         @click="setBgVal(bg.id, i)"
+                         :class="[
+                           'w-2.5 h-2.5 rounded-full border transition-all duration-300', 
+                           i <= getBgVal(bg.id) ? `bg-gold border-gold shadow-[0_0_5px_rgba(201,168,76,0.5)]` : 'border-white/20 bg-transparent hover:border-white/50'
+                         ]">
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <!-- QUALIDADES E DEFEITOS -->
+            <!-- QUALIDADES E DEFEITOS -->
+            <div v-show="activeTab === 'tracos'" class="animate-fade-in">
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <!-- Qualidades -->
                 <div>
