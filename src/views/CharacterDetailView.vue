@@ -103,7 +103,12 @@ const getAttributes = (typeFilter: string) => {
   return character.value.attributes
     .filter((a: any) => {
       const type = a.attributeDefinition?.type?.toLowerCase() || '';
-      return type === typeFilter.toLowerCase();
+      const desc = a.attributeDefinition?.description?.toLowerCase() || '';
+      // Retira acentos para busca mais flexível
+      const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      
+      const filter = normalize(typeFilter);
+      return normalize(type).includes(filter) || normalize(desc).includes(filter);
     })
     .map((a: any) => ({
       name: a.attributeDefinition?.name || '?',
@@ -311,7 +316,7 @@ const getSkills = (typeFilter?: string) => {
             <div>
               <h3 class="font-serif text-[10px] tracking-[2px] uppercase text-parchment-dim mb-3">Físicos</h3>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6">
-                <div v-for="attr in getAttributes('FISICOS')" :key="attr.name" class="flex items-center justify-between">
+                <div v-for="attr in getAttributes('Físico')" :key="attr.name" class="flex items-center justify-between">
                   <span class="font-serif text-[12px] tracking-[1px] text-parchment capitalize min-w-[90px]">{{ attr.name }}</span>
                   <div class="flex gap-1.5">
                     <div v-for="i in 5" :key="i" :class="['w-3 h-3 rounded-full border', i <= attr.value ? 'bg-gold border-gold shadow-[0_0_6px_rgba(201,168,76,0.5)]' : 'border-gold-dim/30 bg-transparent']"></div>
@@ -324,7 +329,7 @@ const getSkills = (typeFilter?: string) => {
             <div>
               <h3 class="font-serif text-[10px] tracking-[2px] uppercase text-parchment-dim mb-3">Sociais</h3>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6">
-                <div v-for="attr in getAttributes('SOCIAIS')" :key="attr.name" class="flex items-center justify-between">
+                <div v-for="attr in getAttributes('Social')" :key="attr.name" class="flex items-center justify-between">
                   <span class="font-serif text-[12px] tracking-[1px] text-parchment capitalize min-w-[90px]">{{ attr.name }}</span>
                   <div class="flex gap-1.5">
                     <div v-for="i in 5" :key="i" :class="['w-3 h-3 rounded-full border', i <= attr.value ? 'bg-gold border-gold shadow-[0_0_6px_rgba(201,168,76,0.5)]' : 'border-gold-dim/30 bg-transparent']"></div>
@@ -337,7 +342,7 @@ const getSkills = (typeFilter?: string) => {
             <div>
               <h3 class="font-serif text-[10px] tracking-[2px] uppercase text-parchment-dim mb-3">Mentais</h3>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6">
-                <div v-for="attr in getAttributes('MENTAIS')" :key="attr.name" class="flex items-center justify-between">
+                <div v-for="attr in getAttributes('Mental')" :key="attr.name" class="flex items-center justify-between">
                   <span class="font-serif text-[12px] tracking-[1px] text-parchment capitalize min-w-[90px]">{{ attr.name }}</span>
                   <div class="flex gap-1.5">
                     <div v-for="i in 5" :key="i" :class="['w-3 h-3 rounded-full border', i <= attr.value ? 'bg-gold border-gold shadow-[0_0_6px_rgba(201,168,76,0.5)]' : 'border-gold-dim/30 bg-transparent']"></div>
