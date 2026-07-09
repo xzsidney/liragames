@@ -401,7 +401,8 @@ const submit = async () => {
           <div class="bg-black/30 border border-white/5 rounded-xl p-6 lg:p-10 shadow-xl min-h-[400px]">
             
             <!-- IDENTIDADE -->
-            <div v-show="activeTab === 'identidade'" class="animate-fade-in space-y-6">
+            <div v-show="activeTab === 'identidade'" class="animate-fade-in space-y-8">
+              <!-- Linha 1: Nome e Conceito -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="space-y-2">
                   <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Nome do Personagem</label>
@@ -411,54 +412,59 @@ const submit = async () => {
                   <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Conceito</label>
                   <input v-model="form.concept" type="text" placeholder="Ex: Detetive Arruinado" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
                 </div>
-                <!-- VAMPIRE SPECIFIC -->
-                <div v-if="sysUpper === 'VAMPIRE'" class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div>
-                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Clã</label>
-                    <select v-model="form.vampireClaId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
-                      <option value="" disabled>Selecione um clã...</option>
-                      <option v-for="c in clans" :key="c.id" :value="c.id">{{ c.name }}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Geração</label>
-                    <select v-model="form.vampireGeneration" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
-                      <option v-for="gen in [8, 9, 10, 11, 12, 13, 14, 15, 16]" :key="gen" :value="gen">{{ gen }}ª Geração</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Predador</label>
-                    <select v-model="form.vampirePredatorId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
-                      <option value="" disabled>Selecione...</option>
-                      <option v-for="p in predatorsDef" :key="p.id" :value="p.id">{{ p.nome }}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Ressonância</label>
-                    <select v-model="form.vampireResonanceId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
-                      <option value="" disabled>Selecione...</option>
-                      <option v-for="r in resonancesDef" :key="r.id" :value="r.id">{{ r.nome }}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Senhor</label>
-                    <input v-model="form.vampireSire" type="text" placeholder="Nome do Senhor..." class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
-                  </div>
-                  <div>
-                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Fome Inicial</label>
-                    <select v-model="form.vampireHunger" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
-                      <option v-for="n in 6" :key="n-1" :value="n-1">{{ n-1 }}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Ambição</label>
-                    <input v-model="form.vampireAmbition" type="text" placeholder="O que deseja a longo prazo..." class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
-                  </div>
-                  <div>
-                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Desejo</label>
-                    <input v-model="form.vampireDesire" type="text" placeholder="O que deseja esta noite..." class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
-                  </div>
+              </div>
+
+              <!-- VAMPIRE SPECIFIC (Linha 2 e 3) -->
+              <div v-if="sysUpper === 'VAMPIRE'" class="grid grid-cols-1 md:grid-cols-4 gap-6 bg-white/5 p-6 rounded-xl border border-white/5">
+                <div>
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Clã</label>
+                  <select v-model="form.vampireClaId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
+                    <option value="" disabled>Selecione um clã...</option>
+                    <option v-for="c in clans" :key="c.id" :value="c.id">{{ c.name }}</option>
+                  </select>
                 </div>
+                <div>
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Geração</label>
+                  <select v-model="form.vampireGeneration" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
+                    <option v-for="gen in [8, 9, 10, 11, 12, 13, 14, 15, 16]" :key="gen" :value="gen">{{ gen }}ª Geração</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Predador</label>
+                  <select v-model="form.vampirePredatorId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
+                    <option value="" disabled>Selecione...</option>
+                    <option v-for="p in predatorsDef" :key="p.id" :value="p.id">{{ p.nome }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Ressonância</label>
+                  <select v-model="form.vampireResonanceId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
+                    <option value="" disabled>Selecione...</option>
+                    <option v-for="r in resonancesDef" :key="r.id" :value="r.id">{{ r.nome }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Senhor</label>
+                  <input v-model="form.vampireSire" type="text" placeholder="Nome do Senhor..." class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+                </div>
+                <div>
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Fome Inicial</label>
+                  <select v-model="form.vampireHunger" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
+                    <option v-for="n in 6" :key="n-1" :value="n-1">{{ n-1 }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Ambição</label>
+                  <input v-model="form.vampireAmbition" type="text" placeholder="A longo prazo..." class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+                </div>
+                <div>
+                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Desejo</label>
+                  <input v-model="form.vampireDesire" type="text" placeholder="Esta noite..." class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+                </div>
+              </div>
+
+              <!-- Linha 4: Natureza e Comportamento -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="space-y-2">
                   <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Natureza</label>
                   <input v-model="form.nature" type="text" placeholder="Ex: Sobrevivente" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
