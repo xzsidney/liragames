@@ -195,6 +195,23 @@ const toggleMerit = (id: string, points: number) => {
 
 const goBack = () => router.push(`/characters/${systemParam.toLowerCase()}`)
 
+// Avatar Upload na Criação
+const avatarFile = ref<File | null>(null)
+const avatarPreviewUrl = ref<string | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const handleFileClick = () => {
+  if (fileInput.value) fileInput.value.click()
+}
+
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files.length > 0) {
+    avatarFile.value = target.files[0]
+    avatarPreviewUrl.value = URL.createObjectURL(target.files[0])
+  }
+}
+
 const submit = async () => {
   if (!form.value.name) {
     errorMsg.value = "O nome do personagem é obrigatório."
@@ -227,9 +244,29 @@ const submit = async () => {
       meritsFlaws: form.value.meritsFlaws.filter(m => m.points !== 0).map(m => ({ meritFlawId: m.meritId, points: m.points }))
     }
 
-    await axios.post('https://api.liragames.com.br/api/characters', payload, {
+    const res = await axios.post('https://api.liragames.com.br/api/characters', payload, {
       headers: { Authorization: `Bearer ${token}` }
     })
+
+    const newCharacterId = res.data.id;
+
+    // Se escolheu uma imagem, faz o upload logo após criar o personagem
+    if (avatarFile.value && newCharacterId) {
+      const formData = new FormData()
+      formData.append('avatar', avatarFile.value)
+      
+      try {
+        await axios.post(`https://api.liragames.com.br/api/characters/${newCharacterId}/avatar`, formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+      } catch (imgError) {
+        console.error("Erro ao subir a imagem na criação:", imgError)
+        // Não impede a navegação se a imagem falhar, mas avisa
+      }
+    }
 
     router.push(`/characters/${systemParam.toLowerCase()}`)
   } catch(e: any) {
@@ -271,11 +308,30 @@ const submit = async () => {
         
         <!-- LEFT COLUMN: PORTRAIT & SUMMARY -->
         <div class="sticky top-[90px] flex flex-col gap-5">
-          <div class="relative rounded-2xl overflow-hidden border border-gold-dim/35 shadow-[0_8px_40px_rgba(0,0,0,0.8)]" :style="{ boxShadow: `0 8px 40px rgba(0,0,0,0.8), 0 0 30px ${theme.glow}` }">
+          <div 
+            class="relative rounded-2xl overflow-hidden border border-gold-dim/35 shadow-[0_8px_40px_rgba(0,0,0,0.8)] group cursor-pointer" 
+            :style="{ boxShadow: `0 8px 40px rgba(0,0,0,0.8), 0 0 30px ${theme.glow}` }"
+            @click="handleFileClick"
+          >
+            <!-- Input oculto -->
+            <input 
+              type="file" 
+              ref="fileInput" 
+              class="hidden" 
+              accept="image/png, image/jpeg, image/webp" 
+              @change="handleFileSelect" 
+            />
+
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 pointer-events-none"></div>
             
-            <img src="/images/adventure.png" class="w-full aspect-[3/4] object-cover saturate-[0.6] opacity-60" />
+            <img :src="avatarPreviewUrl || '/images/adventure.png'" class="w-full aspect-[3/4] object-cover saturate-[0.6] opacity-60 transition-transform duration-500 group-hover:scale-105" />
             
+            <!-- Upload Overlay -->
+            <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+              <span class="text-3xl mb-2 text-gold-dim drop-shadow-md">📸</span>
+              <span class="font-serif text-[12px] uppercase tracking-[2px] text-gold-dim drop-shadow-md">Escolher Imagem</span>
+            </div>
+
             <div class="absolute inset-x-0 bottom-0 p-6 z-20 flex flex-col items-center justify-end">
               <span class="font-serif text-[10px] tracking-[3px] uppercase text-gold-dim mb-2 text-center drop-shadow-md">NOVA LENDA</span>
             </div>
