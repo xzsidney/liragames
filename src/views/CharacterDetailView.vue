@@ -145,6 +145,55 @@ const getSkills = (typeFilter?: string) => {
     value: s.value || 0
   }))
 }
+
+// Upload de Imagem
+const fileInput = ref<HTMLInputElement | null>(null)
+const uploadingAvatar = ref(false)
+
+const handleFileClick = () => {
+  if (fileInput.value) {
+    fileInput.value.click()
+  }
+}
+
+const handleFileUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (!target.files || target.files.length === 0) return
+
+  const file = target.files[0]
+  const token = sessionStorage.getItem('lira_token')
+  if (!token) return
+
+  try {
+    uploadingAvatar.value = true
+    const formData = new FormData()
+    formData.append('avatar', file)
+
+    const res = await axios.post(`https://api.liragames.com.br/api/characters/${characterId}/avatar`, formData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    if (res.data.avatarUrl) {
+      character.value.avatarUrl = res.data.avatarUrl
+    }
+  } catch (err) {
+    console.error('Erro no upload da imagem:', err)
+    alert('Erro ao enviar a imagem. O arquivo deve ser menor que 5MB e em formato JPG/PNG.')
+  } finally {
+    uploadingAvatar.value = false
+    if (fileInput.value) fileInput.value.value = '' // reset
+  }
+}
+
+const displayAvatarUrl = computed(() => {
+  if (!character.value?.avatarUrl) return '/images/adventure.png'
+  const url = character.value.avatarUrl
+  if (url.startsWith('http')) return url
+  return `https://api.liragames.com.br${url}`
+})
 </script>
 
 <template>
@@ -199,12 +248,35 @@ const getSkills = (typeFilter?: string) => {
         <!-- ==================== LEFT COLUMN ==================== -->
         <div class="sticky top-[90px] flex flex-col gap-5">
           
-          <!-- Portrait -->
-          <div class="relative rounded-2xl overflow-hidden border border-gold-dim/35 shadow-[0_8px_40px_rgba(0,0,0,0.8)]" :style="{ boxShadow: `0 8px 40px rgba(0,0,0,0.8), 0 0 30px ${theme.glow}` }">
-            <img :src="character.avatarUrl || '/images/adventure.png'" alt="Retrato" class="w-full aspect-square object-cover saturate-90 contrast-[1.05]" />
-            <div class="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-[#06000a]/95 to-transparent pointer-events-none"></div>
+          <!-- Portrait with Upload Overlay -->
+          <div 
+            class="relative rounded-2xl overflow-hidden border border-gold-dim/35 shadow-[0_8px_40px_rgba(0,0,0,0.8)] group cursor-pointer" 
+            :style="{ boxShadow: `0 8px 40px rgba(0,0,0,0.8), 0 0 30px ${theme.glow}` }"
+            @click="handleFileClick"
+          >
+            <!-- Input oculto para arquivo -->
+            <input 
+              type="file" 
+              ref="fileInput" 
+              class="hidden" 
+              accept="image/png, image/jpeg, image/webp" 
+              @change="handleFileUpload" 
+            />
+
+            <img :src="displayAvatarUrl" alt="Retrato" class="w-full aspect-square object-cover saturate-90 contrast-[1.05] transition-transform duration-500 group-hover:scale-105" />
             
-            <div class="absolute bottom-0 left-0 right-0 p-5 z-10" v-if="primaryStatusName">
+            <!-- Upload Overlay -->
+            <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+              <span v-if="uploadingAvatar" class="w-10 h-10 border-4 border-t-gold border-r-gold border-b-white/10 border-l-white/10 rounded-full animate-spin"></span>
+              <div v-else class="flex flex-col items-center text-gold-dim drop-shadow-md">
+                <span class="text-3xl mb-2">📸</span>
+                <span class="font-serif text-[12px] uppercase tracking-[2px]">Alterar Imagem</span>
+              </div>
+            </div>
+
+            <div class="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-[#06000a]/95 to-transparent pointer-events-none z-10"></div>
+            
+            <div class="absolute bottom-0 left-0 right-0 p-5 z-20" v-if="primaryStatusName">
               <div class="flex flex-col gap-1">
                 <span class="font-serif text-[10px] tracking-[2px] text-parchment-dim uppercase">{{ primaryStatusName }}</span>
                 <div class="flex gap-1.5 mb-2">
