@@ -39,6 +39,7 @@ const tabs = computed(() => [
   { id: 'atributos', label: 'ATRIBUTOS' },
   { id: 'habilidades', label: 'HABILIDADES' },
   { id: 'vantagens', label: sysUpper === 'VAMPIRE' ? 'DISCIPLINAS' : 'VANTAGENS' },
+  { id: 'historico', label: 'HISTÓRICO' },
   { id: 'revisao', label: 'FORJAR' }
 ])
 
@@ -50,13 +51,17 @@ const form = ref({
   vampireClaId: '',
   attributes: [] as { attributeId: string, value: number }[],
   skills: [] as { skillId: string, value: number }[],
-  powers: [] as { powerId: string, value: number }[]
+  powers: [] as { powerId: string, value: number }[],
+  backgrounds: [] as { backgroundId: string, value: number }[],
+  meritsFlaws: [] as { meritId: string, points: number, type: string }[]
 })
 
 const clans = ref<any[]>([])
 const attributesDef = ref<any[]>([])
 const skillsDef = ref<any[]>([])
 const powersDef = ref<any[]>([])
+const backgroundsDef = ref<any[]>([])
+const meritsDef = ref<any[]>([])
 const loading = ref(true)
 const saving = ref(false)
 const errorMsg = ref('')
@@ -108,6 +113,17 @@ onMounted(async () => {
     powersDef.value = resPower.data.filter(filterByGameStyle)
     form.value.powers = powersDef.value.map(p => ({ powerId: p.id, value: 0 }))
 
+    // Antecedentes
+    const resBg = await axios.get('https://api.liragames.com.br/api/background-definitions', { headers })
+    backgroundsDef.value = resBg.data.filter(filterByGameStyle)
+    form.value.backgrounds = backgroundsDef.value.map(b => ({ backgroundId: b.id, value: 0 }))
+
+    // Qualidades e Defeitos
+    const resMerit = await axios.get('https://api.liragames.com.br/api/merit-flaw-definitions', { headers })
+    meritsDef.value = resMerit.data.filter(filterByGameStyle)
+    // Para Qualidades/Defeitos, o usuário irá selecionar depois, iniciamos vazio
+    form.value.meritsFlaws = meritsDef.value.map(m => ({ meritId: m.id, points: 0, type: m.type }))
+
   } catch (err) {
     console.error(err)
     errorMsg.value = 'Erro ao carregar banco de regras do sistema. Certifique-se que o backend está atualizado.'
@@ -144,6 +160,23 @@ const setPowerVal = (id: string, val: number) => {
   }
 }
 
+const getBgVal = (id: string) => form.value.backgrounds.find(b => b.backgroundId === id)?.value || 0
+const setBgVal = (id: string, val: number) => {
+  const b = form.value.backgrounds.find(x => x.backgroundId === id)
+  if (b) {
+    if (b.value === val && b.value > 0) b.value = val - 1
+    else b.value = val
+  }
+}
+
+const toggleMerit = (id: string, points: number) => {
+  const m = form.value.meritsFlaws.find(x => x.meritId === id)
+  if (m) {
+    if (m.points === points) m.points = 0
+    else m.points = points
+  }
+}
+
 const goBack = () => router.push(`/characters/${systemParam.toLowerCase()}`)
 
 const submit = async () => {
@@ -166,7 +199,9 @@ const submit = async () => {
       vampireClaId: form.value.vampireClaId || undefined,
       attributes: form.value.attributes,
       skills: form.value.skills.filter(s => s.value > 0),
-      powers: form.value.powers.filter(p => p.value > 0).map(p => ({ powerDefinitionId: p.powerId, level: p.value }))
+      powers: form.value.powers.filter(p => p.value > 0).map(p => ({ powerDefinitionId: p.powerId, level: p.value })),
+      backgrounds: form.value.backgrounds.filter(b => b.value > 0).map(b => ({ backgroundDefinitionId: b.backgroundId, value: b.value })),
+      meritsFlaws: form.value.meritsFlaws.filter(m => m.points !== 0).map(m => ({ meritFlawId: m.meritId, points: m.points }))
     }
 
     await axios.post('https://api.liragames.com.br/api/characters', payload, {
@@ -359,10 +394,13 @@ const submit = async () => {
             </div>
 
             <!-- VANTAGENS / DISCIPLINAS -->
-            <div v-show="activeTab === 'vantagens'" class="animate-fade-in space-y-8">
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
-                <div v-for="power in powersDef" :key="power.id" class="flex items-center justify-between group">
-                  <span class="font-serif text-[11px] tracking-[0.5px] text-parchment group-hover:text-white transition-colors line-clamp-1 mr-2">{{ power.name }}</span>
+            <div v-show="activeTab === 'vantagens'" class="animate-fade-in">
+              <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-6 border-b border-white/10 pb-2">
+                {{ sysUpper === 'VAMPIRE' ? 'DISCIPLINAS' : 'PODERES' }}
+              </h3>
+              <div class="columns-1 md:columns-2 lg:columns-3 gap-x-12">
+                <div v-for="power in powersDef" :key="power.id" class="flex items-center justify-between group break-inside-avoid mb-5">
+                  <span class="font-serif text-[12px] tracking-[0.5px] text-parchment group-hover:text-white transition-colors line-clamp-1 mr-2">{{ power.name }}</span>
                   <div class="flex gap-1 cursor-pointer shrink-0">
                     <div v-for="i in 5" :key="i" 
                          @click="setPowerVal(power.id, i)"
@@ -370,6 +408,72 @@ const submit = async () => {
                            'w-2.5 h-2.5 rounded-full border transition-all duration-300', 
                            i <= getPowerVal(power.id) ? `bg-gold border-gold shadow-[0_0_5px_rgba(201,168,76,0.5)]` : 'border-white/20 bg-transparent hover:border-white/50'
                          ]">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- HISTÓRICO -->
+            <div v-show="activeTab === 'historico'" class="animate-fade-in space-y-12">
+              
+              <!-- ANTECEDENTES -->
+              <div>
+                <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-6 border-b border-white/10 pb-2">ANTECEDENTES</h3>
+                <div class="columns-1 md:columns-2 lg:columns-3 gap-x-12">
+                  <div v-for="bg in backgroundsDef" :key="bg.id" class="flex items-center justify-between group break-inside-avoid mb-5">
+                    <span class="font-serif text-[12px] tracking-[0.5px] text-parchment group-hover:text-white transition-colors line-clamp-1 mr-2">{{ bg.name }}</span>
+                    <div class="flex gap-1 cursor-pointer shrink-0">
+                      <div v-for="i in 5" :key="i" 
+                           @click="setBgVal(bg.id, i)"
+                           :class="[
+                             'w-2.5 h-2.5 rounded-full border transition-all duration-300', 
+                             i <= getBgVal(bg.id) ? `bg-gold border-gold shadow-[0_0_5px_rgba(201,168,76,0.5)]` : 'border-white/20 bg-transparent hover:border-white/50'
+                           ]">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- QUALIDADES E DEFEITOS -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Qualidades -->
+                <div>
+                  <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 border-b border-white/10 pb-2">QUALIDADES</h3>
+                  <div class="space-y-3">
+                    <div v-for="merit in meritsDef.filter(m => m.type === 'MERIT')" :key="merit.id" class="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-colors">
+                      <div class="flex flex-col">
+                        <span class="font-serif text-[11px] text-parchment">{{ merit.name }}</span>
+                        <span class="font-sans text-[9px] text-text-dim italic mt-0.5">{{ merit.cost }} pts</span>
+                      </div>
+                      <button @click="toggleMerit(merit.id, merit.cost)" 
+                              :class="[
+                                'w-5 h-5 rounded-sm border transition-all flex items-center justify-center',
+                                form.meritsFlaws.find(m => m.meritId === merit.id)?.points ? 'bg-gold border-gold' : 'border-white/20 bg-black/50'
+                              ]">
+                        <span v-if="form.meritsFlaws.find(m => m.meritId === merit.id)?.points" class="text-black text-xs font-bold leading-none">✓</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Defeitos -->
+                <div>
+                  <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-red-500/70 mb-4 border-b border-red-500/20 pb-2">DEFEITOS</h3>
+                  <div class="space-y-3">
+                    <div v-for="flaw in meritsDef.filter(m => m.type === 'FLAW')" :key="flaw.id" class="flex items-center justify-between p-3 rounded-lg border border-red-500/10 bg-red-900/10 hover:bg-red-900/20 transition-colors">
+                      <div class="flex flex-col">
+                        <span class="font-serif text-[11px] text-parchment">{{ flaw.name }}</span>
+                        <span class="font-sans text-[9px] text-red-400/70 italic mt-0.5">+{{ flaw.cost }} pts</span>
+                      </div>
+                      <button @click="toggleMerit(flaw.id, flaw.cost)" 
+                              :class="[
+                                'w-5 h-5 rounded-sm border transition-all flex items-center justify-center',
+                                form.meritsFlaws.find(m => m.meritId === flaw.id)?.points ? 'bg-red-600 border-red-600' : 'border-red-500/30 bg-black/50'
+                              ]">
+                        <span v-if="form.meritsFlaws.find(m => m.meritId === flaw.id)?.points" class="text-white text-xs font-bold leading-none">✓</span>
+                      </button>
                     </div>
                   </div>
                 </div>
