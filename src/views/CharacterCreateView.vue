@@ -34,12 +34,13 @@ const theme = computed(() => {
 })
 
 const activeTab = ref('identidade')
-const tabs = [
+const tabs = computed(() => [
   { id: 'identidade', label: 'IDENTIDADE' },
   { id: 'atributos', label: 'ATRIBUTOS' },
   { id: 'habilidades', label: 'HABILIDADES' },
+  { id: 'vantagens', label: sysUpper === 'VAMPIRE' ? 'DISCIPLINAS' : 'VANTAGENS' },
   { id: 'revisao', label: 'FORJAR' }
-]
+])
 
 const form = ref({
   name: '',
@@ -48,12 +49,14 @@ const form = ref({
   demeanor: '',
   vampireClaId: '',
   attributes: [] as { attributeId: string, value: number }[],
-  skills: [] as { skillId: string, value: number }[]
+  skills: [] as { skillId: string, value: number }[],
+  powers: [] as { powerId: string, value: number }[]
 })
 
 const clans = ref<any[]>([])
 const attributesDef = ref<any[]>([])
 const skillsDef = ref<any[]>([])
+const powersDef = ref<any[]>([])
 const loading = ref(true)
 const saving = ref(false)
 const errorMsg = ref('')
@@ -96,6 +99,17 @@ onMounted(async () => {
     })
     form.value.skills = skillsDef.value.map(s => ({ skillId: s.id, value: 0 }))
 
+    // Poderes / Vantagens
+    const resPower = await axios.get('https://api.liragames.com.br/api/power-definitions', { headers })
+    powersDef.value = resPower.data.filter((p: any) => {
+      if (!p.gameStyle) return true
+      try {
+        const gs = typeof p.gameStyle === 'string' ? JSON.parse(p.gameStyle) : p.gameStyle
+        return gs.includes(sysUpper) || gs.includes('UNIVERSAL')
+      } catch(e) { return true }
+    })
+    form.value.powers = powersDef.value.map(p => ({ powerId: p.id, value: 0 }))
+
   } catch (err) {
     console.error(err)
     errorMsg.value = 'Erro ao carregar banco de regras do sistema. Certifique-se que o backend está atualizado.'
@@ -123,6 +137,15 @@ const setSkillVal = (id: string, val: number) => {
   }
 }
 
+const getPowerVal = (id: string) => form.value.powers.find(p => p.powerId === id)?.value || 0
+const setPowerVal = (id: string, val: number) => {
+  const p = form.value.powers.find(x => x.powerId === id)
+  if (p) {
+    if (p.value === val && p.value > 0) p.value = val - 1
+    else p.value = val
+  }
+}
+
 const goBack = () => router.push(`/characters/${systemParam.toLowerCase()}`)
 
 const submit = async () => {
@@ -144,7 +167,8 @@ const submit = async () => {
       demeanor: form.value.demeanor,
       vampireClaId: form.value.vampireClaId || undefined,
       attributes: form.value.attributes,
-      skills: form.value.skills.filter(s => s.value > 0)
+      skills: form.value.skills.filter(s => s.value > 0),
+      powers: form.value.powers.filter(p => p.value > 0).map(p => ({ powerDefinitionId: p.powerId, level: p.value }))
     }
 
     await axios.post('https://api.liragames.com.br/api/characters', payload, {
@@ -312,22 +336,42 @@ const submit = async () => {
             </div>
 
             <!-- HABILIDADES -->
-            <div v-show="activeTab === 'habilidades'" class="animate-fade-in space-y-8">
-              <div v-for="type in ['TALENTOS', 'PERICIAS', 'CONHECIMENTOS', 'FÍSICO', 'SOCIAL', 'MENTAL', 'NIVEL_1', 'NIVEL_2', 'NIVEL_3']" :key="type">
-                <div v-if="getSkillsByType(type).length > 0">
-                  <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 border-b border-white/10 pb-2">{{ type }}</h3>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
-                    <div v-for="skill in getSkillsByType(type)" :key="skill.id" class="flex items-center justify-between group">
-                      <span class="font-serif text-[11px] tracking-[0.5px] text-parchment group-hover:text-white transition-colors line-clamp-1 mr-2">{{ skill.name }}</span>
-                      <div class="flex gap-1 cursor-pointer shrink-0">
-                        <div v-for="i in 5" :key="i" 
-                             @click="setSkillVal(skill.id, i)"
-                             :class="[
-                               'w-2.5 h-2.5 rounded-full border transition-all duration-300', 
-                               i <= getSkillVal(skill.id) ? `bg-gold border-gold shadow-[0_0_5px_rgba(201,168,76,0.5)]` : 'border-white/20 bg-transparent hover:border-white/50'
-                             ]">
+            <div v-show="activeTab === 'habilidades'" class="animate-fade-in">
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div v-for="type in ['TALENTOS', 'PERICIAS', 'CONHECIMENTOS', 'FÍSICO', 'SOCIAL', 'MENTAL', 'NIVEL_1', 'NIVEL_2', 'NIVEL_3']" :key="type">
+                  <div v-if="getSkillsByType(type).length > 0">
+                    <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 border-b border-white/10 pb-2">{{ type }}</h3>
+                    <div class="space-y-4">
+                      <div v-for="skill in getSkillsByType(type)" :key="skill.id" class="flex items-center justify-between group">
+                        <span class="font-serif text-[11px] tracking-[0.5px] text-parchment group-hover:text-white transition-colors line-clamp-1 mr-2">{{ skill.name }}</span>
+                        <div class="flex gap-1 cursor-pointer shrink-0">
+                          <div v-for="i in 5" :key="i" 
+                               @click="setSkillVal(skill.id, i)"
+                               :class="[
+                                 'w-2.5 h-2.5 rounded-full border transition-all duration-300', 
+                                 i <= getSkillVal(skill.id) ? `bg-gold border-gold shadow-[0_0_5px_rgba(201,168,76,0.5)]` : 'border-white/20 bg-transparent hover:border-white/50'
+                               ]">
+                          </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- VANTAGENS / DISCIPLINAS -->
+            <div v-show="activeTab === 'vantagens'" class="animate-fade-in space-y-8">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
+                <div v-for="power in powersDef" :key="power.id" class="flex items-center justify-between group">
+                  <span class="font-serif text-[11px] tracking-[0.5px] text-parchment group-hover:text-white transition-colors line-clamp-1 mr-2">{{ power.name }}</span>
+                  <div class="flex gap-1 cursor-pointer shrink-0">
+                    <div v-for="i in 5" :key="i" 
+                         @click="setPowerVal(power.id, i)"
+                         :class="[
+                           'w-2.5 h-2.5 rounded-full border transition-all duration-300', 
+                           i <= getPowerVal(power.id) ? `bg-gold border-gold shadow-[0_0_5px_rgba(201,168,76,0.5)]` : 'border-white/20 bg-transparent hover:border-white/50'
+                         ]">
                     </div>
                   </div>
                 </div>
