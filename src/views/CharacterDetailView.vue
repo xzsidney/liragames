@@ -236,9 +236,20 @@ const getSkills = (typeFilter?: string) => {
               <span>{{ theme.icon }}</span> {{ factionName }}
             </div>
             <div class="flex flex-wrap gap-2">
+              <span v-if="character.vampireCla?.sectAlignment" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Seita: {{ character.vampireCla.sectAlignment }}</span>
               <span v-if="character.nature" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Nat: {{ character.nature }}</span>
               <span v-if="character.demeanor" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Comp: {{ character.demeanor }}</span>
             </div>
+          </div>
+
+          <!-- Fraqueza (Weakness) -->
+          <div v-if="character.vampireCla?.weaknessName" class="mt-2 bg-red-900/10 border border-red-900/30 rounded-lg p-3">
+            <h4 class="font-serif text-[10px] tracking-[1px] uppercase text-red-500 mb-1 flex items-center gap-2">
+              <span>🩸</span> Fraqueza: {{ character.vampireCla.weaknessName }}
+            </h4>
+            <p class="font-sans italic text-[0.8rem] text-red-300/70 leading-relaxed">
+              {{ character.vampireCla.weaknessDescription }}
+            </p>
           </div>
 
           <!-- Antecedentes Box -->
@@ -368,6 +379,22 @@ const getSkills = (typeFilter?: string) => {
                 </div>
               </div>
             </div>
+
+            <!-- VIRTUDES (Extraídas temporariamente de Status) -->
+            <div v-if="character.statuses && character.statuses.some((s: any) => ['Consciência', 'Autocontrole', 'Coragem'].includes(s.statusDefinition?.name))">
+              <h3 class="font-serif text-[10px] tracking-[2px] uppercase text-parchment-dim mb-3 mt-8">Virtudes</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div v-for="virtue in ['Consciência', 'Autocontrole', 'Coragem']" :key="virtue">
+                  <div v-if="getStatus(virtue, -1) !== -1" class="flex flex-col items-center justify-center p-3 bg-gold/[0.03] border border-gold-dim/30 rounded">
+                    <span class="font-serif text-[11px] tracking-[1px] text-gold capitalize mb-2">{{ virtue }}</span>
+                    <div class="flex gap-1">
+                      <div v-for="i in 5" :key="i" :class="['w-2.5 h-2.5 rounded-full border', i <= getStatus(virtue, 0) ? 'bg-gold border-gold' : 'border-gold-dim/30 bg-transparent']"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- TAB CONTENT: DISCIPLINES -->
@@ -394,6 +421,20 @@ const getSkills = (typeFilter?: string) => {
               <p class="whitespace-pre-wrap">{{ character.history }}</p>
             </div>
 
+            <!-- QUALIDADES E DEFEITOS -->
+            <div v-if="character.meritFlaws && character.meritFlaws.length > 0" class="mt-8">
+              <h3 class="font-serif text-xs tracking-[3px] uppercase text-gold-dim flex items-center gap-3 mb-4">
+                <span>Qualidades & Defeitos</span>
+                <span class="flex-1 h-px bg-gradient-to-r from-gold-dim to-transparent"></span>
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div v-for="mf in character.meritFlaws" :key="mf.id" class="p-3 border border-gold-dim/20 rounded-lg bg-gold/5 flex flex-col">
+                  <span class="font-serif text-[12px] tracking-[1px] text-parchment uppercase">{{ mf.meritFlawDefinition?.name || '?' }}</span>
+                  <span class="text-[10px] font-sans italic text-text-dim mt-1">{{ mf.meritFlawDefinition?.type || 'QUALIDADE' }} • {{ mf.meritFlawDefinition?.points || 1 }} pt(s)</span>
+                </div>
+              </div>
+            </div>
+
             <div v-if="character.roleplayHints">
               <h3 class="font-serif text-xs tracking-[3px] uppercase text-gold-dim flex items-center gap-3 mt-8 mb-4">
                 <span>Dicas de Interpretação</span>
@@ -406,8 +447,8 @@ const getSkills = (typeFilter?: string) => {
               </div>
             </div>
 
-            <div v-if="!character.history && !character.roleplayHints" class="text-text-dim text-sm italic">
-              Nenhuma história registrada.
+            <div v-if="!character.history && !character.roleplayHints && (!character.meritFlaws || character.meritFlaws.length === 0)" class="text-text-dim text-sm italic">
+              Nenhum dado registrado.
             </div>
           </div>
 
