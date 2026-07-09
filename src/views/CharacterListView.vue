@@ -64,6 +64,10 @@ const viewCharacterDetails = (id: string) => {
   router.push(`/character/${systemParam.toLowerCase()}/${id}`)
 }
 
+const createNewCharacter = () => {
+  router.push(`/character/${systemParam.toLowerCase()}/create`)
+}
+
 const goBack = () => {
   router.push('/dashboard')
 }
@@ -108,15 +112,26 @@ const goBack = () => {
         <p class="font-serif text-[10px] tracking-[3px] uppercase text-gold-dim">Acessando Arquivos...</p>
       </div>
 
-      <!-- EMPTY STATE -->
-      <div v-else-if="characters.length === 0" class="text-center py-20 bg-white/[0.02] border border-white/5 rounded-2xl backdrop-blur-sm max-w-2xl mx-auto">
-        <p class="font-serif text-gold-dim tracking-[2px] uppercase mb-2">Nenhum Registro Encontrado</p>
-        <p class="font-sans text-sm text-text-dim italic">Você ainda não possui personagens cadastrados neste sistema.</p>
-      </div>
-
       <!-- CHARACTER GRID -->
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         
+        <!-- CREATE NEW CHARACTER CARD -->
+        <div @click="createNewCharacter"
+             :class="['group relative bg-black/40 border-2 border-dashed border-white/20 rounded-xl overflow-hidden cursor-pointer transition-all duration-400 min-h-[360px] flex flex-col items-center justify-center', theme.hoverBorder, theme.hoverShadow]">
+          <div class="absolute inset-0 bg-white/0 group-hover:bg-white/[0.02] transition-colors duration-400 pointer-events-none"></div>
+          
+          <div :class="['w-16 h-16 rounded-full border border-white/20 flex items-center justify-center mb-4 transition-all duration-400 group-hover:scale-110 group-hover:bg-white/5', theme.textClass]">
+            <span class="text-3xl font-light">+</span>
+          </div>
+          
+          <h3 class="font-serif text-lg font-bold text-parchment drop-shadow-md uppercase text-center transition-colors group-hover:text-gold">
+            Forjar Nova Lenda
+          </h3>
+          <p class="font-sans italic text-xs text-text-dim mt-2 text-center max-w-[200px]">
+            Inicie os ritos de criação e desperte um novo personagem
+          </p>
+        </div>
+
         <div v-for="char in characters" :key="char.id" 
              @click="viewCharacterDetails(char.id)"
              :class="['group relative bg-black/60 border border-white/10 rounded-xl overflow-hidden cursor-pointer transition-all duration-400 min-h-[360px]', theme.hoverBorder, theme.hoverShadow]">

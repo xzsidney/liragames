@@ -366,7 +366,7 @@ const getSkills = (typeFilter?: string) => {
 
           <!-- TAB CONTENT: SKILLS -->
           <div v-show="activeTab === 'skills'" class="animate-fade-in space-y-8">
-            <div v-for="cat in ['TALENTOS', 'PERICIAS', 'CONHECIMENTOS', 'NIVEL_1', 'NIVEL_2', 'NIVEL_3']" :key="cat">
+            <div v-for="cat in ['TALENTOS', 'PERICIAS', 'CONHECIMENTOS', 'FÍSICO', 'SOCIAL', 'MENTAL', 'NIVEL_1', 'NIVEL_2', 'NIVEL_3']" :key="cat">
               <div v-if="getSkills(cat).length > 0">
                 <h3 class="font-serif text-[10px] tracking-[2px] uppercase text-parchment-dim mb-3">{{ cat.replace('_', ' ') }}</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
