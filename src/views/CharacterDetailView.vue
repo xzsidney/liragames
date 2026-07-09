@@ -237,6 +237,7 @@ const getSkills = (typeFilter?: string) => {
             </div>
             <div class="flex flex-wrap gap-2">
               <span v-if="character.vampireCla?.sectAlignment" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Seita: {{ character.vampireCla.sectAlignment }}</span>
+              <span v-if="character.vampireGeneration" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">{{ character.vampireGeneration }}ª Geração</span>
               <span v-if="character.vampirePredator?.nome" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Predador: {{ character.vampirePredator.nome }}</span>
               <span v-if="character.nature" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Nat: {{ character.nature }}</span>
               <span v-if="character.demeanor" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Comp: {{ character.demeanor }}</span>

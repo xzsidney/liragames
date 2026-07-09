@@ -51,6 +51,7 @@ const form = ref({
   demeanor: '',
   vampireClaId: '',
   vampirePredatorId: '',
+  vampireGeneration: 13,
   attributes: [] as { attributeId: string, value: number }[],
   skills: [] as { skillId: string, value: number }[],
   powers: [] as { powerId: string, value: number }[],
@@ -204,6 +205,7 @@ const submit = async () => {
       demeanor: form.value.demeanor,
       vampireClaId: form.value.vampireClaId || undefined,
       vampirePredatorId: form.value.vampirePredatorId || undefined,
+      vampireGeneration: form.value.vampireGeneration || 13,
       attributes: form.value.attributes,
       skills: form.value.skills.filter(s => s.value > 0),
       powers: form.value.powers.filter(p => p.value > 0).map(p => ({ powerDefinitionId: p.powerId, level: p.value })),
@@ -337,7 +339,7 @@ const submit = async () => {
                   <input v-model="form.concept" type="text" placeholder="Ex: Detetive Arruinado" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
                 </div>
                 <!-- VAMPIRE SPECIFIC -->
-                <div v-if="sysUpper === 'VAMPIRE'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div v-if="sysUpper === 'VAMPIRE'" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Clã</label>
                     <select v-model="form.vampireClaId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
@@ -346,9 +348,15 @@ const submit = async () => {
                     </select>
                   </div>
                   <div>
-                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Tipo de Predador</label>
+                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Geração</label>
+                    <select v-model="form.vampireGeneration" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
+                      <option v-for="gen in [8, 9, 10, 11, 12, 13, 14, 15, 16]" :key="gen" :value="gen">{{ gen }}ª Geração</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Predador</label>
                     <select v-model="form.vampirePredatorId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
-                      <option value="" disabled>Selecione o predador...</option>
+                      <option value="" disabled>Selecione...</option>
                       <option v-for="p in predatorsDef" :key="p.id" :value="p.id">{{ p.nome }}</option>
                     </select>
                   </div>
