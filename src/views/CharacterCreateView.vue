@@ -185,11 +185,11 @@ const setBgVal = (id: string, val: number) => {
   }
 }
 
-const toggleMerit = (id: string, points: number) => {
+const toggleMerit = (id: string, points: any) => {
   const m = form.value.meritsFlaws.find(x => x.meritId === id)
   if (m) {
-    if (m.points === points) m.points = 0
-    else m.points = points
+    if (m.points) m.points = 0
+    else m.points = Number(points) || 1
   }
 }
 
@@ -294,6 +294,10 @@ const submit = async () => {
           <span :class="['font-serif text-[10px] tracking-[2px] uppercase', theme.textClass]">{{ theme.name }}</span>
         </div>
       </div>
+      
+      <button @click="submit" :disabled="saving" class="bg-gold text-black font-bold px-5 py-2.5 rounded text-xs tracking-widest uppercase hover:bg-white hover:scale-105 transition-all disabled:opacity-50">
+        {{ saving ? 'Forjando...' : 'Forjar Personagem' }}
+      </button>
     </header>
 
     <div class="relative z-10 max-w-[1300px] mx-auto px-6 md:px-12 pt-12">
@@ -380,11 +384,11 @@ const submit = async () => {
           </div>
 
           <!-- TABS -->
-          <div class="flex items-center gap-8 border-b border-white/10 mb-8 overflow-x-auto hide-scrollbar">
+          <div class="flex flex-wrap items-center gap-x-8 gap-y-4 border-b border-white/10 mb-8">
             <button v-for="tab in tabs" :key="tab.id"
                     @click="activeTab = tab.id"
                     :class="[
-                      'pb-4 font-serif text-[11px] tracking-[3px] uppercase whitespace-nowrap transition-all duration-300 relative',
+                      'pb-2 font-serif text-[11px] tracking-[3px] uppercase whitespace-nowrap transition-all duration-300 relative',
                       activeTab === tab.id ? `text-gold` : 'text-text-dim hover:text-parchment'
                     ]">
               {{ tab.label }}
@@ -560,13 +564,14 @@ const submit = async () => {
                 <div>
                   <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 border-b border-white/10 pb-2">QUALIDADES</h3>
                   <div class="space-y-3">
-                    <div v-for="merit in meritsDef.filter(m => m.type === 'MERIT')" :key="merit.id" class="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-colors">
+                    <div v-for="merit in meritsDef.filter(m => m.type === 'MERIT')" :key="merit.id" 
+                         @click="toggleMerit(merit.id, merit.cost)"
+                         class="cursor-pointer flex items-center justify-between p-3 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-colors">
                       <div class="flex flex-col">
                         <span class="font-serif text-[11px] text-parchment">{{ merit.name }}</span>
                         <span class="font-sans text-[9px] text-text-dim italic mt-0.5">{{ merit.cost }} pts</span>
                       </div>
-                      <button @click="toggleMerit(merit.id, merit.cost)" 
-                              :class="[
+                      <button :class="[
                                 'w-5 h-5 rounded-sm border transition-all flex items-center justify-center',
                                 form.meritsFlaws.find(m => m.meritId === merit.id)?.points ? 'bg-gold border-gold' : 'border-white/20 bg-black/50'
                               ]">
@@ -580,13 +585,14 @@ const submit = async () => {
                 <div>
                   <h3 class="font-serif text-[11px] tracking-[3px] uppercase text-red-500/70 mb-4 border-b border-red-500/20 pb-2">DEFEITOS</h3>
                   <div class="space-y-3">
-                    <div v-for="flaw in meritsDef.filter(m => m.type === 'FLAW')" :key="flaw.id" class="flex items-center justify-between p-3 rounded-lg border border-red-500/10 bg-red-900/10 hover:bg-red-900/20 transition-colors">
+                    <div v-for="flaw in meritsDef.filter(m => m.type === 'FLAW')" :key="flaw.id" 
+                         @click="toggleMerit(flaw.id, flaw.cost)"
+                         class="cursor-pointer flex items-center justify-between p-3 rounded-lg border border-red-500/10 bg-red-900/10 hover:bg-red-900/20 transition-colors">
                       <div class="flex flex-col">
                         <span class="font-serif text-[11px] text-parchment">{{ flaw.name }}</span>
                         <span class="font-sans text-[9px] text-red-400/70 italic mt-0.5">+{{ flaw.cost }} pts</span>
                       </div>
-                      <button @click="toggleMerit(flaw.id, flaw.cost)" 
-                              :class="[
+                      <button :class="[
                                 'w-5 h-5 rounded-sm border transition-all flex items-center justify-center',
                                 form.meritsFlaws.find(m => m.meritId === flaw.id)?.points ? 'bg-red-600 border-red-600' : 'border-red-500/30 bg-black/50'
                               ]">
