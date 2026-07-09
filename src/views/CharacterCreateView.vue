@@ -50,6 +50,7 @@ const form = ref({
   nature: '',
   demeanor: '',
   vampireClaId: '',
+  vampirePredatorId: '',
   attributes: [] as { attributeId: string, value: number }[],
   skills: [] as { skillId: string, value: number }[],
   powers: [] as { powerId: string, value: number }[],
@@ -58,6 +59,7 @@ const form = ref({
 })
 
 const clans = ref<any[]>([])
+const predatorsDef = ref<any[]>([])
 const attributesDef = ref<any[]>([])
 const skillsDef = ref<any[]>([])
 const powersDef = ref<any[]>([])
@@ -77,10 +79,13 @@ onMounted(async () => {
   try {
     const headers = { Authorization: `Bearer ${token}` }
     
-    // Clans
+    // Clans and Predators
     if (sysUpper === 'VAMPIRE') {
       const res = await axios.get('https://api.liragames.com.br/api/vampire-clas', { headers })
       clans.value = res.data
+
+      const resPred = await axios.get('https://api.liragames.com.br/api/vampire-predators', { headers })
+      predatorsDef.value = resPred.data
     }
 
     // Helper to filter by gameStyle robustly
@@ -198,6 +203,7 @@ const submit = async () => {
       nature: form.value.nature,
       demeanor: form.value.demeanor,
       vampireClaId: form.value.vampireClaId || undefined,
+      vampirePredatorId: form.value.vampirePredatorId || undefined,
       attributes: form.value.attributes,
       skills: form.value.skills.filter(s => s.value > 0),
       powers: form.value.powers.filter(p => p.value > 0).map(p => ({ powerDefinitionId: p.powerId, level: p.value })),
@@ -330,12 +336,22 @@ const submit = async () => {
                   <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Conceito</label>
                   <input v-model="form.concept" type="text" placeholder="Ex: Detetive Arruinado" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
                 </div>
-                <div class="space-y-2" v-if="sysUpper === 'VAMPIRE'">
-                  <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Clã</label>
-                  <select v-model="form.vampireClaId" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans appearance-none">
-                    <option value="">-- Selecione o Clã --</option>
-                    <option v-for="c in clans" :key="c.id" :value="c.id">{{ c.name }}</option>
-                  </select>
+                <!-- VAMPIRE SPECIFIC -->
+                <div v-if="sysUpper === 'VAMPIRE'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Clã</label>
+                    <select v-model="form.vampireClaId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
+                      <option value="" disabled>Selecione um clã...</option>
+                      <option v-for="c in clans" :key="c.id" :value="c.id">{{ c.name }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Tipo de Predador</label>
+                    <select v-model="form.vampirePredatorId" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
+                      <option value="" disabled>Selecione o predador...</option>
+                      <option v-for="p in predatorsDef" :key="p.id" :value="p.id">{{ p.nome }}</option>
+                    </select>
+                  </div>
                 </div>
                 <div class="space-y-2">
                   <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim">Natureza</label>
