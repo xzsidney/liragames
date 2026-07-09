@@ -240,8 +240,12 @@ const getSkills = (typeFilter?: string) => {
               <span v-if="character.vampireGeneration" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">{{ character.vampireGeneration }}ª Geração</span>
               <span v-if="character.vampirePredator?.nome" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Predador: {{ character.vampirePredator.nome }}</span>
               <span v-if="character.vampireResonance?.nome" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Ressonância: {{ character.vampireResonance.nome }}</span>
+              <span v-if="character.vampireSire" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Senhor: {{ character.vampireSire }}</span>
+              <span v-if="character.vampireHunger !== undefined && character.vampireHunger !== null" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-red-900/50 text-red-400 bg-red-900/20">Fome: {{ character.vampireHunger }}</span>
               <span v-if="character.nature" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Nat: {{ character.nature }}</span>
               <span v-if="character.demeanor" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Comp: {{ character.demeanor }}</span>
+              <span v-if="character.vampireAmbition" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Ambição: {{ character.vampireAmbition }}</span>
+              <span v-if="character.vampireDesire" class="font-serif text-[10px] tracking-[1.5px] uppercase px-3 py-1 rounded-full border border-gold-dim/30 text-parchment-dim bg-gold/5">Desejo: {{ character.vampireDesire }}</span>
             </div>
           </div>
 

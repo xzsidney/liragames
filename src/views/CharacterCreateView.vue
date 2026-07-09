@@ -53,6 +53,10 @@ const form = ref({
   vampirePredatorId: '',
   vampireResonanceId: '',
   vampireGeneration: 13,
+  vampireSire: '',
+  vampireHunger: 1,
+  vampireAmbition: '',
+  vampireDesire: '',
   attributes: [] as { attributeId: string, value: number }[],
   skills: [] as { skillId: string, value: number }[],
   powers: [] as { powerId: string, value: number }[],
@@ -212,6 +216,10 @@ const submit = async () => {
       vampirePredatorId: form.value.vampirePredatorId || undefined,
       vampireResonanceId: form.value.vampireResonanceId || undefined,
       vampireGeneration: form.value.vampireGeneration || 13,
+      vampireSire: form.value.vampireSire || undefined,
+      vampireHunger: form.value.vampireHunger || 1,
+      vampireAmbition: form.value.vampireAmbition || undefined,
+      vampireDesire: form.value.vampireDesire || undefined,
       attributes: form.value.attributes,
       skills: form.value.skills.filter(s => s.value > 0),
       powers: form.value.powers.filter(p => p.value > 0).map(p => ({ powerDefinitionId: p.powerId, level: p.value })),
@@ -372,6 +380,24 @@ const submit = async () => {
                       <option value="" disabled>Selecione...</option>
                       <option v-for="r in resonancesDef" :key="r.id" :value="r.id">{{ r.nome }}</option>
                     </select>
+                  </div>
+                  <div>
+                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Senhor</label>
+                    <input v-model="form.vampireSire" type="text" placeholder="Nome do Senhor..." class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+                  </div>
+                  <div>
+                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Fome Inicial</label>
+                    <select v-model="form.vampireHunger" required class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment font-serif focus:outline-none focus:border-gold transition-colors appearance-none">
+                      <option v-for="n in 6" :key="n-1" :value="n-1">{{ n-1 }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Ambição</label>
+                    <input v-model="form.vampireAmbition" type="text" placeholder="O que deseja a longo prazo..." class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
+                  </div>
+                  <div>
+                    <label class="block font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-2">Desejo</label>
+                    <input v-model="form.vampireDesire" type="text" placeholder="O que deseja esta noite..." class="w-full bg-black/40 border border-white/10 rounded px-4 py-3 text-parchment focus:outline-none focus:border-gold transition-colors font-sans" />
                   </div>
                 </div>
                 <div class="space-y-2">
