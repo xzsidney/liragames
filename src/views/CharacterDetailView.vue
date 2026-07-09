@@ -389,21 +389,25 @@ const getSkills = (typeFilter?: string) => {
           <!-- TAB CONTENT: LORE -->
           <div v-show="activeTab === 'lore'" class="animate-fade-in space-y-6">
             
-            <div class="bg-gold/[0.03] border border-gold-dim/30 rounded-xl p-6 text-[0.95rem] text-parchment leading-[1.8]">
+            <div class="bg-gold/[0.03] border border-gold-dim/30 rounded-xl p-6 text-[0.95rem] text-parchment leading-[1.8]" v-if="character.history">
               <h3 class="font-serif text-[10px] tracking-[2px] uppercase text-gold-dim mb-4">História</h3>
-              André é o típico exemplar de homem de sucesso. Ele começou do zero, um desconhecido cuja única vantagem era um sobrenome tradicional na sociedade paulista... (Lore mocado para visualização do formato).
+              <p class="whitespace-pre-wrap">{{ character.history }}</p>
             </div>
 
-            <h3 class="font-serif text-xs tracking-[3px] uppercase text-gold-dim flex items-center gap-3 mt-8 mb-4">
-              <span>Dicas de Interpretação</span>
-              <span class="flex-1 h-px bg-gradient-to-r from-gold-dim to-transparent"></span>
-            </h3>
-            
-            <div class="bg-vamp-c1/5 border border-vamp-c1/20 rounded-xl p-5 mb-5">
-              <span class="block font-serif text-[10px] tracking-[2px] uppercase text-vamp-c2 mb-2.5">🎭 Como Interpretar</span>
-              <p class="font-sans italic text-[0.9rem] text-parchment-dim leading-[1.7]">
-                Você é um profissional, educado e sob controle. Suas ambições são grandes, mas você sabe esperar a hora certa para fazer e cobrar favores.
-              </p>
+            <div v-if="character.roleplayHints">
+              <h3 class="font-serif text-xs tracking-[3px] uppercase text-gold-dim flex items-center gap-3 mt-8 mb-4">
+                <span>Dicas de Interpretação</span>
+                <span class="flex-1 h-px bg-gradient-to-r from-gold-dim to-transparent"></span>
+              </h3>
+              
+              <div class="bg-vamp-c1/5 border border-vamp-c1/20 rounded-xl p-5 mb-5">
+                <span class="block font-serif text-[10px] tracking-[2px] uppercase text-vamp-c2 mb-2.5">🎭 Como Interpretar</span>
+                <p class="font-sans italic text-[0.9rem] text-parchment-dim leading-[1.7] whitespace-pre-wrap">{{ character.roleplayHints }}</p>
+              </div>
+            </div>
+
+            <div v-if="!character.history && !character.roleplayHints" class="text-text-dim text-sm italic">
+              Nenhuma história registrada.
             </div>
           </div>
 
