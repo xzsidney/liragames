@@ -35,9 +35,21 @@
         </p>
       </header>
       
-      <div class="bg-black/30 border border-white/5 rounded-xl p-8 shadow-xl">
-        <h2 class="font-serif text-2xl text-gold-dim mb-4">Painel de Controle Vazio</h2>
-        <p class="text-gray-400">Não há dados ou fichas. O sistema possui apenas o módulo de autenticação ativado.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div 
+          @click="router.push('/jogador/vampire')"
+          class="group border border-gold/30 hover:border-gold rounded-xl p-6 bg-black/40 hover:bg-black/60 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.2)]"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-serif uppercase tracking-widest text-blood-red">World of Darkness</span>
+            <span class="text-gold font-serif">V5</span>
+          </div>
+          <h2 class="font-serif text-2xl text-parchment group-hover:text-gold transition-colors mb-2">Vampiro: A Máscara</h2>
+          <p class="text-gray-400 text-sm italic mb-6">Gerencie seus membros, clãs e linhagens na Camarilla de São Paulo.</p>
+          <div class="flex items-center text-xs font-serif text-gold-dim group-hover:translate-x-1 transition-transform">
+            Acessar Sangue &amp; Escuridão →
+          </div>
+        </div>
       </div>
     </main>
   </div>
