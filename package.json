@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "postinstall": "npm run build",
+    "start": "node server.js",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -13,6 +15,7 @@
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/tsconfig": "^0.9.1",
     "axios": "^1.18.1",
+    "express": "^4.19.2",
     "pinia": "^3.0.4",
     "tailwindcss": "^4.3.2",
     "typescript": "~6.0.2",
