@@ -31,10 +31,10 @@
       <!-- HEADER TITLE -->
       <div class="text-center mb-10">
         <h1 class="font-serif text-4xl md:text-5xl text-gold-dim tracking-wide mb-3 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
-          Os Filhos da Noite
+          Dossiê dos Filhos da Noite
         </h1>
         <p class="text-gray-400 text-sm italic font-serif tracking-wide max-w-xl mx-auto">
-          Treze almas condenadas habitam as sombras de São Paulo. Escolha um, se ousar tocá-lo.
+          Selecione o seu personagem ativo para entrar no Hub de jogabilidade ou criar uma nova linhagem nas sombras.
         </p>
 
         <!-- DROPDOWN / ICON DECORATION -->
@@ -72,16 +72,16 @@
         <!-- CARD: NOVO MEMBRO (BOTÃO DE CRIAÇÃO) -->
         <div 
           @click="router.push('/jogador/vampire/novo')"
-          class="group relative border border-dashed border-gold/40 hover:border-gold rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-500 bg-black/40 hover:bg-gold/5 min-h-[320px] shadow-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.15)]"
+          class="group relative border border-dashed border-gold/40 hover:border-gold rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-500 bg-black/40 hover:bg-gold/5 min-h-[340px] shadow-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.15)]"
         >
           <div class="w-16 h-16 rounded-full border border-gold/30 group-hover:border-gold flex items-center justify-center text-gold text-3xl font-light mb-6 group-hover:scale-110 transition-transform duration-300">
             +
           </div>
           <h3 class="font-serif text-lg text-gold font-medium mb-2 tracking-wide">
-            Novo Membro
+            Criar Novo Vampiro
           </h3>
           <p class="text-xs text-gray-500 italic max-w-[200px] leading-relaxed">
-            Sua linhagem aguarda uma nova adição às sombras de São Paulo.
+            Inicie um novo abraço e construa sua ficha completa em Vampiro: V5.
           </p>
         </div>
 
@@ -89,11 +89,10 @@
         <div 
           v-for="char in filteredCharacters" 
           :key="char.id"
-          @click="router.push(`/jogador/vampire/${char.id}`)"
-          class="group relative border border-white/10 hover:border-blood-red/60 rounded-xl p-6 flex flex-col justify-between cursor-pointer transition-all duration-300 bg-black/60 hover:bg-black/80 min-h-[320px] shadow-xl hover:shadow-[0_0_25px_rgba(139,0,0,0.3)]"
+          class="group relative border border-white/10 hover:border-blood-red/60 rounded-xl p-6 flex flex-col justify-between transition-all duration-300 bg-black/60 hover:bg-black/80 min-h-[340px] shadow-xl hover:shadow-[0_0_25px_rgba(139,0,0,0.3)]"
         >
           <div>
-            <!-- BANNER/HEADER DO CARACTER -->
+            <!-- BANNER/HEADER DO PERSONAGEM -->
             <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
               <span class="text-[10px] font-serif uppercase tracking-widest text-gold-dim">
                 {{ char.DefinitionClan?.name || 'Sem Clã' }}
@@ -109,11 +108,38 @@
             <p class="text-xs text-gray-400 italic mb-4 line-clamp-2">
               {{ char.concept || 'Sem conceito informado' }}
             </p>
+
+            <div class="grid grid-cols-2 gap-2 text-[11px] text-gray-400 mb-4 bg-white/5 p-2 rounded border border-white/5">
+              <div>Fome: <strong class="text-blood-red">{{ char.hunger }}</strong></div>
+              <div>Humanidade: <strong class="text-gold-dim">{{ char.humanity }}</strong></div>
+            </div>
           </div>
 
-          <div class="pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400">
-            <span>Fome: <strong class="text-blood-red">{{ char.hunger }}</strong></span>
-            <span>Humanidade: <strong class="text-gold-dim">{{ char.humanity }}</strong></span>
+          <!-- BOTÕES DE AÇÃO -->
+          <div class="pt-4 border-t border-white/5 flex flex-col gap-2">
+            <button 
+              @click="enterHub(char.id)"
+              class="w-full py-2 px-3 bg-blood-red/80 hover:bg-blood-red text-white text-xs font-serif tracking-wider uppercase rounded transition-all duration-300 shadow-[0_0_10px_rgba(139,0,0,0.4)] flex items-center justify-center gap-2"
+            >
+              <span>Entrar no Hub</span>
+              <span>→</span>
+            </button>
+
+            <div class="flex gap-2">
+              <button 
+                @click="viewSheet(char.id)"
+                class="flex-1 py-1.5 px-2 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-[11px] font-serif rounded border border-white/10 transition-colors text-center"
+              >
+                Ficha Completa
+              </button>
+              <button 
+                @click="deleteCharacter(char.id, char.name)"
+                class="py-1.5 px-3 bg-red-950/40 hover:bg-red-900/60 text-red-400 text-[11px] font-serif rounded border border-red-900/40 transition-colors"
+                title="Excluir Ficha"
+              >
+                Excluir
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -146,6 +172,28 @@ const filteredCharacters = computed(() => {
   return characters.value.filter(c => c.DefinitionClan?.name === selectedClan.value)
 })
 
+const enterHub = (characterId: string) => {
+  localStorage.setItem('lira_active_character_id', characterId)
+  router.push(`/personagem/hub?id=${characterId}`)
+}
+
+const viewSheet = (characterId: string) => {
+  localStorage.setItem('lira_active_character_id', characterId)
+  router.push(`/personagem/ficha?id=${characterId}`)
+}
+
+const deleteCharacter = async (id: string, name: string) => {
+  if (confirm(`Tem certeza que deseja destruir a ficha de "${name}"? Esta ação não pode ser desfeita.`)) {
+    try {
+      await api.delete(`/api/character-vampires/${id}`)
+      await fetchCharacters()
+    } catch (err) {
+      console.error('Erro ao excluir personagem:', err)
+      alert('Erro ao excluir personagem.')
+    }
+  }
+}
+
 const handleLogout = () => {
   sessionStorage.clear()
   localStorage.clear()
@@ -156,7 +204,3 @@ onMounted(() => {
   fetchCharacters()
 })
 </script>
-
-<style scoped>
-/* Transições suaves */
-</style>
