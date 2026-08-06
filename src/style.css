@@ -14,6 +14,8 @@
   /* Cores dos Sistemas */
   --color-vamp-c1: #8b0000;
   --color-vamp-c2: #c0392b;
+  --color-vamp-border: #4a0000;
+  --color-vamp-bg: #0a0000;
   --color-wolf-c1: #1a4a00;
   --color-wolf-c2: #4a9a1a;
   --color-mage-c1: #2a0070;
@@ -22,7 +24,7 @@
   --color-hunt-c2: #d4820a;
 
   /* Fontes do Protótipo */
-  --font-sans: 'Lora', serif; /* Mantendo Lora como padrão para texto corrido (sans do tailwind) */
+  --font-sans: 'Lora', serif; /* Mantendo Lora como padrão para texto corrido */
   --font-serif: 'Cinzel', serif;
   --font-deco: 'Cinzel Decorative', serif;
 
@@ -62,3 +64,55 @@ body {
 .btn-secondary {
   @apply w-full bg-transparent border border-white/20 hover:bg-white/5 text-white font-semibold py-2.5 rounded-lg transition-all duration-300;
 }
+
+/* Tema Demiplane Vampire */
+.demiplane-bg {
+  /* Usaremos um gradiente radial escuro e possivelmente um background de textura de sangue misturado */
+  background: radial-gradient(circle at center, #1a0505 0%, #050000 100%);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Caixa com borda dupla vermelha escura */
+.demiplane-box {
+  @apply bg-black/60 border-t border-b border-vamp-border shadow-lg backdrop-blur-sm;
+  box-shadow: inset 0 0 20px rgba(139, 0, 0, 0.1);
+}
+
+.demiplane-title {
+  @apply font-serif font-bold tracking-widest text-vamp-c2 uppercase;
+  text-shadow: 0 0 10px rgba(192, 57, 43, 0.5);
+}
+
+.demiplane-text {
+  @apply font-serif text-sm tracking-wide text-gray-300 uppercase;
+}
+
+/* Dots (bolinhas de atributos) */
+.dot-filled {
+  @apply inline-block w-2.5 h-2.5 bg-vamp-c2 rounded-full mx-0.5 shadow-[0_0_5px_rgba(192,57,43,0.8)];
+}
+.dot-empty {
+  @apply inline-block w-2.5 h-2.5 border border-vamp-c2 rounded-full mx-0.5 bg-transparent opacity-40;
+}
+
+/* Quadrados de vitalidade / willpower */
+.box-empty {
+  @apply inline-block w-4 h-4 border border-vamp-border bg-black/40 mx-0.5;
+}
+.box-filled {
+  @apply inline-block w-4 h-4 border border-vamp-c2 bg-vamp-c2 mx-0.5 shadow-[0_0_5px_rgba(192,57,43,0.8)];
+}
+
+/* Tabela Demiplane */
+.demiplane-table {
+  @apply w-full text-left text-sm font-sans;
+}
+.demiplane-table th {
+  @apply font-serif text-vamp-c2 border-b border-vamp-border pb-2 uppercase tracking-wider text-xs;
+}
+.demiplane-table td {
+  @apply py-2 border-b border-vamp-border/50 text-gray-300;
+}
+

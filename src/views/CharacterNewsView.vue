@@ -1,35 +1,34 @@
 <template>
-  <div class="min-h-screen bg-[#050505] text-parchment font-sans relative overflow-x-hidden selection:bg-blood-red selection:text-white">
-    <!-- BACKGROUND ATMOSPHERE -->
-    <div class="fixed inset-0 pointer-events-none opacity-20 mix-blend-overlay z-0" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
-    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[450px] bg-blue-500/10 blur-[160px] rounded-full pointer-events-none z-0"></div>
+  <div class="min-h-screen demiplane-bg text-parchment font-sans relative overflow-x-hidden selection:bg-blood-red selection:text-white pb-20">
+    <!-- SUBTLE NOISE/TEXTURE -->
+    <div class="fixed inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay z-0" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
 
     <!-- NAVBAR -->
-    <nav class="relative z-20 border-b border-white/10 bg-black/70 backdrop-blur-md sticky top-0">
-      <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <button @click="router.push(`/personagem/hub?id=${characterId}`)" class="text-xs text-gray-400 hover:text-white flex items-center gap-1 font-serif uppercase tracking-wider">
-          <span>←</span> Voltar ao Hub
+    <nav class="relative z-20 border-b border-vamp-border bg-black/80 backdrop-blur-md sticky top-0">
+      <div class="max-w-[1200px] mx-auto px-4 h-12 flex items-center justify-between">
+        <button @click="router.push(`/personagem/hub?id=${characterId}`)" class="text-[10px] text-gray-400 hover:text-white flex items-center gap-1 font-serif uppercase tracking-widest transition-colors">
+          <span>←</span> Back to Hub
         </button>
 
-        <div class="flex items-center gap-4 text-xs font-serif tracking-widest uppercase">
-          <span class="text-blue-400 font-semibold">Feed de Notícias Urbanas</span>
+        <div class="flex items-center gap-4 text-[10px] font-serif tracking-widest uppercase">
+          <span class="text-gray-500">URBAN NEWS FEED</span>
         </div>
       </div>
     </nav>
 
     <!-- MAIN CONTENT -->
-    <main class="relative z-10 max-w-5xl mx-auto px-6 py-10">
+    <main class="relative z-10 max-w-[1200px] mx-auto px-4 py-8">
       <!-- NEWSPAPER HEADER -->
-      <div class="text-center border-b border-white/10 pb-8 mb-10">
+      <div class="text-center border-b border-vamp-border pb-8 mb-10">
         <div class="text-[11px] font-serif uppercase tracking-[4px] text-gray-400 mb-2">
           Jornal das Sombras de São Paulo • Edição Diária
         </div>
-        <h1 class="font-serif text-4xl md:text-6xl text-gold-dim tracking-wide drop-shadow-md">
+        <h1 class="demiplane-title text-4xl md:text-6xl text-white drop-shadow-md">
           A GAZETA DA NOITE
         </h1>
-        <p class="text-xs text-gray-400 italic font-serif mt-2 max-w-xl mx-auto">
+        <h2 class="demiplane-text text-vamp-c2 mt-2 max-w-xl mx-auto">
           Relatos, investigações policiais e desdobramentos urbanos provocado pelas ações da Camarilla e dos Anarchs na metrópole.
-        </p>
+        </h2>
       </div>
 
       <!-- ARTICLES LIST -->
@@ -37,10 +36,10 @@
         <div 
           v-for="news in newsList" 
           :key="news.id"
-          class="bg-black/60 border border-white/10 hover:border-blue-500/40 rounded-2xl p-6 md:p-8 backdrop-blur-md transition-all duration-300 shadow-xl"
+          class="demiplane-box p-6 md:p-8 hover:border-vamp-c1 transition-all duration-300"
         >
-          <div class="flex items-center justify-between gap-4 mb-3 pb-3 border-b border-white/5">
-            <span class="px-2.5 py-0.5 bg-blue-500/20 border border-blue-500/40 text-blue-400 text-[10px] font-serif uppercase tracking-widest rounded-full">
+          <div class="flex items-center justify-between gap-4 mb-3 pb-3 border-b border-vamp-border/50">
+            <span class="px-2.5 py-0.5 bg-black/50 border border-vamp-c2 text-white text-[10px] font-sans font-bold uppercase tracking-widest rounded-sm">
               {{ news.tag }}
             </span>
             <span class="text-[11px] font-mono text-gray-500">
@@ -48,16 +47,16 @@
             </span>
           </div>
 
-          <h2 class="font-serif text-2xl text-parchment hover:text-gold transition-colors mb-3">
+          <h2 class="font-sans font-bold text-xl uppercase text-white hover:text-vamp-c2 transition-colors mb-3 tracking-wide">
             {{ news.title }}
           </h2>
-          <p class="text-sm text-gray-300 leading-relaxed font-serif">
+          <p class="text-sm text-gray-300 leading-relaxed font-sans">
             {{ news.content }}
           </p>
 
-          <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-gray-500 italic">
+          <div class="mt-4 pt-4 border-t border-vamp-border/50 flex items-center justify-between text-xs text-gray-500 italic">
             <span>Fonte: {{ news.source }}</span>
-            <span class="text-gold-dim">Impacto na Máscara: {{ news.impact }}</span>
+            <span class="text-vamp-c1">Impacto na Máscara: {{ news.impact }}</span>
           </div>
         </div>
       </div>
