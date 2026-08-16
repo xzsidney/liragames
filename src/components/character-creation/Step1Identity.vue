@@ -23,26 +23,26 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div 
-            v-for="arch in store.archetypes" 
-            :key="arch.id"
-            @click="store.form.concept = arch.name"
+            v-for="pkg in store.professionPackages" 
+            :key="pkg.id"
+            @click="store.form.concept = pkg.id"
             class="cursor-pointer relative overflow-hidden rounded-xl border p-4 transition-all duration-300 group/card"
-            :class="store.form.concept === arch.name ? 'border-blood-red bg-blood-red/10 shadow-[0_0_15px_rgba(139,0,0,0.3)]' : 'border-white/10 bg-black/40 hover:border-white/30 hover:bg-black/60'"
+            :class="store.form.concept === pkg.id ? 'border-blood-red bg-blood-red/10 shadow-[0_0_15px_rgba(139,0,0,0.3)]' : 'border-white/10 bg-black/40 hover:border-white/30 hover:bg-black/60'"
           >
             <!-- Background fx -->
             <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
             
-            <h3 class="font-serif text-lg mb-1" :class="store.form.concept === arch.name ? 'text-white' : 'text-gray-300'">{{ arch.name }}</h3>
-            <p class="text-xs text-gray-500 font-sans line-clamp-2">{{ arch.description || 'Uma vida mundana normal...' }}</p>
+            <h3 class="font-serif text-lg mb-1" :class="store.form.concept === pkg.id ? 'text-white' : 'text-gray-300'">{{ pkg.name }}</h3>
+            <p class="text-xs text-gray-500 font-sans line-clamp-2">{{ pkg.description || 'Uma vida mundana normal...' }}</p>
             
             <div class="mt-3 flex items-center justify-between text-[10px] uppercase tracking-widest">
-              <span class="text-gold-dim border border-gold-dim/30 px-2 py-0.5 rounded-full">{{ arch.category || 'Mundano' }}</span>
-              <span v-if="store.form.concept === arch.name" class="text-blood-red font-bold">Selecionado</span>
+              <span class="text-gold-dim border border-gold-dim/30 px-2 py-0.5 rounded-full">Profissão</span>
+              <span v-if="store.form.concept === pkg.id" class="text-blood-red font-bold">Selecionado</span>
             </div>
           </div>
         </div>
         
-        <p v-if="store.archetypes.length === 0" class="text-sm text-gray-500 italic mt-2">Carregando profissões do servidor...</p>
+        <p v-if="store.professionPackages.length === 0" class="text-sm text-gray-500 italic mt-2">Carregando profissões do servidor...</p>
       </div>
     </div>
   </div>

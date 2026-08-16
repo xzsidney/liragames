@@ -4,6 +4,7 @@ import api from '../services/api'
 export const useCharacterCreationStore = defineStore('characterCreation', {
   state: () => ({
     // Definições carregadas da API
+    packages: [] as any[],
     clans: [] as any[],
     archetypes: [] as any[],
     predators: [] as any[],
@@ -36,72 +37,97 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
   }),
 
   getters: {
-    selectedArchetype(state) {
-      if (!state.form.concept) return null
-      return state.archetypes.find(a => a.name === state.form.concept || a.id === state.form.concept)
+    professionPackages(state) {
+      return state.packages.filter(p => p.packageType === 'PROFESSION')
     },
     
-    // Apenas clãs interessados na profissão (usaremos uma lógica mockada se o DB não tiver)
+    selectedProfessionPackage(state) {
+      if (!state.form.concept) return null
+      return state.packages.find(p => p.id === state.form.concept)
+    },
+
+    // Apenas clãs interessados na profissão dinâmica
     filteredClans(state): any[] {
-      if (!this.selectedArchetype) return state.clans
+      const selected = this.selectedProfessionPackage
+      if (!selected) return state.clans
       
-      // Lógica de restrição baseada na categoria do arquétipo
-      const category = this.selectedArchetype.category?.toUpperCase() || ''
-      if (category === 'CEO' || category.includes('ELITE')) {
-        return state.clans.filter(c => ['Ventrue', 'Lasombra', 'Hécata'].includes(c.name))
-      } else if (category === 'STREET' || category.includes('RUA')) {
-        return state.clans.filter(c => ['Gangrel', 'Brujah', 'Nosferatu'].includes(c.name))
-      }
+      const allowedClanItems = selected.CreationPackageItems?.filter((item: any) => item.itemType === 'CLAN_ALLOWED') || []
+      if (allowedClanItems.length === 0) return state.clans // No restriction
       
-      return state.clans // Retorna todos caso não haja restrição clara
+      const allowedIds = allowedClanItems.map((item: any) => item.referenceId)
+      return state.clans.filter(c => allowedIds.includes(c.id))
     },
 
-    // Apenas predadores lógicos para o Clã
-    filteredPredators(state): any[] {
-      if (!state.form.clanId) return state.predators
-      const clan = state.clans.find(c => c.id === state.form.clanId)
-      if (!clan) return state.predators
+    // Apenas pacotes de predadores disponíveis para o Clã
+    filteredPredatorPackages(state): any[] {
+      const predPackages = state.packages.filter(p => p.packageType === 'PREDATOR_CHOICE')
+      if (!state.form.clanId) return predPackages // Not filtered yet
 
-      if (clan.name === 'Ventrue') {
-        return state.predators.filter(p => !['Beco', 'Sanguessuga', 'Ratos'].some(b => p.name.includes(b)))
-      }
-
-      return state.predators
+      return predPackages.filter(pkg => {
+        const restrictions = pkg.CreationPackageItems?.filter((item: any) => item.itemType === 'CLAN_RESTRICTION') || []
+        if (restrictions.length === 0) return true // No restriction
+        
+        const restrictedIds = restrictions.map((item: any) => item.referenceId)
+        return restrictedIds.includes(state.form.clanId)
+      })
     },
 
-    // Cálculo automático de Atributos com base na Profissão
+    selectedPredatorPackage(state) {
+      if (!state.form.predatorId) return null
+      return state.packages.find(p => p.id === state.form.predatorId)
+    },
+
+    // Cálculo dinâmico de Atributos com base nos Pacotes
     calculatedAttributes(state) {
       const attrs: Record<string, number> = {}
       state.attributesList.forEach(a => {
         attrs[a.id] = 1 // Padrão
       })
 
-      if (this.selectedArchetype) {
-        const focus = this.selectedArchetype.category?.toUpperCase() || ''
-        state.attributesList.forEach(a => {
-          if (a.category?.toUpperCase() === focus) {
-            attrs[a.id] = 2 // Foco ganha +1
+      if (this.selectedProfessionPackage) {
+        const attrItems = this.selectedProfessionPackage.CreationPackageItems?.filter((i: any) => i.itemType === 'ATTRIBUTE') || []
+        attrItems.forEach((item: any) => {
+          if (attrs[item.referenceId] !== undefined) {
+            attrs[item.referenceId] += item.amount
           }
         })
       }
+      
+      if (this.selectedPredatorPackage) {
+         const attrItems = this.selectedPredatorPackage.CreationPackageItems?.filter((i: any) => i.itemType === 'ATTRIBUTE') || []
+         attrItems.forEach((item: any) => {
+           if (attrs[item.referenceId] !== undefined) {
+             attrs[item.referenceId] += item.amount
+           }
+         })
+      }
+
       return attrs
     },
 
-    // Cálculo automático de Perícias (Profissão + Predador)
+    // Cálculo dinâmico de Perícias com base nos Pacotes
     calculatedSkills(state) {
       const skills: Record<string, number> = {}
       state.skillsList.forEach(s => {
         skills[s.id] = 0 // Padrão
       })
 
-      // TODO: Aplicar bônus do Archetype quando os dados do DB estiverem mapeados
-      
-      // Bônus do Predador (+1 em uma perícia relacionada)
-      if (state.form.predatorId) {
-        const pred = state.predators.find(p => p.id === state.form.predatorId)
-        if (pred && pred.bonusSkillId) {
-           skills[pred.bonusSkillId] = 1
-        }
+      if (this.selectedProfessionPackage) {
+        const skillItems = this.selectedProfessionPackage.CreationPackageItems?.filter((i: any) => i.itemType === 'SKILL') || []
+        skillItems.forEach((item: any) => {
+          if (skills[item.referenceId] !== undefined) {
+            skills[item.referenceId] += item.amount
+          }
+        })
+      }
+
+      if (this.selectedPredatorPackage) {
+        const skillItems = this.selectedPredatorPackage.CreationPackageItems?.filter((i: any) => i.itemType === 'SKILL') || []
+        skillItems.forEach((item: any) => {
+          if (skills[item.referenceId] !== undefined) {
+            skills[item.referenceId] += item.amount
+          }
+        })
       }
 
       return skills
@@ -136,7 +162,8 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
     async fetchLibraries() {
       this.isLoading = true
       try {
-        const [clanRes, predRes, archRes, resRes, bpRes, attrRes, skRes] = await Promise.all([
+        const [pkgRes, clanRes, predRes, archRes, resRes, bpRes, attrRes, skRes] = await Promise.all([
+          api.get('/api/creation-packages'),
           api.get('/api/definition-clans'),
           api.get('/api/definition-predators'),
           api.get('/api/definition-archetypes'),
@@ -145,6 +172,7 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
           api.get('/api/definition-attributes'),
           api.get('/api/definition-skills')
         ])
+        this.packages = pkgRes.data
         this.clans = clanRes.data
         this.predators = predRes.data
         this.archetypes = archRes.data
@@ -206,12 +234,18 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
 
         const stats = this.derivedStats
 
+        let realPredatorId = null;
+        if (this.selectedPredatorPackage) {
+          const predItem = this.selectedPredatorPackage.CreationPackageItems?.find((i: any) => i.itemType === 'PREDATOR')
+          if (predItem) realPredatorId = predItem.referenceId
+        }
+
         const payload = {
           userId,
           name: this.form.name,
-          concept: this.form.concept || null,
+          concept: this.selectedProfessionPackage?.name || null,
           clanId: this.form.clanId,
-          predatorId: this.form.predatorId,
+          predatorId: realPredatorId,
           sire: this.form.sire || null,
           generation: 12, // Padrão Neófito
           ambition: this.form.ambition || null,
