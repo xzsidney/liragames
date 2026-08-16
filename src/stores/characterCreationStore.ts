@@ -25,6 +25,7 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
       chronicleTenets: '',
       history: '',
       pillar: '',
+      backgroundId: 'none', // Valor default do radio button
     },
 
     // Sires dinâmicos baseados no clã
@@ -39,6 +40,10 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
   getters: {
     professionPackages(state) {
       return state.packages.filter(p => p.packageType === 'PROFESSION')
+    },
+    
+    backgroundPackages(state) {
+      return state.packages.filter(p => p.packageType === 'BACKGROUND')
     },
     
     selectedProfessionPackage(state) {

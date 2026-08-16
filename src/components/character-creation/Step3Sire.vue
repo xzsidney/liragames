@@ -29,19 +29,26 @@
         <p class="text-xs text-gray-500 mb-4">Escolha os fardos e recursos que você traz da vida mortal para as noites.</p>
         
         <div class="space-y-3">
+          <!-- Opção Limpa (Sempre disponível) -->
           <label class="flex items-center gap-3 p-3 rounded-lg border border-white/10 bg-black/20 hover:bg-black/50 cursor-pointer transition-colors">
-            <input type="radio" name="lifePackage" value="none" checked class="text-blood-red bg-black border-white/20 focus:ring-blood-red" />
+            <input type="radio" v-model="store.form.backgroundId" value="none" class="text-blood-red bg-black border-white/20 focus:ring-blood-red" />
             <div>
               <p class="font-serif text-sm text-gray-200">Nenhum (Modo Limpo)</p>
               <p class="text-xs text-gray-500">Sem recursos extras, mas sem inimigos no seu calcanhar.</p>
             </div>
           </label>
 
-          <label class="flex items-center gap-3 p-3 rounded-lg border border-white/10 bg-black/20 hover:bg-black/50 cursor-pointer transition-colors opacity-50">
-            <input type="radio" name="lifePackage" value="criminal" disabled class="text-blood-red bg-black border-white/20" />
+          <!-- Pacotes Dinâmicos -->
+          <label 
+            v-for="pkg in store.backgroundPackages" 
+            :key="pkg.id"
+            class="flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer"
+            :class="store.form.backgroundId === pkg.id ? 'border-blood-red bg-blood-red/10' : 'border-white/10 bg-black/20 hover:bg-black/50'"
+          >
+            <input type="radio" v-model="store.form.backgroundId" :value="pkg.id" class="text-blood-red bg-black border-white/20 focus:ring-blood-red" />
             <div>
-              <p class="font-serif text-sm text-gray-200">Rei do Crime (Em breve)</p>
-              <p class="text-xs text-gray-500">+ Recursos, + Lacaios | - Inimigos</p>
+              <p class="font-serif text-sm" :class="store.form.backgroundId === pkg.id ? 'text-white' : 'text-gray-200'">{{ pkg.name }}</p>
+              <p class="text-xs text-gray-500">{{ pkg.description }}</p>
             </div>
           </label>
         </div>
