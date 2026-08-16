@@ -16,6 +16,7 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
     // Dados do Formulário do Jogador
     form: {
       name: '',
+      avatarUrl: null as string | null,
       concept: '', // Archetype ID ou Nome
       clanId: null as string | null,
       predatorId: null as string | null,
@@ -208,6 +209,22 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
       }
     },
 
+    async uploadAvatar(file: File) {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      try {
+        const res = await api.post('/api/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+        this.form.avatarUrl = res.data.url
+      } catch (err) {
+        console.error('Erro no upload de avatar', err)
+        throw err
+      }
+    },
+
     nextStep() {
       if (this.currentStep < 6) this.currentStep++
     },
@@ -248,6 +265,7 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
         const payload = {
           userId,
           name: this.form.name,
+          avatarUrl: this.form.avatarUrl,
           concept: this.selectedProfessionPackage?.name || null,
           clanId: this.form.clanId,
           predatorId: realPredatorId,

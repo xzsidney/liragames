@@ -6,15 +6,33 @@
     </header>
 
     <div class="space-y-6 max-w-2xl mx-auto">
-      <!-- Nome -->
-      <div class="group">
-        <label class="block text-xs font-serif uppercase tracking-wider text-gray-400 mb-2 group-focus-within:text-gold transition-colors">Nome do Personagem</label>
-        <input 
-          v-model="store.form.name" 
-          type="text" 
-          placeholder="Ex: Kael Lira" 
-          class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blood-red focus:ring-1 focus:ring-blood-red/50 transition-all duration-300 shadow-inner"
-        />
+      <!-- Nome & Avatar -->
+      <div class="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-6 items-start">
+        
+        <!-- Avatar Upload -->
+        <div class="group flex flex-col items-center">
+          <label class="block text-[10px] font-serif uppercase tracking-wider text-gray-400 mb-2 group-focus-within:text-gold transition-colors text-center w-full">Retrato</label>
+          <div class="relative w-24 h-32 bg-black/60 border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-blood transition-colors group/avatar" @click="triggerFileInput">
+            <img v-if="store.form.avatarUrl" :src="'http://localhost:3000' + store.form.avatarUrl" class="w-full h-full object-cover saturate-50 group-hover/avatar:saturate-100 transition-all" />
+            <div v-else class="absolute inset-0 flex items-center justify-center text-4xl text-gray-600 font-serif pb-2">+</div>
+            
+            <div v-if="uploading" class="absolute inset-0 bg-black/80 flex items-center justify-center">
+              <div class="animate-spin w-5 h-5 border-2 border-gold border-t-transparent rounded-full"></div>
+            </div>
+          </div>
+          <input type="file" ref="fileInput" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handleFileUpload" />
+        </div>
+
+        <!-- Nome -->
+        <div class="group">
+          <label class="block text-xs font-serif uppercase tracking-wider text-gray-400 mb-2 group-focus-within:text-gold transition-colors">Nome do Personagem</label>
+          <input 
+            v-model="store.form.name" 
+            type="text" 
+            placeholder="Ex: Kael Lira" 
+            class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/50 transition-all duration-300 shadow-inner"
+          />
+        </div>
       </div>
 
       <!-- Arquétipo / Profissão -->
@@ -49,7 +67,29 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useCharacterCreationStore } from '../../stores/characterCreationStore'
 
 const store = useCharacterCreationStore()
+const fileInput = ref<HTMLInputElement | null>(null)
+const uploading = ref(false)
+
+const triggerFileInput = () => {
+  if (fileInput.value) fileInput.value.click()
+}
+
+const handleFileUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files.length > 0) {
+    const file = target.files[0]
+    uploading.value = true
+    try {
+      await store.uploadAvatar(file)
+    } catch (err) {
+      alert('Erro ao enviar imagem. O arquivo pode ser muito grande ou estar em formato inválido.')
+    } finally {
+      uploading.value = false
+    }
+  }
+}
 </script>

@@ -21,107 +21,79 @@
     </header>
 
     <!-- MAIN CONTENT -->
-    <main class="relative z-10 max-w-7xl mx-auto px-6 py-10">
+    <main class="relative z-10">
       
-      <!-- TOP TITLE BAR -->
-      <div class="flex items-center justify-between mb-8 pb-4 border-b border-vamp-border/40">
-        <div>
-          <h1 class="font-sans font-bold text-3xl text-white tracking-wide">Meus Personagens</h1>
-          <p class="text-gray-500 text-sm mt-1">Personagens ativos em Vampiro: A Máscara V5</p>
+      <!-- GALLERY HERO -->
+      <section class="text-center pt-16 pb-10 px-6 relative z-10">
+        <h1 class="font-serif font-bold text-4xl md:text-5xl lg:text-6xl text-gold mb-4 tracking-[4px] drop-shadow-[0_0_30px_rgba(201,168,76,0.4)]" style="font-family: 'Cinzel Decorative', serif;">
+          OS FILHOS DA NOITE
+        </h1>
+        <p class="font-sans italic text-base md:text-lg text-parchment-dim max-w-2xl mx-auto leading-relaxed mb-8">
+          Treze almas condenadas habitam as sombras de Curitiba. Escolha um, se ousar conhecê-lo.
+        </p>
+        <div class="flex items-center justify-center gap-4">
+          <div class="w-20 h-px bg-gradient-to-r from-transparent to-gold-dim"></div>
+          <span class="text-blood-bright drop-shadow-[0_0_6px_rgba(192,57,43,0.8)]">🩸</span>
+          <div class="w-20 h-px bg-gradient-to-l from-transparent to-gold-dim"></div>
         </div>
-        <button @click="router.push('/jogador/vampire/novo')" class="bg-[#1e88e5] hover:bg-blue-600 text-white text-xs font-bold px-6 py-2 rounded shadow-md uppercase tracking-wide transition-colors">
-          Criar Personagem
+      </section>
+
+      <!-- FILTER BAR -->
+      <section class="flex flex-wrap items-center justify-center gap-3 px-6 pb-10 relative z-10">
+        <button 
+          @click="activeFilter = ''" 
+          class="bg-transparent border border-border-dark text-parchment-dim font-serif text-xs tracking-widest uppercase px-5 py-2 rounded-full hover:border-gold-dim hover:text-gold hover:bg-gold/5 transition-all duration-300"
+          :class="activeFilter === '' ? 'bg-gold/10 border-gold text-gold-bright shadow-[0_0_12px_rgba(201,168,76,0.2)]' : ''"
+        >
+          Todos
         </button>
-      </div>
-
-      <!-- GAMES FILTER RIBBON -->
-      <div class="flex gap-4 overflow-x-auto pb-4 mb-8 custom-scrollbar">
-        <!-- ALL GAMES PILL -->
-        <div class="flex-shrink-0 w-32 h-24 border border-[#1e88e5] bg-black/40 rounded flex items-center justify-center cursor-pointer hover:bg-white/5 transition-colors">
-          <span class="font-bold text-white uppercase text-center text-sm leading-tight">Todos os<br>Jogos</span>
-        </div>
-        <!-- VAMPIRE PILL -->
-        <div class="flex-shrink-0 w-32 h-24 border border-transparent hover:border-white/20 bg-vamp-c1/30 rounded flex items-center justify-center cursor-pointer transition-colors relative overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-          <span class="relative z-10 font-serif font-bold text-vamp-c2 text-center text-sm uppercase">Vampiro<br><span class="text-[10px] text-white">A Máscara</span></span>
-        </div>
-      </div>
-
-      <!-- VAMPIRE SECTION BANNER -->
-      <div class="demiplane-box rounded mb-6 p-4 flex items-center justify-between border-l-4 border-l-vamp-c2 bg-gradient-to-r from-vamp-c1/20 to-transparent">
-        <h2 class="demiplane-title text-2xl flex items-center gap-3">
-          Vampiro: A Máscara
-          <span class="text-xs text-gray-400 font-sans tracking-normal bg-black/50 px-2 py-0.5 rounded cursor-pointer hover:text-white transition-colors" @click="router.push('/jogador/vampire/novo')">CRIAR PERSONAGEM</span>
-        </h2>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-        </svg>
-      </div>
+        <button 
+          v-for="clan in availableClans" :key="clan"
+          @click="activeFilter = clan"
+          class="bg-transparent border border-border-dark text-parchment-dim font-serif text-xs tracking-widest uppercase px-5 py-2 rounded-full hover:border-gold-dim hover:text-gold hover:bg-gold/5 transition-all duration-300 flex items-center gap-2"
+          :class="activeFilter === clan ? 'bg-gold/10 border-gold text-gold-bright shadow-[0_0_12px_rgba(201,168,76,0.2)]' : ''"
+        >
+          <span>👑</span> {{ clan }}
+        </button>
+        
+        <!-- Botão Novo -->
+        <button 
+          @click="router.push('/jogador/vampire/novo')" 
+          class="ml-4 bg-blood/20 border border-blood text-blood-bright font-serif text-xs tracking-widest uppercase px-5 py-2 rounded-full hover:bg-blood hover:text-white hover:shadow-[0_0_15px_rgba(139,0,0,0.4)] transition-all duration-300 transform hover:-translate-y-0.5"
+        >
+          + Criar Novo
+        </button>
+      </section>
 
       <!-- CARDS GRID -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- PERSONAGENS EXISTENTES DO USUÁRIO -->
-        <div 
-          v-for="char in characters" 
-          :key="char.id"
-          class="demiplane-box relative flex items-center p-0 overflow-hidden group cursor-pointer border-l-[3px] border-l-vamp-c2 hover:border-white/30 transition-colors"
-          @click="enterHub(char.id)"
-        >
-          <!-- Fundo hover sutil -->
-          <div class="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-0"></div>
-          
-          <!-- Avatar Placeholder (Ankh ou Clan Icon) -->
-          <div class="relative z-10 w-24 h-24 bg-black border-r border-vamp-border flex items-center justify-center shrink-0">
-            <span class="text-3xl text-vamp-c2 font-serif opacity-70 group-hover:opacity-100 transition-opacity">☥</span>
-          </div>
-
-          <!-- Info Principal -->
-          <div class="relative z-10 p-4 flex-1">
-            <h3 class="font-sans font-bold text-lg text-white mb-0 uppercase tracking-wide">
-              {{ char.name }}
-            </h3>
-            <p class="text-xs text-vamp-c2 font-serif italic uppercase tracking-wider mb-2">
-              {{ char.DefinitionClan?.name || 'Sem Clã' }} {{ char.concept ? ' — ' + char.concept : '' }}
-            </p>
-            
-            <div class="flex gap-4 text-[10px] text-gray-500 font-sans">
-              <span>FOME: <strong class="text-white">{{ char.hunger }}</strong></span>
-              <span>HUMANIDADE: <strong class="text-white">{{ char.humanity }}</strong></span>
-              <span>GERAÇÃO: <strong class="text-white">{{ char.generation }}ª</strong></span>
-            </div>
-          </div>
-
-          <!-- Quick Actions Dropdown (Simulated via hover for now) -->
-          <div class="relative z-10 px-4 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2">
-            <button @click.stop="viewSheet(char.id)" class="text-xs text-gray-400 hover:text-white transition-colors p-1" title="Ficha Completa">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </button>
-            <button @click.stop="deleteCharacter(char.id, char.name)" class="text-xs text-vamp-c2 hover:text-red-500 transition-colors p-1" title="Excluir">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
-          </div>
+      <section class="max-w-7xl mx-auto px-8 pb-20 relative z-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-7">
+          <CharacterCard 
+            v-for="char in filteredCharacters" 
+            :key="char.id" 
+            :character="char"
+            @click="viewSheet(char.id)"
+          />
         </div>
 
         <!-- Empty State -->
-        <div v-if="characters.length === 0" class="col-span-full py-10 text-center text-gray-500 font-serif italic border border-dashed border-vamp-border rounded bg-black/20">
-          Você ainda não possui personagens de Vampiro. Clique em "Criar Personagem".
+        <div v-if="filteredCharacters.length === 0" class="py-16 text-center text-parchment-dim font-serif italic border border-dashed border-border-dark rounded-xl bg-black/20 mt-8">
+          Nenhum filho da noite encontrado. As ruas estão vazias.
         </div>
-      </div>
+      </section>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
+import CharacterCard from '../components/CharacterCard.vue'
 
 const router = useRouter()
 const characters = ref<any[]>([])
+const activeFilter = ref('')
 
 const fetchCharacters = async () => {
   try {
@@ -132,26 +104,22 @@ const fetchCharacters = async () => {
   }
 }
 
-const enterHub = (characterId: string) => {
-  localStorage.setItem('lira_active_character_id', characterId)
-  router.push(`/personagem/hub?id=${characterId}`)
-}
+const availableClans = computed(() => {
+  const clans = new Set<string>()
+  characters.value.forEach(c => {
+    if (c.DefinitionClan?.name) clans.add(c.DefinitionClan.name)
+  })
+  return Array.from(clans)
+})
+
+const filteredCharacters = computed(() => {
+  if (!activeFilter.value) return characters.value
+  return characters.value.filter(c => c.DefinitionClan?.name === activeFilter.value)
+})
 
 const viewSheet = (characterId: string) => {
   localStorage.setItem('lira_active_character_id', characterId)
   router.push(`/personagem/ficha?id=${characterId}`)
-}
-
-const deleteCharacter = async (id: string, name: string) => {
-  if (confirm(`Tem certeza que deseja destruir a ficha de "${name}"? Esta ação não pode ser desfeita.`)) {
-    try {
-      await api.delete(`/api/character-vampires/${id}`)
-      await fetchCharacters()
-    } catch (err) {
-      console.error('Erro ao excluir personagem:', err)
-      alert('Erro ao excluir personagem.')
-    }
-  }
 }
 
 const handleLogout = () => {
