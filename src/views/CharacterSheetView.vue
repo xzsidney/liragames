@@ -21,12 +21,20 @@
         
         <!-- LEFT COLUMN: PORTRAIT & VITALS -->
         <div class="sticky top-20">
-          <div class="relative rounded-xl overflow-hidden border border-border-mid shadow-[0_8px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(139,0,0,0.4)]">
+          <div class="relative rounded-xl overflow-hidden border border-border-mid shadow-[0_8px_40px_rgba(0,0,0,0.8),0_0_30px_rgba(139,0,0,0.4)] group/avatar cursor-pointer" @click="triggerFileInput">
             <img 
               :src="character?.avatarUrl ? 'http://localhost:3000' + character.avatarUrl : '/placeholder-vampire.jpg'" 
-              class="w-full object-cover saturate-90"
+              class="w-full object-cover saturate-90 transition-all duration-300 group-hover/avatar:saturate-100"
             />
-            <div class="absolute bottom-0 left-0 right-0 h-2/5 bg-gradient-to-t from-bg-deep to-transparent"></div>
+            
+            <!-- Upload Overlay -->
+            <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300">
+               <span class="text-gold font-serif text-sm tracking-widest uppercase mb-1">Mudar Retrato</span>
+               <div v-if="uploading" class="animate-spin w-5 h-5 border-2 border-gold border-t-transparent rounded-full mt-2"></div>
+            </div>
+            <input type="file" ref="fileInput" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handleFileUpload" />
+
+            <div class="absolute bottom-0 left-0 right-0 h-2/5 bg-gradient-to-t from-bg-deep to-transparent pointer-events-none"></div>
             
             <div class="absolute bottom-0 left-0 right-0 p-5 z-10">
               <div class="flex flex-col items-end gap-1 mb-3">
@@ -177,6 +185,41 @@ const route = useRoute()
 const loading = ref(true)
 const character = ref<any>(null)
 const characterId = ref<string>('')
+const fileInput = ref<HTMLInputElement | null>(null)
+const uploading = ref(false)
+
+const triggerFileInput = () => {
+  if (fileInput.value) fileInput.value.click()
+}
+
+const handleFileUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files.length > 0) {
+    const file = target.files[0]
+    uploading.value = true
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      
+      const res = await api.post('/api/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      
+      const newUrl = res.data.url
+      character.value.avatarUrl = newUrl
+      
+      // Update DB
+      await api.put(`/api/character-vampires/${characterId.value}`, {
+        avatarUrl: newUrl
+      })
+      
+    } catch (err) {
+      alert('Erro ao enviar imagem. O arquivo pode ser muito grande ou inválido.')
+    } finally {
+      uploading.value = false
+    }
+  }
+}
 
 const activeTab = ref('attributes')
 const tabs = [

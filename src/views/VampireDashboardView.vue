@@ -29,7 +29,7 @@
           OS FILHOS DA NOITE
         </h1>
         <p class="font-sans italic text-base md:text-lg text-parchment-dim max-w-2xl mx-auto leading-relaxed mb-8">
-          Treze almas condenadas habitam as sombras de Curitiba. Escolha um, se ousar conhecê-lo.
+          Treze almas condenadas habitam as sombras de Nocturna. Escolha um, se ousar conhecê-lo.
         </p>
         <div class="flex items-center justify-center gap-4">
           <div class="w-20 h-px bg-gradient-to-r from-transparent to-gold-dim"></div>
