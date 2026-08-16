@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.liragames.com.br'
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://api.liragames.com.br'
+  baseURL: API_BASE_URL
 })
 
 api.interceptors.request.use((config) => {

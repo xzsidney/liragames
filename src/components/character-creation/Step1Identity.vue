@@ -13,7 +13,7 @@
         <div class="group flex flex-col items-center">
           <label class="block text-[10px] font-serif uppercase tracking-wider text-gray-400 mb-2 group-focus-within:text-gold transition-colors text-center w-full">Retrato</label>
           <div class="relative w-24 h-32 bg-black/60 border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-blood transition-colors group/avatar" @click="triggerFileInput">
-            <img v-if="store.form.avatarUrl" :src="'http://localhost:3000' + store.form.avatarUrl" class="w-full h-full object-cover saturate-50 group-hover/avatar:saturate-100 transition-all" />
+            <img v-if="store.form.avatarUrl" :src="API_BASE_URL + store.form.avatarUrl" class="w-full h-full object-cover saturate-50 group-hover/avatar:saturate-100 transition-all" />
             <div v-else class="absolute inset-0 flex items-center justify-center text-4xl text-gray-600 font-serif pb-2">+</div>
             
             <div v-if="uploading" class="absolute inset-0 bg-black/80 flex items-center justify-center">
@@ -69,6 +69,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useCharacterCreationStore } from '../../stores/characterCreationStore'
+import { API_BASE_URL } from '../../services/api'
 
 const store = useCharacterCreationStore()
 const fileInput = ref<HTMLInputElement | null>(null)
