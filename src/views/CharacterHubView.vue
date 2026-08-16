@@ -7,11 +7,11 @@
     <nav class="relative z-20 border-b border-vamp-border bg-black/80 backdrop-blur-md sticky top-0">
       <div class="max-w-[1200px] mx-auto px-4 h-12 flex items-center justify-between">
         <button @click="router.push('/jogador/vampire')" class="text-[10px] text-gray-400 hover:text-white flex items-center gap-1 font-serif uppercase tracking-widest transition-colors">
-          <span>←</span> My Characters
+          <span>←</span> Meus Personagens
         </button>
 
         <div class="flex items-center gap-4 text-[10px] font-serif tracking-widest uppercase">
-          <span class="text-gray-500">CHARACTER HUB</span>
+          <span class="text-gray-500">HUB DO PERSONAGEM</span>
         </div>
       </div>
     </nav>
@@ -59,7 +59,7 @@
           <!-- FOME -->
           <div class="bg-black/60 border border-vamp-border p-4 rounded">
             <div class="flex justify-between items-center mb-3">
-              <span class="text-[11px] font-sans tracking-widest uppercase text-vamp-c2 font-bold">Hunger</span>
+              <span class="text-[11px] font-sans tracking-widest uppercase text-vamp-c2 font-bold">Fome</span>
               <span class="text-xs font-mono font-bold text-gray-400">{{ character?.hunger }} / 5</span>
             </div>
             <div class="flex gap-2 justify-between">
@@ -75,7 +75,7 @@
           <!-- VITALIDADE -->
           <div class="bg-black/60 border border-vamp-border p-4 rounded">
             <div class="flex justify-between items-center mb-3">
-              <span class="text-[11px] font-sans tracking-widest uppercase text-gray-400 font-bold">Health</span>
+              <span class="text-[11px] font-sans tracking-widest uppercase text-gray-400 font-bold">Vitalidade</span>
               <span class="text-xs font-mono text-gray-500">Max: {{ character?.healthMax }}</span>
             </div>
             <div class="flex gap-1.5 justify-between">
@@ -94,7 +94,7 @@
           <!-- FORÇA DE VONTADE -->
           <div class="bg-black/60 border border-vamp-border p-4 rounded">
             <div class="flex justify-between items-center mb-3">
-              <span class="text-[11px] font-sans tracking-widest uppercase text-gray-400 font-bold">Willpower</span>
+              <span class="text-[11px] font-sans tracking-widest uppercase text-gray-400 font-bold">Força de Vontade</span>
               <span class="text-xs font-mono text-gray-500">Max: {{ character?.willpowerMax }}</span>
             </div>
             <div class="flex gap-1.5 justify-between">

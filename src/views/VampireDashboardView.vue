@@ -13,8 +13,8 @@
         </div>
 
         <div class="flex items-center gap-6 text-xs font-sans tracking-wide uppercase">
-          <router-link to="/dashboard" class="text-gray-400 hover:text-white transition-colors">Games</router-link>
-          <span class="text-white font-bold border-b-2 border-vamp-c2 pb-1">Characters</span>
+          <router-link to="/dashboard" class="text-gray-400 hover:text-white transition-colors">Jogos</router-link>
+          <span class="text-white font-bold border-b-2 border-vamp-c2 pb-1">Personagens</span>
           <button @click="handleLogout" class="text-gray-400 hover:text-white transition-colors ml-4">Sair</button>
         </div>
       </div>
@@ -26,11 +26,11 @@
       <!-- TOP TITLE BAR -->
       <div class="flex items-center justify-between mb-8 pb-4 border-b border-vamp-border/40">
         <div>
-          <h1 class="font-sans font-bold text-3xl text-white tracking-wide">My Characters</h1>
+          <h1 class="font-sans font-bold text-3xl text-white tracking-wide">Meus Personagens</h1>
           <p class="text-gray-500 text-sm mt-1">Personagens ativos em Vampiro: A Máscara V5</p>
         </div>
         <button @click="router.push('/jogador/vampire/novo')" class="bg-[#1e88e5] hover:bg-blue-600 text-white text-xs font-bold px-6 py-2 rounded shadow-md uppercase tracking-wide transition-colors">
-          Create Character
+          Criar Personagem
         </button>
       </div>
 
@@ -38,20 +38,20 @@
       <div class="flex gap-4 overflow-x-auto pb-4 mb-8 custom-scrollbar">
         <!-- ALL GAMES PILL -->
         <div class="flex-shrink-0 w-32 h-24 border border-[#1e88e5] bg-black/40 rounded flex items-center justify-center cursor-pointer hover:bg-white/5 transition-colors">
-          <span class="font-bold text-white uppercase text-center text-sm leading-tight">All<br>Games</span>
+          <span class="font-bold text-white uppercase text-center text-sm leading-tight">Todos os<br>Jogos</span>
         </div>
         <!-- VAMPIRE PILL -->
         <div class="flex-shrink-0 w-32 h-24 border border-transparent hover:border-white/20 bg-vamp-c1/30 rounded flex items-center justify-center cursor-pointer transition-colors relative overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-          <span class="relative z-10 font-serif font-bold text-vamp-c2 text-center text-sm uppercase">Vampire<br><span class="text-[10px] text-white">The Masquerade</span></span>
+          <span class="relative z-10 font-serif font-bold text-vamp-c2 text-center text-sm uppercase">Vampiro<br><span class="text-[10px] text-white">A Máscara</span></span>
         </div>
       </div>
 
       <!-- VAMPIRE SECTION BANNER -->
       <div class="demiplane-box rounded mb-6 p-4 flex items-center justify-between border-l-4 border-l-vamp-c2 bg-gradient-to-r from-vamp-c1/20 to-transparent">
         <h2 class="demiplane-title text-2xl flex items-center gap-3">
-          Vampire: The Masquerade
-          <span class="text-xs text-gray-400 font-sans tracking-normal bg-black/50 px-2 py-0.5 rounded cursor-pointer hover:text-white transition-colors" @click="router.push('/jogador/vampire/novo')">CREATE CHARACTER</span>
+          Vampiro: A Máscara
+          <span class="text-xs text-gray-400 font-sans tracking-normal bg-black/50 px-2 py-0.5 rounded cursor-pointer hover:text-white transition-colors" @click="router.push('/jogador/vampire/novo')">CRIAR PERSONAGEM</span>
         </h2>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -85,9 +85,9 @@
             </p>
             
             <div class="flex gap-4 text-[10px] text-gray-500 font-sans">
-              <span>HUNGER: <strong class="text-white">{{ char.hunger }}</strong></span>
-              <span>HUMANITY: <strong class="text-white">{{ char.humanity }}</strong></span>
-              <span>GEN: <strong class="text-white">{{ char.generation }}ª</strong></span>
+              <span>FOME: <strong class="text-white">{{ char.hunger }}</strong></span>
+              <span>HUMANIDADE: <strong class="text-white">{{ char.humanity }}</strong></span>
+              <span>GERAÇÃO: <strong class="text-white">{{ char.generation }}ª</strong></span>
             </div>
           </div>
 
@@ -108,7 +108,7 @@
 
         <!-- Empty State -->
         <div v-if="characters.length === 0" class="col-span-full py-10 text-center text-gray-500 font-serif italic border border-dashed border-vamp-border rounded bg-black/20">
-          Você ainda não possui personagens de Vampiro. Clique em "Create Character".
+          Você ainda não possui personagens de Vampiro. Clique em "Criar Personagem".
         </div>
       </div>
     </main>

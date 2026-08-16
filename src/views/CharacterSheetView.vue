@@ -7,12 +7,12 @@
     <nav class="relative z-20 border-b border-vamp-border bg-black/80 backdrop-blur-md sticky top-0">
       <div class="max-w-[1200px] mx-auto px-4 h-12 flex items-center justify-between">
         <button @click="router.push(`/personagem/hub?id=${characterId}`)" class="text-[10px] text-gray-400 hover:text-white flex items-center gap-1 font-serif uppercase tracking-widest transition-colors">
-          <span>←</span> Back to Hub
+          <span>←</span> Voltar ao Hub
         </button>
 
         <div class="flex items-center gap-4 text-[10px] font-serif tracking-widest uppercase">
-          <span class="text-gray-500">VIEWING CHARACTER</span>
-          <button class="border border-vamp-border hover:bg-white/5 text-gray-400 px-3 py-1 rounded transition-colors">SAVE COPY</button>
+          <span class="text-gray-500">VISUALIZANDO FICHA</span>
+          <button class="border border-vamp-border hover:bg-white/5 text-gray-400 px-3 py-1 rounded transition-colors">SALVAR CÓPIA</button>
         </div>
       </div>
     </nav>
@@ -20,7 +20,7 @@
     <!-- LOADING STATE -->
     <div v-if="loading" class="relative z-10 max-w-[1200px] mx-auto px-6 py-20 text-center text-gray-400 font-serif">
       <div class="animate-spin w-8 h-8 border-2 border-vamp-c2 border-t-transparent rounded-full mx-auto mb-4"></div>
-      Loading Vampire...
+      Invocando dados da noite...
     </div>
 
     <!-- SHEET CONTENT -->
@@ -35,32 +35,32 @@
           <div>
             <h1 class="demiplane-title text-3xl md:text-4xl text-white">{{ character?.name }}</h1>
             <h2 class="demiplane-text text-vamp-c2 mt-1">
-              {{ character?.DefinitionClan?.name || 'UNKNOWN' }} {{ character?.concept ? '— ' + character?.concept : '' }}
+              {{ character?.DefinitionClan?.name || 'DESCONHECIDO' }} {{ character?.concept ? '— ' + character?.concept : '' }}
             </h2>
           </div>
         </div>
 
         <div class="flex items-center gap-6">
           <div class="text-right font-sans text-[11px] text-gray-400 uppercase tracking-widest leading-relaxed hidden sm:block">
-            <div>GENERATION: <span class="text-vamp-c2">{{ character?.generation }}ª</span></div>
-            <div>BANE: <span class="text-vamp-c2">Clan Bane</span></div>
-            <div>COMPULSION: <span class="text-vamp-c2">None</span></div>
+            <div>GERAÇÃO: <span class="text-vamp-c2">{{ character?.generation }}ª</span></div>
+            <div>MALDIÇÃO: <span class="text-vamp-c2">Maldição de Clã</span></div>
+            <div>COMPULSÃO: <span class="text-vamp-c2">Nenhuma</span></div>
           </div>
           
           <button class="w-16 h-16 shrink-0 rounded-full bg-vamp-c2 hover:bg-red-700 flex flex-col items-center justify-center text-black font-bold uppercase tracking-widest text-[10px] shadow-[0_0_15px_rgba(192,57,43,0.5)] transition-colors border-2 border-black">
-            <span>Roll</span>
-            <span class="text-[8px] opacity-70">Rouse</span>
+            <span>Rolar</span>
+            <span class="text-[8px] opacity-70">Fome</span>
           </button>
           
           <div class="text-center shrink-0">
             <div class="text-xl font-serif text-white">{{ availableXP }}/{{ character?.experienceTotal || 0 }}</div>
-            <div class="text-[10px] uppercase font-sans text-gray-500 tracking-widest">Experience</div>
+            <div class="text-[10px] uppercase font-sans text-gray-500 tracking-widest">Experiência</div>
           </div>
         </div>
       </div>
 
       <div class="text-center mb-2">
-        <span class="demiplane-title text-sm text-vamp-c1">ATTRIBUTES</span>
+        <span class="demiplane-title text-sm text-vamp-c1">ATRIBUTOS</span>
       </div>
 
       <!-- ATRIBUTOS -->
@@ -81,7 +81,7 @@
       </div>
 
       <div class="text-center mb-2 mt-10">
-        <span class="demiplane-title text-sm text-vamp-c1">SKILLS</span>
+        <span class="demiplane-title text-sm text-vamp-c1">PERÍCIAS</span>
       </div>
 
       <!-- PERÍCIAS -->
@@ -106,18 +106,18 @@
 
       <!-- MEDIDORES VITAIS -->
       <div class="demiplane-box p-6 mb-8 rounded-sm flex flex-col md:flex-row items-center justify-center gap-12 font-sans relative">
-        <div class="absolute top-0 text-[9px] text-vamp-border tracking-widest uppercase bg-black px-2 -translate-y-1/2">EXPAND</div>
+        <div class="absolute top-0 text-[9px] text-vamp-border tracking-widest uppercase bg-black px-2 -translate-y-1/2">EXPANDIR</div>
         
         <!-- Esquerda (Health / Willpower) -->
         <div class="flex flex-col gap-3 text-right">
           <div class="flex items-center justify-end gap-3">
-            <span class="text-[10px] text-gray-400 tracking-widest uppercase">Health <span class="text-vamp-c2 ml-1">({{character?.health || 0}})</span></span>
+            <span class="text-[10px] text-gray-400 tracking-widest uppercase">Vitalidade <span class="text-vamp-c2 ml-1">({{character?.health || 0}})</span></span>
             <div class="flex gap-1">
                <span v-for="i in 7" :key="i" class="box-empty relative"></span>
             </div>
           </div>
           <div class="flex items-center justify-end gap-3">
-            <span class="text-[10px] text-gray-400 tracking-widest uppercase">Willpower <span class="text-vamp-c2 ml-1">({{character?.willpower || 0}})</span></span>
+            <span class="text-[10px] text-gray-400 tracking-widest uppercase">Força de Vontade <span class="text-vamp-c2 ml-1">({{character?.willpower || 0}})</span></span>
             <div class="flex gap-1">
                <span v-for="i in 6" :key="i" class="box-empty relative"></span>
             </div>
@@ -127,13 +127,13 @@
         <!-- Centro (Humanity / Hunger) -->
         <div class="flex flex-col gap-3 text-right">
           <div class="flex items-center justify-end gap-3">
-            <span class="text-[10px] text-gray-400 tracking-widest uppercase">Humanity <span class="text-vamp-c2 ml-1">({{character?.humanity || 7}})</span></span>
+            <span class="text-[10px] text-gray-400 tracking-widest uppercase">Humanidade <span class="text-vamp-c2 ml-1">({{character?.humanity || 7}})</span></span>
             <div class="flex gap-1">
                <span v-for="i in 10" :key="i" :class="i <= (character?.humanity || 7) ? 'box-filled' : 'box-empty'"></span>
             </div>
           </div>
           <div class="flex items-center justify-end gap-3">
-            <span class="text-[10px] text-gray-400 tracking-widest uppercase">Hunger <span class="text-vamp-c2 ml-1">({{character?.hunger || 1}})</span></span>
+            <span class="text-[10px] text-gray-400 tracking-widest uppercase">Fome <span class="text-vamp-c2 ml-1">({{character?.hunger || 1}})</span></span>
             <div class="flex gap-1">
                <span v-for="i in 5" :key="i" :class="i <= (character?.hunger || 1) ? 'box-filled' : 'box-empty'"></span>
             </div>
@@ -143,10 +143,10 @@
         <!-- Direita (Blood Potency / Resonance) -->
         <div class="flex flex-col gap-3 text-left">
           <div class="text-[10px] text-gray-400 tracking-widest uppercase">
-            Blood Potency <span class="text-vamp-c2 ml-2">1</span>
+            Potência de Sangue <span class="text-vamp-c2 ml-2">1</span>
           </div>
           <div class="text-[10px] text-gray-400 tracking-widest uppercase">
-            Resonance <span class="text-vamp-c2 ml-2">None</span>
+            Ressonância <span class="text-vamp-c2 ml-2">Nenhuma</span>
           </div>
         </div>
       </div>
@@ -172,12 +172,12 @@
           <!-- TAB: DISCIPLINES & POWERS -->
           <div v-if="activeTab === 'disciplines'" class="space-y-6">
             <div class="flex justify-between items-center mb-4">
-              <input type="text" placeholder="Search Disciplines & Powers" class="bg-black/50 border border-vamp-border rounded text-sm px-3 py-1.5 text-white w-64 focus:outline-none focus:border-vamp-c2">
-              <button class="text-[10px] text-gray-400 border border-vamp-border px-3 py-1 rounded hover:bg-white/5 uppercase">Manage</button>
+              <input type="text" placeholder="Buscar Disciplinas e Poderes" class="bg-black/50 border border-vamp-border rounded text-sm px-3 py-1.5 text-white w-64 focus:outline-none focus:border-vamp-c2">
+              <button class="text-[10px] text-gray-400 border border-vamp-border px-3 py-1 rounded hover:bg-white/5 uppercase">GERENCIAR</button>
             </div>
             
             <div v-if="!character?.CharacterVampireDisciplines?.length" class="text-center text-gray-500 italic py-10 font-serif">
-              No Disciplines added yet.
+              Nenhuma Disciplina adicionada.
             </div>
 
             <div v-for="disc in character?.CharacterVampireDisciplines" :key="disc.id" class="border-t border-vamp-border pt-4">
@@ -218,8 +218,8 @@
                <!-- Merits -->
                <div>
                   <div class="flex justify-between items-center border-b border-vamp-border pb-2 mb-4">
-                    <h3 class="text-xs font-serif text-gray-400 uppercase tracking-widest">Merits</h3>
-                    <button class="text-[10px] border border-vamp-border px-2 py-0.5 rounded text-gray-500">MANAGE</button>
+                    <h3 class="text-xs font-serif text-gray-400 uppercase tracking-widest">Vantagens</h3>
+                    <button class="text-[10px] border border-vamp-border px-2 py-0.5 rounded text-gray-500">GERENCIAR</button>
                   </div>
                   <!-- Exemplos Estáticos Baseado na Tela (poderão ser dinâmicos depois) -->
                   <div class="bg-black/40 border border-vamp-border p-3 flex justify-between text-xs mb-2 items-center">
@@ -237,8 +237,8 @@
                <!-- Backgrounds -->
                <div>
                   <div class="flex justify-between items-center border-b border-vamp-border pb-2 mb-4">
-                    <h3 class="text-xs font-serif text-gray-400 uppercase tracking-widest">Backgrounds</h3>
-                    <button class="text-[10px] border border-vamp-border px-2 py-0.5 rounded text-gray-500">MANAGE</button>
+                    <h3 class="text-xs font-serif text-gray-400 uppercase tracking-widest">Antecedentes</h3>
+                    <button class="text-[10px] border border-vamp-border px-2 py-0.5 rounded text-gray-500">GERENCIAR</button>
                   </div>
                   <div class="bg-black/40 border border-vamp-border p-3 flex justify-between text-xs mb-2 items-center">
                     <span class="font-bold text-white uppercase">FAME</span>
@@ -256,24 +256,24 @@
           <div v-else-if="activeTab === 'coterie'" class="space-y-6">
              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                <div class="space-y-4">
-                 <div>
-                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Name</label>
-                   <div class="border border-vamp-border bg-black/40 p-2 text-xs text-gray-300 min-h-[34px]">Coterie Name</div>
+                  <div>
+                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Nome</label>
+                   <div class="border border-vamp-border bg-black/40 p-2 text-xs text-gray-300 min-h-[34px]">Nome da Coterie</div>
                  </div>
                  <div>
-                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Coterie Type</label>
+                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Tipo de Coterie</label>
                    <div class="border border-vamp-border bg-black/40 p-2 text-xs text-gray-300 min-h-[34px]"></div>
                  </div>
                  <div>
-                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Chronicle Tenets</label>
+                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Princípios da Crônica</label>
                    <div class="border border-vamp-border bg-black/40 p-2 text-xs text-gray-300 min-h-[34px]"></div>
                  </div>
                </div>
 
                <div>
                  <div class="flex justify-between items-center mb-2">
-                   <h3 class="text-xs font-serif text-vamp-c2 uppercase tracking-widest">DOMAIN</h3>
-                   <span class="text-[10px] text-gray-500">COTERIE POOL 0/1</span>
+                   <h3 class="text-xs font-serif text-vamp-c2 uppercase tracking-widest">DOMÍNIO</h3>
+                   <span class="text-[10px] text-gray-500">PARADA DA COTERIE 0/1</span>
                  </div>
                  <div class="bg-black/40 border border-vamp-border p-2 mb-2 flex justify-between text-xs text-white uppercase">CHASSE</div>
                  <div class="bg-black/40 border border-vamp-border p-2 mb-2 flex justify-between text-xs text-white uppercase">LIEN</div>
@@ -286,22 +286,22 @@
           <div v-else-if="activeTab === 'concept'" class="space-y-6">
              <!-- Details -->
              <div>
-               <h3 class="text-xs font-serif text-gray-400 uppercase tracking-widest border-b border-vamp-border pb-2 mb-4">Details</h3>
+               <h3 class="text-xs font-serif text-gray-400 uppercase tracking-widest border-b border-vamp-border pb-2 mb-4">Detalhes</h3>
                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div>
-                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Concept</label>
+                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Conceito</label>
                    <div class="border border-vamp-border bg-black/40 p-2 text-xs text-gray-300 mt-1 min-h-[34px]">{{character?.concept}}</div>
                  </div>
                  <div>
-                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Chronicle</label>
+                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Crônica</label>
                    <div class="border border-vamp-border bg-black/40 p-2 text-xs text-gray-300 mt-1 min-h-[34px]"></div>
                  </div>
                  <div>
-                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Sire</label>
+                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Senhor(a)</label>
                    <div class="border border-vamp-border bg-black/40 p-2 text-xs text-gray-300 mt-1 min-h-[34px]">{{character?.sire}}</div>
                  </div>
                  <div>
-                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Apparent Age</label>
+                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Idade Aparente</label>
                    <div class="border border-vamp-border bg-black/40 p-2 text-xs text-gray-300 mt-1 min-h-[34px]"></div>
                  </div>
                </div>
@@ -309,15 +309,15 @@
 
              <!-- Beliefs -->
              <div class="mt-8">
-               <h3 class="text-xs font-serif text-gray-400 uppercase tracking-widest border-b border-vamp-border pb-2 mb-4">Beliefs</h3>
+               <h3 class="text-xs font-serif text-gray-400 uppercase tracking-widest border-b border-vamp-border pb-2 mb-4">Crenças</h3>
                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div>
-                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Convictions</label>
-                   <div class="border border-vamp-border bg-black/40 p-2 text-xs text-white mt-1 min-h-[34px]">The truth is sacred; thou shalt not lie</div>
+                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Convicções</label>
+                   <div class="border border-vamp-border bg-black/40 p-2 text-xs text-white mt-1 min-h-[34px]">A verdade é sagrada; não mentir</div>
                  </div>
                  <div>
-                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Touchstones</label>
-                   <div class="border border-vamp-border bg-black/40 p-2 text-xs text-white mt-1 min-h-[34px]">Noa Fernandez, a former student</div>
+                   <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Pilares</label>
+                   <div class="border border-vamp-border bg-black/40 p-2 text-xs text-white mt-1 min-h-[34px]">Noa Fernandez, uma antiga aluna</div>
                  </div>
                </div>
              </div>
@@ -326,12 +326,12 @@
           <!-- TAB: INVENTORY -->
           <div v-else-if="activeTab === 'inventory'" class="space-y-6">
             <div class="flex justify-between items-center mb-4">
-              <input type="text" placeholder="Search Items" class="bg-black/50 border border-vamp-border rounded text-sm px-3 py-1.5 text-white w-64 focus:outline-none focus:border-vamp-c2">
-              <button class="text-[10px] text-gray-400 border border-vamp-border px-3 py-1 rounded hover:bg-white/5 uppercase">Add Items</button>
+              <input type="text" placeholder="Buscar Itens" class="bg-black/50 border border-vamp-border rounded text-sm px-3 py-1.5 text-white w-64 focus:outline-none focus:border-vamp-c2">
+              <button class="text-[10px] text-gray-400 border border-vamp-border px-3 py-1 rounded hover:bg-white/5 uppercase">ADICIONAR ITENS</button>
             </div>
-            <div class="text-gray-300 text-sm font-bold mb-6">No Items</div>
+            <div class="text-gray-300 text-sm font-bold mb-6">Sem Itens</div>
             <div>
-              <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Other Possessions</label>
+              <label class="text-[10px] text-vamp-c2 uppercase font-bold tracking-widest">Outras Posses</label>
               <div class="border border-vamp-border bg-black/40 p-2 text-xs text-gray-300 mt-1 min-h-[34px]"></div>
             </div>
           </div>
@@ -339,11 +339,11 @@
           <!-- TAB: NOTES -->
           <div v-else-if="activeTab === 'notes'" class="space-y-6">
             <div class="flex justify-between items-center mb-4">
-              <input type="text" placeholder="Search Your Notes..." class="bg-black/50 border border-vamp-border rounded text-sm px-3 py-1.5 text-white w-full max-w-md focus:outline-none focus:border-vamp-c2">
-              <button class="text-[10px] text-gray-400 border border-vamp-border px-3 py-1 rounded hover:bg-white/5 uppercase">New Entry</button>
+              <input type="text" placeholder="Buscar Anotações..." class="bg-black/50 border border-vamp-border rounded text-sm px-3 py-1.5 text-white w-full max-w-md focus:outline-none focus:border-vamp-c2">
+              <button class="text-[10px] text-gray-400 border border-vamp-border px-3 py-1 rounded hover:bg-white/5 uppercase">NOVA ENTRADA</button>
             </div>
             <div class="text-center text-gray-300 text-sm font-sans py-10">
-              Your Journal is empty - add a new entry above.
+              Seu diário está vazio - adicione uma nova entrada acima.
             </div>
           </div>
 
@@ -367,12 +367,12 @@ const characterId = ref<string>('')
 
 const activeTab = ref('disciplines')
 const tabs = [
-  { id: 'disciplines', label: 'DISCIPLINES & POWERS' },
-  { id: 'merits', label: 'MERITS & FLAWS' },
+  { id: 'disciplines', label: 'DISCIPLINAS E PODERES' },
+  { id: 'merits', label: 'VANTAGENS E DEFEITOS' },
   { id: 'coterie', label: 'COTERIE' },
-  { id: 'concept', label: 'CONCEPT & LORE' },
-  { id: 'inventory', label: 'INVENTORY' },
-  { id: 'notes', label: 'NOTES' }
+  { id: 'concept', label: 'CONCEITO E HISTÓRIA' },
+  { id: 'inventory', label: 'INVENTÁRIO' },
+  { id: 'notes', label: 'ANOTAÇÕES' }
 ]
 
 const availableXP = computed(() => {
@@ -390,9 +390,9 @@ const attributeColumns = computed(() => {
   const attrs = character.value.CharacterVampireAttributes
   
   return [
-    { title: 'Physical', items: attrs.filter((a: any) => physicalAttrNames.includes(a.DefinitionAttribute?.name)) },
-    { title: 'Social', items: attrs.filter((a: any) => socialAttrNames.includes(a.DefinitionAttribute?.name)) },
-    { title: 'Mental', items: attrs.filter((a: any) => mentalAttrNames.includes(a.DefinitionAttribute?.name)) }
+    { title: 'Físicos', items: attrs.filter((a: any) => physicalAttrNames.includes(a.DefinitionAttribute?.name)) },
+    { title: 'Sociais', items: attrs.filter((a: any) => socialAttrNames.includes(a.DefinitionAttribute?.name)) },
+    { title: 'Mentais', items: attrs.filter((a: any) => mentalAttrNames.includes(a.DefinitionAttribute?.name)) }
   ]
 })
 
@@ -402,9 +402,9 @@ const skillColumns = computed(() => {
   const skills = character.value.CharacterVampireSkills
   
   return [
-    { title: 'Physical', items: skills.filter((s: any) => s.DefinitionSkill?.type === 'TALENTOS') },
-    { title: 'Social', items: skills.filter((s: any) => s.DefinitionSkill?.type === 'PERICIAS') },
-    { title: 'Mental', items: skills.filter((s: any) => s.DefinitionSkill?.type === 'CONHECIMENTOS') }
+    { title: 'Físicos', items: skills.filter((s: any) => s.DefinitionSkill?.type === 'TALENTOS') },
+    { title: 'Sociais', items: skills.filter((s: any) => s.DefinitionSkill?.type === 'PERICIAS') },
+    { title: 'Mentais', items: skills.filter((s: any) => s.DefinitionSkill?.type === 'CONHECIMENTOS') }
   ]
 })
 

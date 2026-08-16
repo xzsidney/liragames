@@ -7,11 +7,11 @@
     <nav class="relative z-20 border-b border-vamp-border bg-black/80 backdrop-blur-md sticky top-0">
       <div class="max-w-[1200px] mx-auto px-4 h-12 flex items-center justify-between">
         <button @click="router.push(`/personagem/hub?id=${characterId}`)" class="text-[10px] text-gray-400 hover:text-white flex items-center gap-1 font-serif uppercase tracking-widest transition-colors">
-          <span>←</span> Back to Hub
+          <span>←</span> Voltar ao Hub
         </button>
 
         <div class="flex items-center gap-4 text-[10px] font-serif tracking-widest uppercase">
-          <span class="text-gray-500">URBAN NEWS FEED</span>
+          <span class="text-gray-500">FEED DE NOTÍCIAS URBANAS</span>
         </div>
       </div>
     </nav>
