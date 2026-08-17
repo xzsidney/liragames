@@ -74,7 +74,7 @@
             <h2 class="font-serif text-xs text-amber-400/80 uppercase tracking-widest mb-4 flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-red-600 animate-ping shadow-[0_0_8px_rgba(220,38,38,0.8)]"></span> Ações da Noite
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               
               <button @click="router.push(`/personagem/aventuras?id=${characterId}`)" class="bg-stone-900/70 hover:bg-red-950/40 border border-stone-800 hover:border-red-600/50 p-4 rounded-lg text-left transition group shadow-md hover:shadow-[0_0_15px_rgba(153,27,27,0.3)]">
                 <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left">🩸</span>
@@ -92,6 +92,12 @@
                 <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left">📰</span>
                 <h3 class="font-serif text-sm tracking-wide text-stone-200 group-hover:text-purple-300 font-bold uppercase">Gazeta da Noite</h3>
                 <p class="text-[11px] text-stone-500 mt-1 leading-relaxed">Notícias do submundo, política e boatos vitais para a Camarilla.</p>
+              </button>
+
+              <button @click="router.push(`/personagem/radar?id=${characterId}`)" class="bg-stone-900/70 hover:bg-cyan-950/40 border border-stone-800 hover:border-cyan-600/50 p-4 rounded-lg text-left transition group shadow-md hover:shadow-[0_0_15px_rgba(8,145,178,0.3)]">
+                <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left" style="color: #00ffff; text-shadow: 0 0 10px #00ffff;">⚜</span>
+                <h3 class="font-serif text-sm tracking-wide text-stone-200 group-hover:text-cyan-300 font-bold uppercase">Explorar Nocturna</h3>
+                <p class="text-[11px] text-stone-500 mt-1 leading-relaxed">Acesse o radar tático de domínios, segurança e dificuldades.</p>
               </button>
 
             </div>

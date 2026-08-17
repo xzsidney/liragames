@@ -5,7 +5,8 @@ import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import VampireDashboardView from '../views/VampireDashboardView.vue'
 import CharacterVampireCreateView from '../views/CharacterVampireCreateView.vue'
-import CharacterHubView from '../views/CharacterHubView.vue'
+import CharacterHubView from '@/views/CharacterHubView.vue'
+import RadarNocturnaView from '@/views/RadarNocturnaView.vue'
 import CharacterSheetView from '../views/CharacterSheetView.vue'
 import CharacterInventoryStoreView from '../views/CharacterInventoryStoreView.vue'
 import CharacterNewsView from '../views/CharacterNewsView.vue'
@@ -43,8 +44,14 @@ const routes: Array<RouteRecordRaw> = [
   // NÍVEL DO PERSONAGEM (JOGABILIDADE ATIVA)
   {
     path: '/personagem/hub',
-    name: 'character-hub',
+    name: 'CharacterHub',
     component: CharacterHubView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/personagem/radar',
+    name: 'RadarNocturna',
+    component: RadarNocturnaView,
     meta: { requiresAuth: true }
   },
   {
