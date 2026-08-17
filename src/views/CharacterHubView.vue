@@ -66,49 +66,24 @@
           </div>
         </div>
 
-        <!-- COLUNA DA DIREITA: AÇÕES DA NOITE + RADAR DE NOCTURNA -->
+        <!-- COLUNA DA DIREITA: ABAS E CONTEÚDO -->
         <div class="lg:col-span-8 flex flex-col gap-6">
           
-          <!-- PAINEL: AÇÕES DA NOITE -->
-          <div class="bg-stone-950/60 border border-[rgba(212,175,55,0.25)] rounded-xl p-6 shadow-lg">
-            <h2 class="font-serif text-xs text-amber-400/80 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-red-600 animate-ping shadow-[0_0_8px_rgba(220,38,38,0.8)]"></span> Ações da Noite
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              
-              <button @click="router.push(`/personagem/aventuras?id=${characterId}`)" class="bg-stone-900/70 hover:bg-red-950/40 border border-stone-800 hover:border-red-600/50 p-4 rounded-lg text-left transition group shadow-md hover:shadow-[0_0_15px_rgba(153,27,27,0.3)]">
-                <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left">🩸</span>
-                <h3 class="font-serif text-sm tracking-wide text-stone-200 group-hover:text-red-400 font-bold uppercase">Caçar Sangue</h3>
-                <p class="text-[11px] text-stone-500 mt-1 leading-relaxed">Alimentar-se no banco de sangue ou nas ruas. Reduza sua fome.</p>
-              </button>
-              
-              <button @click="router.push(`/personagem/inventario?id=${characterId}`)" class="bg-stone-900/70 hover:bg-amber-950/40 border border-stone-800 hover:border-amber-600/50 p-4 rounded-lg text-left transition group shadow-md hover:shadow-[0_0_15px_rgba(146,64,14,0.3)]">
-                <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left">⚔️</span>
-                <h3 class="font-serif text-sm tracking-wide text-stone-200 group-hover:text-amber-300 font-bold uppercase">Inventário & Loja</h3>
-                <p class="text-[11px] text-stone-500 mt-1 leading-relaxed">Adquira suprimentos, armas e relíquias com seus recursos.</p>
-              </button>
-
-              <button @click="router.push(`/personagem/noticias?id=${characterId}`)" class="bg-stone-900/70 hover:bg-purple-950/40 border border-stone-800 hover:border-purple-600/50 p-4 rounded-lg text-left transition group shadow-md hover:shadow-[0_0_15px_rgba(88,28,135,0.3)]">
-                <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left">📰</span>
-                <h3 class="font-serif text-sm tracking-wide text-stone-200 group-hover:text-purple-300 font-bold uppercase">Gazeta da Noite</h3>
-                <p class="text-[11px] text-stone-500 mt-1 leading-relaxed">Notícias do submundo, política e boatos vitais para a Camarilla.</p>
-              </button>
-
-              <button @click="router.push(`/personagem/radar?id=${characterId}`)" class="bg-stone-900/70 hover:bg-cyan-950/40 border border-stone-800 hover:border-cyan-600/50 p-4 rounded-lg text-left transition group shadow-md hover:shadow-[0_0_15px_rgba(8,145,178,0.3)]">
-                <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left" style="color: #00ffff; text-shadow: 0 0 10px #00ffff;">⚜</span>
-                <h3 class="font-serif text-sm tracking-wide text-stone-200 group-hover:text-cyan-300 font-bold uppercase">Explorar Nocturna</h3>
-                <p class="text-[11px] text-stone-500 mt-1 leading-relaxed">Acesse o radar tático de domínios, segurança e dificuldades.</p>
-              </button>
-
-            </div>
+          <!-- SISTEMA DE ABAS -->
+          <div class="flex items-center gap-6 border-b border-[rgba(212,175,55,0.2)] overflow-x-auto no-scrollbar">
+            <button @click="activeTab = 'geral'" class="pb-3 text-[11px] tracking-widest font-serif uppercase transition border-b-2 whitespace-nowrap" :class="activeTab === 'geral' ? 'text-amber-500 border-amber-500' : 'text-stone-500 border-transparent hover:text-stone-300'">VISÃO GERAL</button>
+            <button @click="activeTab = 'acoes'" class="pb-3 text-[11px] tracking-widest font-serif uppercase transition border-b-2 whitespace-nowrap" :class="activeTab === 'acoes' ? 'text-amber-500 border-amber-500' : 'text-stone-500 border-transparent hover:text-stone-300'">AÇÕES & LOCAIS</button>
+            <button @click="activeTab = 'aventura'" class="pb-3 text-[11px] tracking-widest font-serif uppercase transition border-b-2 whitespace-nowrap" :class="activeTab === 'aventura' ? 'text-amber-500 border-amber-500' : 'text-stone-500 border-transparent hover:text-stone-300'">AVENTURA SOLO</button>
+            <button @click="activeTab = 'missoes'" class="pb-3 text-[11px] tracking-widest font-serif uppercase transition border-b-2 whitespace-nowrap" :class="activeTab === 'missoes' ? 'text-amber-500 border-amber-500' : 'text-stone-500 border-transparent hover:text-stone-300'">MISSÕES AFK</button>
           </div>
 
-          <!-- PAINEL: RADAR DA CIDADE & OBJETIVOS -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+          <!-- CONTEÚDO DAS ABAS -->
+          
+          <!-- ABA: VISÃO GERAL (Radar + Objetivos) -->
+          <div v-show="activeTab === 'geral'" class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 animate-[fadeIn_0.3s_ease-out]">
             
             <!-- FEED DO MUNDO VIVO -->
             <div class="bg-stone-950/60 border border-stone-900 rounded-xl p-5 shadow-lg relative overflow-hidden">
-              <!-- Glow sutil de fundo -->
               <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-red-900/10 blur-[40px] pointer-events-none"></div>
               
               <h3 class="font-serif text-[10px] text-stone-400 uppercase tracking-widest mb-4">Radar de Nocturna</h3>
@@ -152,6 +127,54 @@
 
           </div>
 
+          <!-- ABA: AÇÕES & LOCAIS -->
+          <div v-show="activeTab === 'acoes'" class="bg-stone-950/60 border border-[rgba(212,175,55,0.25)] rounded-xl p-6 shadow-lg animate-[fadeIn_0.3s_ease-out]">
+            <h2 class="font-serif text-xs text-amber-400/80 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-red-600 animate-ping shadow-[0_0_8px_rgba(220,38,38,0.8)]"></span> Ações da Noite
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+              
+              <button @click="router.push(`/personagem/aventuras?id=${characterId}`)" class="bg-stone-900/70 hover:bg-red-950/40 border border-stone-800 hover:border-red-600/50 p-4 rounded-lg text-left transition group shadow-md hover:shadow-[0_0_15px_rgba(153,27,27,0.3)]">
+                <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left">🩸</span>
+                <h3 class="font-serif text-sm tracking-wide text-stone-200 group-hover:text-red-400 font-bold uppercase">Caçar Sangue</h3>
+                <p class="text-[11px] text-stone-500 mt-1 leading-relaxed">Alimentar-se no banco de sangue ou nas ruas. Reduza sua fome.</p>
+              </button>
+              
+              <button @click="router.push(`/personagem/inventario?id=${characterId}`)" class="bg-stone-900/70 hover:bg-amber-950/40 border border-stone-800 hover:border-amber-600/50 p-4 rounded-lg text-left transition group shadow-md hover:shadow-[0_0_15px_rgba(146,64,14,0.3)]">
+                <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left">⚔️</span>
+                <h3 class="font-serif text-sm tracking-wide text-stone-200 group-hover:text-amber-300 font-bold uppercase">Inventário & Loja</h3>
+                <p class="text-[11px] text-stone-500 mt-1 leading-relaxed">Adquira suprimentos, armas e relíquias com seus recursos.</p>
+              </button>
+
+              <button @click="router.push(`/personagem/noticias?id=${characterId}`)" class="bg-stone-900/70 hover:bg-purple-950/40 border border-stone-800 hover:border-purple-600/50 p-4 rounded-lg text-left transition group shadow-md hover:shadow-[0_0_15px_rgba(88,28,135,0.3)]">
+                <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left">📰</span>
+                <h3 class="font-serif text-sm tracking-wide text-stone-200 group-hover:text-purple-300 font-bold uppercase">Gazeta da Noite</h3>
+                <p class="text-[11px] text-stone-500 mt-1 leading-relaxed">Notícias do submundo, política e boatos vitais para a Camarilla.</p>
+              </button>
+
+              <button @click="router.push(`/personagem/radar?id=${characterId}`)" class="bg-stone-900/70 hover:bg-cyan-950/40 border border-stone-800 hover:border-cyan-600/50 p-4 rounded-lg text-left transition group shadow-md hover:shadow-[0_0_15px_rgba(8,145,178,0.3)]">
+                <span class="text-2xl block mb-2 drop-shadow-md group-hover:scale-110 transition-transform origin-bottom-left" style="color: #00ffff; text-shadow: 0 0 10px #00ffff;">⚜</span>
+                <h3 class="font-serif text-sm tracking-wide text-stone-200 group-hover:text-cyan-300 font-bold uppercase">Explorar Nocturna</h3>
+                <p class="text-[11px] text-stone-500 mt-1 leading-relaxed">Acesse o radar tático de domínios, segurança e dificuldades.</p>
+              </button>
+
+            </div>
+          </div>
+
+          <!-- ABA: AVENTURA SOLO -->
+          <div v-show="activeTab === 'aventura'" class="bg-stone-950/60 border border-stone-900 border-dashed rounded-xl p-10 shadow-lg text-center animate-[fadeIn_0.3s_ease-out] flex flex-col items-center justify-center min-h-[300px]">
+            <span class="text-4xl mb-4 grayscale opacity-50 block">📜</span>
+            <h3 class="font-serif text-amber-500/80 uppercase tracking-widest text-sm mb-2">Motor de Aventura Solo</h3>
+            <p class="text-stone-500 text-xs max-w-md mx-auto leading-relaxed">O sistema de Livro-Jogo guiado pelo narrador está sendo preparado. Suas escolhas moldarão a crônica em breve.</p>
+          </div>
+
+          <!-- ABA: MISSÕES AFK -->
+          <div v-show="activeTab === 'missoes'" class="bg-stone-950/60 border border-stone-900 border-dashed rounded-xl p-10 shadow-lg text-center animate-[fadeIn_0.3s_ease-out] flex flex-col items-center justify-center min-h-[300px]">
+            <span class="text-4xl mb-4 grayscale opacity-50 block">⏳</span>
+            <h3 class="font-serif text-amber-500/80 uppercase tracking-widest text-sm mb-2">Despachos e Missões em Tempo Real</h3>
+            <p class="text-stone-500 text-xs max-w-md mx-auto leading-relaxed">Envie carniçais e aliados para executarem tarefas pela cidade enquanto você está offline.</p>
+          </div>
+
         </div>
       </main>
     </div>
@@ -169,6 +192,7 @@ const route = useRoute()
 const loading = ref(true)
 const character = ref<any>(null)
 const characterId = ref<string>('')
+const activeTab = ref<string>('geral')
 
 const fetchCharacter = async () => {
   try {
