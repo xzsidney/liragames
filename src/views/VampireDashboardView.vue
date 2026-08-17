@@ -119,7 +119,7 @@ const filteredCharacters = computed(() => {
 
 const viewSheet = (characterId: string) => {
   localStorage.setItem('lira_active_character_id', characterId)
-  router.push(`/personagem/ficha?id=${characterId}`)
+  router.push(`/personagem/hub?id=${characterId}`)
 }
 
 const handleLogout = () => {
