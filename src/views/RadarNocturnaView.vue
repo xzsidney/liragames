@@ -37,7 +37,7 @@
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-[rgba(0,150,255,0.25)] rounded-full pointer-events-none w-3/4 h-3/4"></div>
 
         <!-- Radar Sweep -->
-        <div class="absolute inset-0 origin-center rounded-full pointer-events-none z-10 animate-[sweep_4s_linear_infinite]" style="background: conic-gradient(from 0deg, transparent 70%, rgba(0, 200, 255, 0.1) 90%, rgba(0, 255, 255, 0.6) 100%);"></div>
+        <div class="absolute inset-0 origin-center rounded-full pointer-events-none z-10 animate-sweep" style="background: conic-gradient(from 0deg, transparent 70%, rgba(0, 200, 255, 0.1) 90%, rgba(0, 255, 255, 0.6) 100%);"></div>
         
         <!-- Radar Center -->
         <div class="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400 shadow-[0_0_15px_#00ffff] z-20"></div>
@@ -204,18 +204,27 @@ const fetchLocations = async () => {
     const nodes: any[] = []
 
     zones.forEach((zone: any) => {
-      const zoneKey = zone.attributes?.key || 'zona_central'
+      let zoneAttrs = zone.attributes || {}
+      if (typeof zoneAttrs === 'string') {
+        try { zoneAttrs = JSON.parse(zoneAttrs) } catch (e) {}
+      }
+      const zoneKey = zoneAttrs.key || 'zona_central'
       const sector = ZONAS_MAP[zoneKey] || ZONAS_MAP['zona_central']
 
       if (zone.children && Array.isArray(zone.children)) {
         zone.children.forEach((bairro: any) => {
+          let bairroAttrs = bairro.attributes || {}
+          if (typeof bairroAttrs === 'string') {
+            try { bairroAttrs = JSON.parse(bairroAttrs) } catch (e) {}
+          }
+
           const r = sector.minR + seededRandom() * (sector.maxR - sector.minR)
           const a = sector.minA + seededRandom() * (sector.maxA - sector.minA)
           
           const x = 50 + (r * Math.cos(a) * 50)
           const y = 50 + (r * Math.sin(a) * 50)
 
-          const faccao = bairro.attributes?.dominio_faccao || 'Desconhecido'
+          const faccao = bairroAttrs.dominio_faccao || 'Desconhecido'
 
           nodes.push({
             id: bairro.id,
@@ -228,7 +237,7 @@ const fetchLocations = async () => {
             color: getFactionColor(faccao),
             faccao: faccao,
             icon: getFactionIcon(faccao),
-            attributes: bairro.attributes || {}
+            attributes: bairroAttrs
           })
         })
       }
@@ -282,6 +291,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.animate-sweep {
+  animation: sweep 4s linear infinite;
+}
+
 @keyframes sweep {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
