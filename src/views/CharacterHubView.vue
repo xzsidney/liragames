@@ -169,20 +169,101 @@
           </div>
 
           <!-- ABA: MISSÕES AFK -->
-          <div v-show="activeTab === 'missoes'" class="bg-stone-950/60 border border-stone-900 border-dashed rounded-xl p-10 shadow-lg text-center animate-[fadeIn_0.3s_ease-out] flex flex-col items-center justify-center min-h-[300px]">
-            <span class="text-4xl mb-4 grayscale opacity-50 block">⏳</span>
-            <h3 class="font-serif text-amber-500/80 uppercase tracking-widest text-sm mb-2">Despachos e Missões em Tempo Real</h3>
-            <p class="text-stone-500 text-xs max-w-md mx-auto leading-relaxed">Envie carniçais e aliados para executarem tarefas pela cidade enquanto você está offline.</p>
+          <div v-show="activeTab === 'missoes'" class="bg-stone-950/60 border border-[rgba(212,175,55,0.25)] rounded-xl p-6 shadow-lg animate-[fadeIn_0.3s_ease-out]">
+            <h2 class="font-serif text-xs text-amber-400/80 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-600 animate-pulse shadow-[0_0_8px_rgba(217,119,6,0.8)]"></span> Despachos e Missões
+            </h2>
+            
+            <div v-if="loadingMissions" class="text-center text-stone-500 py-10">
+              <div class="animate-spin w-6 h-6 border-2 border-amber-900 border-t-transparent rounded-full mx-auto mb-2"></div>
+              Acessando contatos...
+            </div>
+            
+            <div v-else>
+              <!-- MISSÃO ATIVA -->
+              <div v-if="activeMission" class="bg-stone-900/80 border border-amber-900/50 rounded-lg p-5 mb-6 shadow-[0_0_15px_rgba(217,119,6,0.1)] relative overflow-hidden">
+                <div class="absolute -right-5 -top-5 w-24 h-24 bg-amber-600/10 blur-[30px] pointer-events-none"></div>
+                <h3 class="font-serif text-amber-400 text-lg mb-1">{{ activeMission.DefinitionMissionIdle?.title }}</h3>
+                <p class="text-xs text-stone-400 mb-4">{{ activeMission.DefinitionMissionIdle?.description }}</p>
+                
+                <div class="flex items-center justify-between border-t border-stone-800 pt-4">
+                  <div class="flex items-center gap-3">
+                    <span class="text-2xl animate-spin" style="animation-duration: 4s;">⏳</span>
+                    <div>
+                      <span class="block text-[10px] text-stone-500 uppercase tracking-widest">Tempo Restante</span>
+                      <span class="text-lg font-mono text-stone-300">{{ formatTimeRemaining(activeMission.expiresAt) }}</span>
+                    </div>
+                  </div>
+                  
+                  <button 
+                    v-if="isMissionExpired(activeMission.expiresAt)"
+                    @click="resolveActiveMission()" 
+                    class="bg-amber-900 hover:bg-amber-800 text-amber-100 px-6 py-2 rounded text-sm font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(217,119,6,0.4)] transition"
+                  >
+                    Receber Relatório
+                  </button>
+                  <button 
+                    v-else
+                    disabled
+                    class="bg-stone-800 text-stone-500 cursor-not-allowed px-6 py-2 rounded text-sm font-bold uppercase tracking-widest"
+                  >
+                    Em Andamento...
+                  </button>
+                </div>
+              </div>
+
+              <!-- LISTA DE MISSÕES DISPONÍVEIS -->
+              <div v-if="!activeMission">
+                <h3 class="text-xs text-stone-500 uppercase tracking-widest mb-3">Missões Disponíveis</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div 
+                    v-for="mission in availableMissions" :key="mission.id"
+                    class="bg-stone-900/40 border border-stone-800 hover:border-amber-900/50 p-4 rounded-lg transition group cursor-pointer"
+                    @click="openMissionModal(mission)"
+                  >
+                    <div class="flex justify-between items-start mb-2">
+                      <h4 class="font-serif text-sm text-stone-300 group-hover:text-amber-400 transition">{{ mission.title }}</h4>
+                      <span class="bg-stone-950 text-stone-500 border border-stone-800 text-[10px] px-2 py-0.5 rounded">{{ mission.durationMinutes }} min</span>
+                    </div>
+                    <p class="text-[11px] text-stone-500 line-clamp-2">{{ mission.description }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
       </main>
+
+      <!-- MODAL INICIAR MISSÃO -->
+      <div v-if="selectedMission" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 px-4">
+        <div class="bg-[#0b0608] border border-amber-900/50 rounded-xl max-w-md w-full shadow-[0_0_50px_rgba(217,119,6,0.15)] relative overflow-hidden">
+          
+          <div class="p-6 relative z-10">
+            <h3 class="font-serif text-amber-400 text-xl mb-2">{{ selectedMission.title }}</h3>
+            <p class="text-sm text-stone-400 mb-6">{{ selectedMission.description }}</p>
+
+            <div class="bg-stone-900/50 border border-stone-800 rounded p-4 mb-6">
+              <span class="block text-[10px] text-stone-500 uppercase tracking-widest mb-1">Duração Estimada</span>
+              <span class="text-lg font-mono text-stone-300">{{ selectedMission.durationMinutes }} Minutos</span>
+            </div>
+
+            <div class="flex items-center gap-3 mt-6">
+              <button @click="selectedMission = null" class="flex-1 bg-transparent hover:bg-stone-900 text-stone-400 border border-stone-800 px-4 py-2.5 rounded text-xs uppercase tracking-widest transition font-bold">Cancelar</button>
+              <button @click="startSelectedMission()" class="flex-1 bg-amber-900 hover:bg-amber-800 text-amber-100 border border-amber-700/50 px-4 py-2.5 rounded text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(217,119,6,0.3)] transition font-bold">
+                Iniciar Expedição
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api, { API_BASE_URL } from '../services/api'
 
@@ -193,6 +274,14 @@ const loading = ref(true)
 const character = ref<any>(null)
 const characterId = ref<string>('')
 const activeTab = ref<string>('geral')
+
+// Missões AFK
+const loadingMissions = ref(false)
+const availableMissions = ref<any[]>([])
+const activeMission = ref<any>(null)
+const selectedMission = ref<any>(null)
+let timerInterval: any = null
+const now = ref(new Date())
 
 const fetchCharacter = async () => {
   try {
@@ -206,6 +295,8 @@ const fetchCharacter = async () => {
 
     const res = await api.get(`/api/character-vampires/${id}`)
     character.value = res.data
+
+    fetchMissions()
   } catch (err) {
     console.error('Erro ao buscar personagem:', err)
     router.push('/jogador/vampire')
@@ -214,7 +305,91 @@ const fetchCharacter = async () => {
   }
 }
 
+const fetchMissions = async () => {
+  loadingMissions.value = true
+  try {
+    // Busca missão ativa
+    const resActive = await api.get(`/api/missions-idle/active/${characterId.value}`)
+    if (resActive.data) {
+      activeMission.value = resActive.data
+    } else {
+      activeMission.value = null
+      // Se não tem ativa, busca disponíveis
+      const resAvail = await api.get(`/api/missions-idle`)
+      availableMissions.value = resAvail.data
+    }
+  } catch (err) {
+    console.error('Erro ao buscar missões:', err)
+  } finally {
+    loadingMissions.value = false
+  }
+}
+
+const openMissionModal = (mission: any) => {
+  selectedMission.value = mission
+}
+
+const startSelectedMission = async () => {
+  if (!selectedMission.value) return
+  
+  try {
+    await api.post('/api/missions-idle/start', {
+      characterId: characterId.value,
+      missionId: selectedMission.value.id,
+      selectedAttribute: 'Físico', // Placeholder por enquanto
+      selectedSkill: 'Sobrevivência'
+    })
+    
+    selectedMission.value = null
+    fetchMissions() // Atualiza a tela para mostrar o andamento
+  } catch (err: any) {
+    alert(err.response?.data?.error || 'Erro ao iniciar missão')
+  }
+}
+
+const resolveActiveMission = async () => {
+  if (!activeMission.value) return
+  try {
+    const res = await api.post('/api/missions-idle/resolve', {
+      activeMissionId: activeMission.value.id
+    })
+    
+    // Atualiza personagem com os novos status
+    character.value = res.data.character
+    alert(res.data.logs.join('\n'))
+    
+    fetchMissions() // Volta a tela para as missões disponíveis
+  } catch (err: any) {
+    alert(err.response?.data?.error || 'Erro ao resolver missão')
+  }
+}
+
+const isMissionExpired = (expiresAtStr: string) => {
+  return now.value >= new Date(expiresAtStr)
+}
+
+const formatTimeRemaining = (expiresAtStr: string) => {
+  const expires = new Date(expiresAtStr).getTime()
+  const current = now.value.getTime()
+  
+  const diff = expires - current
+  if (diff <= 0) return '00:00:00'
+  
+  const h = Math.floor(diff / (1000 * 60 * 60))
+  const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  const s = Math.floor((diff % (1000 * 60)) / 1000)
+  
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+}
+
 onMounted(() => {
   fetchCharacter()
+  timerInterval = setInterval(() => {
+    now.value = new Date()
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (timerInterval) clearInterval(timerInterval)
 })
 </script>
