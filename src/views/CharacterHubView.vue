@@ -70,12 +70,12 @@
         <div class="lg:col-span-8 flex flex-col gap-6">
           
           <!-- SISTEMA DE ABAS -->
-          <div class="flex items-center gap-6 border-b border-[rgba(212,175,55,0.2)] overflow-x-auto no-scrollbar">
-            <button @click="activeTab = 'geral'" class="pb-3 text-[11px] tracking-widest font-serif uppercase transition border-b-2 whitespace-nowrap" :class="activeTab === 'geral' ? 'text-amber-500 border-amber-500' : 'text-stone-500 border-transparent hover:text-stone-300'">VISÃO GERAL</button>
-            <button @click="activeTab = 'acoes'" class="pb-3 text-[11px] tracking-widest font-serif uppercase transition border-b-2 whitespace-nowrap" :class="activeTab === 'acoes' ? 'text-amber-500 border-amber-500' : 'text-stone-500 border-transparent hover:text-stone-300'">AÇÕES & LOCAIS</button>
-            <button @click="activeTab = 'aventura'" class="pb-3 text-[11px] tracking-widest font-serif uppercase transition border-b-2 whitespace-nowrap" :class="activeTab === 'aventura' ? 'text-amber-500 border-amber-500' : 'text-stone-500 border-transparent hover:text-stone-300'">AVENTURA SOLO</button>
-            <button @click="activeTab = 'missoes'" class="pb-3 text-[11px] tracking-widest font-serif uppercase transition border-b-2 whitespace-nowrap" :class="activeTab === 'missoes' ? 'text-amber-500 border-amber-500' : 'text-stone-500 border-transparent hover:text-stone-300'">MISSÕES AFK</button>
-          </div>
+          <nav class="flex gap-8 border-b border-stone-800/50 mb-8 px-6">
+            <button @click="activeTab = 'geral'" :class="activeTab === 'geral' ? 'text-amber-500 border-b-2 border-amber-500' : 'text-stone-500 hover:text-stone-300'" class="pb-4 text-[10px] uppercase tracking-[0.2em] transition">Visão Geral</button>
+            <button @click="activeTab = 'acoes'" :class="activeTab === 'acoes' ? 'text-amber-500 border-b-2 border-amber-500' : 'text-stone-500 hover:text-stone-300'" class="pb-4 text-[10px] uppercase tracking-[0.2em] transition">Ações & Locais</button>
+            <button @click="activeTab = 'aventura'" :class="activeTab === 'aventura' ? 'text-amber-500 border-b-2 border-amber-500' : 'text-stone-500 hover:text-stone-300'" class="pb-4 text-[10px] uppercase tracking-[0.2em] transition">Aventura Solo</button>
+            <button @click="activeTab = 'operacoes'" :class="activeTab === 'operacoes' ? 'text-amber-500 border-b-2 border-amber-500' : 'text-stone-500 hover:text-stone-300'" class="pb-4 text-[10px] uppercase tracking-[0.2em] transition">Operações da Noite</button>
+          </nav>
 
           <!-- CONTEÚDO DAS ABAS -->
           
@@ -168,8 +168,8 @@
             <p class="text-stone-500 text-xs max-w-md mx-auto leading-relaxed">O sistema de Livro-Jogo guiado pelo narrador está sendo preparado. Suas escolhas moldarão a crônica em breve.</p>
           </div>
 
-          <!-- ABA: MISSÕES AFK -->
-          <div v-show="activeTab === 'missoes'" class="bg-stone-950/60 border border-[rgba(212,175,55,0.25)] rounded-xl p-6 shadow-lg animate-[fadeIn_0.3s_ease-out]">
+          <!-- ABA OPERACOES DA NOITE -->
+          <div v-if="activeTab === 'operacoes'" class="animate-fade-in bg-stone-950/60 border border-[rgba(212,175,55,0.25)] rounded-xl p-6 shadow-lg">
             <h2 class="font-serif text-xs text-amber-400/80 uppercase tracking-widest mb-4 flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-amber-600 animate-pulse shadow-[0_0_8px_rgba(217,119,6,0.8)]"></span> Despachos e Missões
             </h2>
@@ -225,7 +225,11 @@
                       <h4 class="font-serif text-sm text-stone-300 group-hover:text-amber-400 transition">{{ mission.title }}</h4>
                       <span class="bg-stone-950 text-stone-500 border border-stone-800 text-[10px] px-2 py-0.5 rounded">{{ mission.durationMinutes }} min</span>
                     </div>
-                    <p class="text-[11px] text-stone-500 line-clamp-2">{{ mission.description }}</p>
+                    <p class="text-[11px] text-stone-500 line-clamp-2 mb-3">{{ mission.description }}</p>
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] bg-stone-800 text-stone-400 px-2 py-0.5 rounded uppercase tracking-widest">{{ mission.Actions?.length || 0 }} Etapas</span>
+                      <span class="text-[10px] bg-stone-800 text-stone-400 px-2 py-0.5 rounded uppercase tracking-widest">Dif. {{ mission.baseDifficulty }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -243,9 +247,27 @@
             <h3 class="font-serif text-amber-400 text-xl mb-2">{{ selectedMission.title }}</h3>
             <p class="text-sm text-stone-400 mb-6">{{ selectedMission.description }}</p>
 
-            <div class="bg-stone-900/50 border border-stone-800 rounded p-4 mb-6">
+            <div class="bg-stone-900/50 border border-stone-800 rounded p-4 mb-4">
               <span class="block text-[10px] text-stone-500 uppercase tracking-widest mb-1">Duração Estimada</span>
               <span class="text-lg font-mono text-stone-300">{{ selectedMission.durationMinutes }} Minutos</span>
+            </div>
+
+            <div v-if="selectedMission.Actions && selectedMission.Actions.length > 0" class="mb-6">
+              <span class="block text-[10px] text-stone-500 uppercase tracking-widest mb-2">Etapas da Operação</span>
+              <ul class="space-y-2">
+                <li v-for="action in selectedMission.Actions" :key="action.id" class="bg-stone-900/80 border border-stone-800 p-3 rounded">
+                  <div class="flex justify-between items-center mb-1">
+                    <span class="text-sm font-serif text-amber-500">{{ action.stepOrder }}. {{ action.name }}</span>
+                    <span class="text-[10px] bg-stone-800 text-stone-400 px-2 py-0.5 rounded uppercase tracking-widest">Dif. {{ action.difficulty || 6 }}</span>
+                  </div>
+                  <div class="text-xs text-stone-400 mb-2">{{ action.description }}</div>
+                  <div class="flex gap-2">
+                    <span v-if="action.attributeReq" class="text-[10px] text-stone-500 border border-stone-700 px-1 rounded">{{ action.attributeReq }}</span>
+                    <span v-if="action.skillReq" class="text-[10px] text-stone-500 border border-stone-700 px-1 rounded">{{ action.skillReq }}</span>
+                    <span class="text-[10px] text-red-500/70 border border-red-900/30 px-1 rounded ml-auto">3d10</span>
+                  </div>
+                </li>
+              </ul>
             </div>
 
             <div class="flex items-center gap-3 mt-6">
