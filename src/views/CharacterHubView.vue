@@ -258,6 +258,33 @@
         </div>
       </div>
 
+      <!-- MODAL DE RELATÓRIO DA MISSÃO -->
+      <div v-if="reportModalData" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 px-4">
+        <div class="bg-[#0b0608] border rounded-xl max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden" :class="reportModalData.isSuccess ? 'border-amber-600/50' : 'border-red-900/50'">
+          <div class="absolute -right-10 -top-10 w-32 h-32 blur-[40px] pointer-events-none" :class="reportModalData.isSuccess ? 'bg-amber-600/20' : 'bg-red-900/20'"></div>
+          
+          <div class="p-6 relative z-10 text-center">
+            <span class="text-4xl block mb-2">{{ reportModalData.isSuccess ? '🏆' : '💀' }}</span>
+            <h3 class="font-serif text-2xl mb-2" :class="reportModalData.isSuccess ? 'text-amber-400' : 'text-red-500'">{{ reportModalData.title }}</h3>
+            <p class="text-sm text-stone-400 mb-6 italic">"{{ reportModalData.narrative }}"</p>
+
+            <div class="bg-stone-900/50 border border-stone-800 rounded p-4 mb-6 text-left">
+              <span class="block text-[10px] text-stone-500 uppercase tracking-widest mb-2">Consequências da Noite</span>
+              <ul class="space-y-2">
+                <li v-for="(change, index) in reportModalData.changes" :key="index" class="text-sm text-stone-300 flex items-start gap-2">
+                  <span :class="reportModalData.isSuccess ? 'text-amber-500' : 'text-red-500'">•</span> {{ change }}
+                </li>
+                <li v-if="reportModalData.changes.length === 0" class="text-sm text-stone-500 italic">Nenhuma mudança significativa.</li>
+              </ul>
+            </div>
+
+            <button @click="closeReportModal()" class="w-full bg-stone-900 hover:bg-stone-800 text-stone-300 border border-stone-700 px-4 py-3 rounded text-xs uppercase tracking-widest transition font-bold">
+              Compreendido
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -280,6 +307,7 @@ const loadingMissions = ref(false)
 const availableMissions = ref<any[]>([])
 const activeMission = ref<any>(null)
 const selectedMission = ref<any>(null)
+const reportModalData = ref<any>(null)
 let timerInterval: any = null
 const now = ref(new Date())
 
@@ -356,12 +384,16 @@ const resolveActiveMission = async () => {
     
     // Atualiza personagem com os novos status
     character.value = res.data.character
-    alert(res.data.logs.join('\n'))
+    reportModalData.value = res.data.report
     
     fetchMissions() // Volta a tela para as missões disponíveis
   } catch (err: any) {
     alert(err.response?.data?.error || 'Erro ao resolver missão')
   }
+}
+
+const closeReportModal = () => {
+  reportModalData.value = null
 }
 
 const isMissionExpired = (expiresAtStr: string) => {
