@@ -24,25 +24,24 @@
         <p class="text-gray-500 italic">Nenhum estilo de predador encontrado.</p>
       </div>
 
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
         <div 
           v-for="pkg in filteredPredators" 
           :key="pkg.id"
           @click="store.form.predatorId = pkg.id"
-          class="cursor-pointer flex flex-col p-5 h-full rounded-xl border transition-all duration-300 group/card relative overflow-hidden"
-          :class="store.form.predatorId === pkg.id ? 'border-blood-red bg-blood-red/10 shadow-[0_0_15px_rgba(139,0,0,0.3)]' : 'border-white/10 bg-black/40 hover:border-white/30 hover:bg-black/60'"
+          class="cursor-pointer relative overflow-hidden rounded-lg border p-3 transition-all duration-300 group/card flex flex-col justify-between"
+          :class="store.form.predatorId === pkg.id ? 'border-blood-red bg-blood-red/10 shadow-[0_0_10px_rgba(139,0,0,0.2)]' : 'border-white/10 bg-black/40 hover:border-white/30 hover:bg-black/60'"
         >
           <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
 
-          <h3 class="font-serif text-lg mb-2 relative z-10 leading-tight" :class="store.form.predatorId === pkg.id ? 'text-white' : 'text-gold-dim'">{{ pkg.name }}</h3>
-          <p class="text-xs text-gray-400 flex-grow relative z-10 line-clamp-4 mb-4">{{ pkg.description || 'Uma forma de caçar nas ruas de Nocturna.' }}</p>
+          <div>
+            <h3 class="font-serif text-sm font-bold mb-1 leading-tight" :class="store.form.predatorId === pkg.id ? 'text-white' : 'text-gray-300'">{{ pkg.name }}</h3>
+            <p class="text-[11px] text-gray-500 font-sans line-clamp-3 leading-snug">{{ pkg.description || 'Uma forma de caçar nas ruas de Nocturna.' }}</p>
+          </div>
           
-          <div class="border-t border-white/10 pt-3 mt-auto relative z-10 flex justify-between items-center">
-            <span class="text-[10px] text-gray-500 uppercase tracking-widest">Bônus:</span>
-            <span class="bg-black/50 border border-white/10 text-gold text-[10px] px-2 py-0.5 rounded shadow-inner flex items-center gap-1">
-              Pacote de Caça
-              <span v-if="store.form.predatorId === pkg.id" class="text-blood-red font-bold">✓</span>
-            </span>
+          <div class="mt-2 flex items-center justify-between text-[9px] uppercase tracking-widest border-t border-white/5 pt-2">
+            <span class="text-gold-dim border border-gold-dim/30 px-1.5 py-0.5 rounded-sm">Pacote de Caça</span>
+            <span v-if="store.form.predatorId === pkg.id" class="text-blood-red font-bold">✓ Sel</span>
           </div>
         </div>
       </div>
