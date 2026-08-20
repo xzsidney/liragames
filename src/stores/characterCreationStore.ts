@@ -47,12 +47,17 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
     },
     
     backgroundPackages(state) {
-      return state.packages.filter(p => p.packageType === 'BACKGROUND')
+      return state.packages.filter(p => p.packageType === 'BACKGROUND_BUNDLE')
     },
     
     selectedProfessionPackage(state) {
       if (!state.form.concept) return null
       return state.packages.find(p => p.id === state.form.concept)
+    },
+
+    selectedBackgroundPackage(state) {
+      if (!state.form.backgroundId || state.form.backgroundId === 'none') return null
+      return state.packages.find(p => p.id === state.form.backgroundId)
     },
 
     // Apenas clãs interessados na profissão dinâmica
@@ -168,6 +173,28 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
   },
 
   actions: {
+    resetForm() {
+      this.form = {
+        name: '',
+        avatarUrl: null,
+        concept: '',
+        clanId: null,
+        predatorId: null,
+        sire: '',
+        ambition: '',
+        desire: '',
+        chronicleTenets: '',
+        history: '',
+        pillar: '',
+        backgroundId: 'none',
+        apparentAge: null,
+        dateOfBirth: '',
+        dateOfDeath: '',
+      }
+      this.currentStep = 1
+      this.errorMessage = ''
+    },
+
     async fetchLibraries() {
       this.isLoading = true
       try {
@@ -265,6 +292,26 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
           if (predItem) realPredatorId = predItem.referenceId
         }
 
+        const backgroundsPayload: any[] = [];
+        const meritsFlawsPayload: any[] = [];
+
+        if (this.selectedBackgroundPackage) {
+          const items = this.selectedBackgroundPackage.CreationPackageItems || [];
+          items.forEach((item: any) => {
+            if (item.itemType === 'BACKGROUND') {
+              backgroundsPayload.push({
+                definitionBackgroundId: item.referenceId,
+                value: item.amount
+              });
+            } else if (item.itemType === 'MERIT' || item.itemType === 'FLAW') {
+              meritsFlawsPayload.push({
+                definitionMeritFlawId: item.referenceId,
+                value: item.amount
+              });
+            }
+          });
+        }
+
         const payload = {
           userId,
           name: this.form.name,
@@ -288,8 +335,8 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
           skills: skillsPayload,
           disciplines: [], // Recebe pontos base no backend baseados no clã
           powers: [],
-          meritsFlaws: [],
-          backgrounds: [],
+          meritsFlaws: meritsFlawsPayload,
+          backgrounds: backgroundsPayload,
           equipments: []
         }
 

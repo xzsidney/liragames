@@ -105,8 +105,8 @@ const router = useRouter()
 const store = useCharacterCreationStore()
 
 onMounted(() => {
+  store.resetForm()
   store.fetchLibraries()
-  store.setStep(1) // Garante que comece no passo 1 ao montar
 })
 
 // Validações simples para impedir avanço sem preencher campos obrigatórios
