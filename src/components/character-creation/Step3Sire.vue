@@ -57,13 +57,28 @@
           <label 
             v-for="pkg in filteredBackgrounds" 
             :key="pkg.id"
-            class="flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer"
+            class="flex flex-col p-3 rounded-lg border transition-colors cursor-pointer"
             :class="store.form.backgroundId === pkg.id ? 'border-blood-red bg-blood-red/10' : 'border-white/10 bg-black/20 hover:bg-black/50'"
           >
-            <input type="radio" v-model="store.form.backgroundId" :value="pkg.id" class="text-blood-red bg-black border-white/20 focus:ring-blood-red" />
-            <div>
-              <p class="font-serif text-sm" :class="store.form.backgroundId === pkg.id ? 'text-white' : 'text-gray-200'">{{ pkg.name }}</p>
-              <p class="text-xs text-gray-500">{{ pkg.description }}</p>
+            <div class="flex items-center gap-3">
+              <input type="radio" v-model="store.form.backgroundId" :value="pkg.id" class="text-blood-red bg-black border-white/20 focus:ring-blood-red" />
+              <div>
+                <p class="font-serif text-sm" :class="store.form.backgroundId === pkg.id ? 'text-white' : 'text-gray-200'">{{ pkg.name }}</p>
+                <p class="text-xs text-gray-500">{{ pkg.description }}</p>
+              </div>
+            </div>
+            
+            <!-- Expandable Bonuses Area -->
+            <div v-if="store.form.backgroundId === pkg.id" class="mt-3 pt-3 border-t border-blood-red/30 pl-8 animate-fade-in">
+              <p class="text-[10px] text-blood-red uppercase tracking-widest mb-2 font-bold">Conteúdo do Pacote:</p>
+              <div v-for="bonus in store.getPackageBonusesSummary(pkg.id)" :key="bonus.group" class="mb-2 last:mb-0">
+                <span class="text-[9px] text-gray-400 uppercase tracking-wider block mb-1">{{ bonus.group }}</span>
+                <div class="flex flex-wrap gap-1">
+                  <span v-for="item in bonus.items" :key="item" class="text-[10px] bg-black/50 border border-gold-dim/20 text-gold-dim px-1.5 py-0.5 rounded">
+                    {{ item }}
+                  </span>
+                </div>
+              </div>
             </div>
           </label>
           

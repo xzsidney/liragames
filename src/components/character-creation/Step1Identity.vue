@@ -104,6 +104,19 @@
               <span class="text-gold-dim border border-gold-dim/30 px-1.5 py-0.5 rounded-sm">Profissão</span>
               <span v-if="store.form.concept === pkg.id" class="text-blood-red font-bold">✓ Sel</span>
             </div>
+
+            <!-- Expandable Bonuses Area -->
+            <div v-if="store.form.concept === pkg.id" class="mt-3 pt-3 border-t border-blood-red/30 animate-fade-in">
+              <p class="text-[10px] text-blood-red uppercase tracking-widest mb-2 font-bold">Bônus Adquiridos:</p>
+              <div v-for="bonus in store.getPackageBonusesSummary(pkg.id)" :key="bonus.group" class="mb-2 last:mb-0">
+                <span class="text-[9px] text-gray-400 uppercase tracking-wider block mb-1">{{ bonus.group }}</span>
+                <div class="flex flex-wrap gap-1">
+                  <span v-for="item in bonus.items" :key="item" class="text-[10px] bg-black/50 border border-gold-dim/20 text-gold-dim px-1.5 py-0.5 rounded">
+                    {{ item }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div v-if="filteredProfessions.length === 0 && !store.isLoading" class="col-span-full py-8 text-center text-gray-500 text-sm italic">

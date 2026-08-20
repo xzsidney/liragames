@@ -173,6 +173,57 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
   },
 
   actions: {
+    getPackageBonusesSummary(packageId: string) {
+      if (!packageId) return null;
+      const pkg = this.packages.find(p => p.id === packageId);
+      if (!pkg || !pkg.CreationPackageItems) return null;
+
+      const summary: Record<string, string[]> = {
+        'Atributos': [],
+        'Perícias': [],
+        'Antecedentes': [],
+        'Qualidades': [],
+        'Defeitos': []
+      };
+
+      pkg.CreationPackageItems.forEach((item: any) => {
+        let name = 'Desconhecido';
+        let prefix = '+';
+        let amount = item.amount;
+        let typeGroup = '';
+
+        if (item.itemType === 'ATTRIBUTE') {
+          const attr = this.attributesList.find(a => a.id === item.referenceId);
+          if (attr) { name = attr.name; typeGroup = 'Atributos'; }
+        } else if (item.itemType === 'SKILL') {
+          const skill = this.skillsList.find(s => s.id === item.referenceId);
+          if (skill) { name = skill.name; typeGroup = 'Perícias'; }
+        } else if (item.itemType === 'BACKGROUND') {
+          typeGroup = 'Antecedentes';
+          name = 'Um Antecedente'; // We don't load backgroundsList in store directly yet, we can't map names perfectly without a fetch, wait, we do fetch something!
+        } else if (item.itemType === 'MERIT') {
+          typeGroup = 'Qualidades';
+          name = 'Uma Qualidade';
+        } else if (item.itemType === 'FLAW') {
+          typeGroup = 'Defeitos';
+          name = 'Um Defeito';
+          prefix = '-'; // Flaws can be represented differently if needed
+        }
+
+        if (typeGroup && name !== 'Desconhecido') {
+          summary[typeGroup].push(`${name} ${prefix}${amount}`);
+        }
+      });
+
+      // Filter out empty groups and format as array of strings for UI
+      const result: { group: string, items: string[] }[] = [];
+      Object.entries(summary).forEach(([group, items]) => {
+        if (items.length > 0) result.push({ group, items });
+      });
+
+      return result.length > 0 ? result : null;
+    },
+    
     resetForm() {
       this.form = {
         name: '',
