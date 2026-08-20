@@ -278,7 +278,6 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
         }))
 
         const skillsPayload = Object.entries(this.calculatedSkills)
-          .filter(([_, val]) => val > 0)
           .map(([id, val]) => ({
             definitionSkillId: id,
             value: val

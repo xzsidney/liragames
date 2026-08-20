@@ -154,15 +154,49 @@
 
             <!-- HISTÓRICO E OUTROS -->
             <div v-if="activeTab === 'history'" class="space-y-6">
-              <!-- Background / Qualities etc... placeholder for now, matches HTML prototype style -->
-              <div class="bg-gold/5 border border-border-dark rounded-xl p-6 leading-relaxed text-[0.95rem] text-text-main">
-                <h3 class="font-serif text-[13px] tracking-wide text-gold mb-2">História de Fundo</h3>
-                <p>{{ character?.history || 'Sua história ainda será escrita nas sombras.' }}</p>
-              </div>
-
-              <div class="bg-blood/5 border border-blood/20 rounded-xl p-6">
-                <h3 class="font-serif text-[10px] tracking-widest text-blood-bright uppercase mb-2">Fraqueza de Clã</h3>
-                <p class="font-sans text-[0.88rem] text-text-main">As restrições de sua linhagem amaldiçoada pesam sobre sua alma.</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- História de Fundo -->
+                <div class="bg-gold/5 border border-border-dark rounded-xl p-6 leading-relaxed text-[0.95rem] text-text-main">
+                  <h3 class="font-serif text-[13px] tracking-wide text-gold mb-2">História de Fundo</h3>
+                  <p>{{ character?.history || 'Sua história ainda será escrita nas sombras.' }}</p>
+                </div>
+                
+                <!-- Qualidades e Defeitos -->
+                <div class="space-y-4">
+                  <div class="bg-blood/5 border border-blood/20 rounded-xl p-6">
+                    <h3 class="font-serif text-[10px] tracking-widest text-blood-bright uppercase mb-2">Fraqueza de Clã</h3>
+                    <p class="font-sans text-[0.88rem] text-text-main">As restrições de sua linhagem amaldiçoada pesam sobre sua alma.</p>
+                  </div>
+                  
+                  <div v-if="character?.CharacterVampireMeritFlaws?.length" class="bg-gold/5 border border-border-dark rounded-xl p-6">
+                    <h3 class="font-serif text-[13px] tracking-wide text-gold mb-4">Qualidades & Defeitos</h3>
+                    <ul class="space-y-2">
+                      <li v-for="mf in character.CharacterVampireMeritFlaws" :key="mf.id" class="flex justify-between items-start border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                        <div>
+                          <span class="font-serif text-[11px] uppercase" :class="mf.DefinitionMeritFlaw?.type === 'QUALIDADE' ? 'text-green-400' : 'text-blood-red'">
+                            {{ mf.DefinitionMeritFlaw?.name }}
+                          </span>
+                          <p class="text-[10px] text-gray-500">{{ mf.DefinitionMeritFlaw?.description }}</p>
+                        </div>
+                        <span class="font-mono text-xs text-gold ml-2">+{{ mf.value }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <!-- Antecedentes -->
+                <div v-if="character?.CharacterVampireBackgrounds?.length" class="bg-gold/5 border border-border-dark rounded-xl p-6 md:col-span-2">
+                  <h3 class="font-serif text-[13px] tracking-wide text-gold mb-4">Antecedentes (Backgrounds)</h3>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div v-for="bg in character.CharacterVampireBackgrounds" :key="bg.id" class="bg-black/30 p-3 rounded border border-white/5">
+                      <div class="flex justify-between items-center mb-1">
+                        <span class="font-serif text-[11px] uppercase text-gray-200">{{ bg.DefinitionBackground?.name }}</span>
+                        <DotRating :value="bg.value" :max="5" color="gold" />
+                      </div>
+                      <p class="text-[10px] text-gray-500 leading-tight">{{ bg.DefinitionBackground?.description }}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -231,7 +265,7 @@ const tabs = [
 
 const physicalAttrNames = ['Força', 'Destreza', 'Vigor', 'Strength', 'Dexterity', 'Stamina']
 const socialAttrNames = ['Carisma', 'Manipulação', 'Autocontrole', 'Charisma', 'Manipulation', 'Composure']
-const mentalAttrNames = ['Inteligência', 'Raciocínio', 'Perseverança', 'Intelligence', 'Wits', 'Resolve']
+const mentalAttrNames = ['Inteligência', 'Raciocínio', 'Perseverança', 'Determinação', 'Intelligence', 'Wits', 'Resolve']
 
 const attributeColumns = computed(() => {
   if (!character.value?.CharacterVampireAttributes) return []
