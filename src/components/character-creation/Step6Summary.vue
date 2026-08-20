@@ -20,7 +20,7 @@
           
           <div>
             <h3 class="text-[10px] text-gray-500 uppercase tracking-widest font-serif mb-1">Conceito (Vida Mortal)</h3>
-            <p class="text-md text-gray-300">{{ store.form.concept || 'Não Definido' }}</p>
+            <p class="text-md text-gray-300">{{ professionName }}</p>
           </div>
 
           <div>
@@ -85,13 +85,18 @@ const store = useCharacterCreationStore()
 
 const stats = computed(() => store.derivedStats)
 
+const professionName = computed(() => {
+  const prof = store.packages.find(p => p.id === store.form.concept)
+  return prof ? prof.name : (store.form.concept || 'Não Definido')
+})
+
 const clanName = computed(() => {
   const clan = store.clans.find(c => c.id === store.form.clanId)
   return clan ? clan.name : 'Sangue-Fraco / Desconhecido'
 })
 
 const predatorName = computed(() => {
-  const pred = store.predators.find(p => p.id === store.form.predatorId)
+  const pred = store.packages.find(p => p.id === store.form.predatorId)
   return pred ? pred.name : 'Nenhum'
 })
 </script>
