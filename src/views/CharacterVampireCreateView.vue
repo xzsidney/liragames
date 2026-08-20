@@ -80,7 +80,7 @@
           :disabled="store.isLoading"
           class="px-8 py-2.5 rounded-lg bg-blood-red hover:bg-red-700 text-white font-serif text-xs tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_rgba(139,0,0,0.6)] disabled:opacity-50 hover:scale-105"
         >
-          {{ store.isLoading ? 'Iniciando...' : 'Entrar em Nocturna' }}
+          {{ store.isLoading ? 'Iniciando...' : 'Ver Ficha Completa' }}
         </button>
 
       </div>
