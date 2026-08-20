@@ -129,10 +129,14 @@ const handleFinish = async () => {
       return
     }
 
-    await store.saveCharacter(user.id)
+    const newChar = await store.saveCharacter(user.id)
     
-    // Sucesso - Animação ou redirecionamento direto
-    router.push('/jogador/vampire')
+    // Sucesso - Animação ou redirecionamento direto para a nova ficha!
+    if (newChar && newChar.id) {
+      router.push(`/personagem/ficha?id=${newChar.id}`)
+    } else {
+      router.push('/jogador/vampire')
+    }
     
   } catch (err) {
     // Erro já tratado na store (errorMessage atualizada)

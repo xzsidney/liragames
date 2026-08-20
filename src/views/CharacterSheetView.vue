@@ -49,12 +49,12 @@
             <!-- Health -->
             <div>
                <span class="font-serif text-[10px] tracking-widest text-parchment-dim uppercase block mb-1">Vitalidade</span>
-               <DotRating :value="character?.health || 0" :max="7" :isBox="true" color="blood" />
+               <DotRating :value="character?.healthMax || 0" :max="7" :isBox="true" color="blood" />
             </div>
             <!-- Willpower -->
             <div>
                <span class="font-serif text-[10px] tracking-widest text-parchment-dim uppercase block mb-1">F. Vontade</span>
-               <DotRating :value="character?.willpower || 0" :max="6" :isBox="true" color="gold" />
+               <DotRating :value="character?.willpowerMax || 0" :max="6" :isBox="true" color="gold" />
             </div>
           </div>
 
