@@ -42,6 +42,21 @@
         ></textarea>
       </div>
       
+      <!-- Princípios da Crônica -->
+      <div class="p-6 bg-stone-900 border border-gold-dim/40 rounded-xl">
+        <h3 class="text-xs font-serif uppercase tracking-wider text-gold mb-2 flex items-center gap-2">
+          <span>📜</span> Princípios da Crônica (Imutável)
+        </h3>
+        <p class="text-[11px] text-gray-400 mb-3">
+          Todos os vampiros na cidade de Nocturna estão amarrados às seguintes regras morais. Quebrar esses princípios resulta em perda massiva de Humanidade.
+        </p>
+        <ul class="text-sm font-serif text-gray-300 space-y-2 list-disc list-inside bg-black/50 p-4 rounded border border-white/5">
+          <li>A Máscara é a lei absoluta. Nunca revele sua natureza.</li>
+          <li>Não mate inocentes sem necessidade ou provocação.</li>
+          <li>O território do Príncipe é solo sagrado; respeite as tradições.</li>
+        </ul>
+      </div>
+
       <div class="p-4 bg-blood-red/10 border border-blood-red/30 rounded-lg">
         <p class="text-xs text-red-200 text-center font-serif">
           * Nota de Sistema: Seu Desejo diário e Convicções morais serão definidos in-game pelas suas ações no Hub.

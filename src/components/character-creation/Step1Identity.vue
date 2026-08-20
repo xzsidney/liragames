@@ -23,15 +23,46 @@
           <input type="file" ref="fileInput" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handleFileUpload" />
         </div>
 
-        <!-- Nome -->
-        <div class="group">
-          <label class="block text-xs font-serif uppercase tracking-wider text-gray-400 mb-2 group-focus-within:text-gold transition-colors">Nome do Personagem</label>
-          <input 
-            v-model="store.form.name" 
-            type="text" 
-            placeholder="Ex: Kael Lira" 
-            class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/50 transition-all duration-300 shadow-inner"
-          />
+        <!-- Nome e Biografia -->
+        <div class="space-y-4">
+          <div class="group">
+            <label class="block text-xs font-serif uppercase tracking-wider text-gray-400 mb-2 group-focus-within:text-gold transition-colors">Nome do Personagem</label>
+            <input 
+              v-model="store.form.name" 
+              type="text" 
+              placeholder="Ex: Kael Lira" 
+              class="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-3 text-white focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/50 transition-all duration-300 shadow-inner"
+            />
+          </div>
+
+          <div class="grid grid-cols-3 gap-4">
+            <div class="group">
+              <label class="block text-[10px] font-serif uppercase tracking-wider text-gray-400 mb-2 group-focus-within:text-gold transition-colors">Nascimento (Mortal)</label>
+              <input 
+                v-model="store.form.dateOfBirth" 
+                type="date" 
+                class="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/50 transition-all duration-300 shadow-inner [color-scheme:dark]"
+              />
+            </div>
+            <div class="group">
+              <label class="block text-[10px] font-serif uppercase tracking-wider text-gray-400 mb-2 group-focus-within:text-gold transition-colors">Data da Morte (Abraço)</label>
+              <input 
+                v-model="store.form.dateOfDeath" 
+                type="date" 
+                class="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/50 transition-all duration-300 shadow-inner [color-scheme:dark]"
+              />
+            </div>
+            <div class="group">
+              <label class="block text-[10px] font-serif uppercase tracking-wider text-gray-400 mb-2 group-focus-within:text-gold transition-colors">Idade Aparente</label>
+              <input 
+                v-model.number="store.form.apparentAge" 
+                type="number" 
+                min="18"
+                placeholder="25" 
+                class="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blood focus:ring-1 focus:ring-blood/50 transition-all duration-300 shadow-inner"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

@@ -30,9 +30,9 @@
             <p class="text-xs text-gray-400 text-center flex-grow line-clamp-3 mb-4">{{ clan.description || 'Uma linhagem de vampiros antigos.' }}</p>
             
             <div class="border-t border-white/10 pt-3 mt-auto">
-              <p class="text-[10px] text-center uppercase tracking-widest text-gray-500 mb-2">Bônus de Sistema</p>
-              <div class="flex justify-center gap-2">
-                <span class="bg-black border border-white/10 text-[10px] px-2 py-1 rounded text-gray-300">Disciplinas +1</span>
+              <p class="text-[10px] text-center uppercase tracking-widest text-red-500/80 mb-1">Perdição do Clã</p>
+              <div class="text-[10px] text-gray-400 text-center line-clamp-3 bg-red-950/20 p-2 rounded border border-red-900/30">
+                {{ clan.weakness || 'Fraqueza desconhecida.' }}
               </div>
             </div>
           </div>

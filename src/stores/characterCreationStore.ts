@@ -27,6 +27,9 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
       history: '',
       pillar: '',
       backgroundId: 'none', // Valor default do radio button
+      apparentAge: null as number | null,
+      dateOfBirth: '',
+      dateOfDeath: '',
     },
 
     // Sires dinâmicos baseados no clã
@@ -273,8 +276,12 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
           generation: 12, // Padrão Neófito
           ambition: this.form.ambition || null,
           desire: this.form.desire || null,
-          chronicleTenets: this.form.chronicleTenets || null,
+          chronicleTenets: '1. A Máscara é a lei absoluta. 2. Não mate inocentes sem necessidade. 3. O território do Príncipe é sagrado.',
           history: this.form.history || null,
+          apparentAge: this.form.apparentAge || null,
+          dateOfBirth: this.form.dateOfBirth || null,
+          dateOfDeath: this.form.dateOfDeath || null,
+          touchstones: this.form.pillar ? [{ name: this.form.pillar, description: 'Primeiro pilar e âncora da humanidade.' }] : [],
           hunger: stats.hunger,
           humanity: stats.humanity,
           attributes: attributesPayload,
