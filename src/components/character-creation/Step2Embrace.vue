@@ -19,8 +19,15 @@
           :class="store.form.clanId === clan.id ? 'border-blood-red bg-gradient-to-b from-blood-red/20 to-black shadow-[0_0_20px_rgba(139,0,0,0.4)] scale-[1.02]' : 'border-white/10 bg-black/60 hover:border-white/30 hover:bg-black/80'"
         >
           <!-- Background image (placeholder ou logo do clã, se tiver no bd) -->
-          <div class="h-24 w-full bg-gradient-to-br from-black to-gray-900 border-b border-white/5 relative flex items-center justify-center overflow-hidden">
-            <span class="font-serif text-4xl opacity-20 group-hover/card:opacity-40 transition-opacity" :class="store.form.clanId === clan.id ? 'text-blood-red' : 'text-gray-500'">
+          <div class="h-32 w-full bg-gradient-to-br from-black to-gray-900 border-b border-white/5 relative flex items-center justify-center overflow-hidden">
+            <!-- Tenta carregar o icone do clã na pasta public/img/clans, se falhar, mostra a letra -->
+            <img 
+              :src="`/img/clans/${clan.name.toLowerCase().replace(/\\s+/g, '_')}.svg`" 
+              class="h-20 w-20 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] opacity-80 group-hover/card:opacity-100 transition-opacity group-hover/card:scale-110 duration-500"
+              @error="(e) => (e.target as HTMLImageElement).style.display = 'none'"
+              alt=""
+            />
+            <span class="absolute font-serif text-5xl opacity-10 transition-opacity" :class="store.form.clanId === clan.id ? 'text-blood-red' : 'text-gray-500'">
               {{ clan.name.charAt(0) }}
             </span>
           </div>
