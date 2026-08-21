@@ -69,6 +69,50 @@
               <span class="font-serif text-2xl text-gold drop-shadow-md">{{ character?.generation }}ª</span>
             </div>
           </div>
+
+          <!-- Potência de Sangue -->
+          <div class="mt-6 border border-border-dark rounded-xl bg-bg-deep/50 overflow-hidden">
+            <div class="bg-blood/10 px-4 py-2 border-b border-border-dark flex justify-between items-center">
+              <span class="font-serif text-[11px] tracking-widest text-blood-bright uppercase font-bold">Potência de Sangue</span>
+              <DotRating :value="character?.DefinitionBloodPotency?.level || 1" :max="10" color="blood" />
+            </div>
+            <div class="grid grid-cols-2 text-[10px] divide-x divide-border-dark font-sans">
+              <div class="p-3 border-b border-border-dark">
+                <span class="text-parchment-dim block mb-1">Surto de Sangue</span>
+                <span class="text-gray-200">{{ character?.DefinitionBloodPotency?.bloodSurge || '-' }}</span>
+              </div>
+              <div class="p-3 border-b border-border-dark">
+                <span class="text-parchment-dim block mb-1">Qtd. Recuperada</span>
+                <span class="text-gray-200">{{ character?.DefinitionBloodPotency?.mendAmount || '-' }}</span>
+              </div>
+              <div class="p-3 border-b border-border-dark">
+                <span class="text-parchment-dim block mb-1">Bônus de Poder</span>
+                <span class="text-gray-200">{{ character?.DefinitionBloodPotency?.disciplineBonus || '-' }}</span>
+              </div>
+              <div class="p-3 border-b border-border-dark">
+                <span class="text-parchment-dim block mb-1">Penalidade Alimentação</span>
+                <span class="text-gray-200">{{ character?.DefinitionBloodPotency?.feedingPenalty || '-' }}</span>
+              </div>
+              <div class="p-3 col-span-2 text-center bg-black/20">
+                <span class="text-parchment-dim block mb-1">Gravidade da Perdição</span>
+                <span class="text-purple-400 font-bold text-xs">{{ character?.DefinitionBloodPotency?.baneSeverity || 0 }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- XP -->
+          <div class="mt-6 space-y-2">
+            <div class="flex items-end text-sm">
+              <span class="font-serif text-gold-dim w-32 shrink-0">Experiência Total</span>
+              <div class="flex-1 border-b border-dashed border-white/20 mx-2 mb-1"></div>
+              <span class="font-mono text-gray-300 w-8 text-right">{{ character?.experienceTotal || 0 }}</span>
+            </div>
+            <div class="flex items-end text-sm">
+              <span class="font-serif text-gold-dim w-32 shrink-0">Experiência Gasta</span>
+              <div class="flex-1 border-b border-dashed border-white/20 mx-2 mb-1"></div>
+              <span class="font-mono text-gray-300 w-8 text-right">{{ character?.experienceSpent || 0 }}</span>
+            </div>
+          </div>
         </div>
 
         <!-- RIGHT COLUMN: DETAILS & TABS -->
@@ -82,9 +126,9 @@
               {{ character?.name }}
             </h1>
             <p class="font-sans italic text-[15px] text-parchment-dim mb-2">
-              Senhor: {{ character?.sire || 'Desconhecido' }}
+              Senhor: {{ character?.sire || 'Desconhecido' }} &nbsp;•&nbsp; Predador: <span class="text-gray-300 not-italic font-serif">{{ character?.DefinitionPredator?.name || 'Desconhecido' }}</span>
             </p>
-            <p class="font-sans text-parchment-dim">
+            <p class="font-serif text-[15px] text-gray-300">
               {{ character?.concept || 'Conceito não definido' }}
             </p>
           </div>
