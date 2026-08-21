@@ -4,8 +4,19 @@
     <nav class="relative z-20 border-b border-border-dark bg-bg-deep/90 backdrop-blur-md sticky top-0">
       <div class="max-w-[1300px] mx-auto px-6 h-14 flex items-center justify-between">
         <button @click="router.push('/jogador/vampire')" class="text-gold hover:text-gold-bright flex items-center gap-2 font-serif uppercase tracking-widest text-xs transition-colors">
-          <span>←</span> Retornar à Galeria
+          <span class="text-lg">←</span> Retornar à Galeria
         </button>
+        <button @click="confirmDelete" class="flex items-center gap-2 text-blood-red hover:text-red-500 transition-colors font-serif text-xs tracking-widest uppercase border border-blood-red/50 hover:border-red-500 px-3 py-1 rounded">
+          <span>☠</span> Deletar Personagem
+        </button>
+
+          <!-- Evoluir Button -->
+          <div class="flex items-center gap-4">
+            <button @click="toggleXpMode" class="bg-gold-dim/10 hover:bg-gold-dim/20 text-gold-dim border border-gold-dim/50 px-4 py-1.5 rounded text-xs font-serif tracking-widest uppercase transition-all duration-300 flex items-center gap-2">
+              <span class="text-lg leading-none">+</span> {{ isXpMode ? 'Sair da Evolução' : 'Evoluir' }}
+            </button>
+          </div>
+
       </div>
     </nav>
 
@@ -159,7 +170,7 @@
                 <div class="space-y-3">
                   <div v-for="attr in col.items" :key="attr.id" class="flex items-center">
                     <span class="font-serif text-[11px] tracking-widest text-text-main uppercase w-40 shrink-0">{{ attr.DefinitionAttribute?.name }}</span>
-                    <DotRating :value="attr.value" :max="5" color="gold" />
+                    <DotRating :value="attr.value" :max="5" color="gold" :interactive="isXpMode" @update:value="val => handleDotClick(attr, 'attribute', val)" />
                   </div>
                 </div>
               </div>
@@ -286,6 +297,25 @@
       </div>
     </main>
   </div>
+
+    <!-- Floating XP Panel -->
+    <div v-if="isXpMode" class="fixed bottom-0 left-0 right-0 bg-black/90 border-t border-gold-dim backdrop-blur-md z-50 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.8)]">
+      <div class="max-w-[1300px] mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-6">
+          <div class="text-gold-dim font-serif uppercase tracking-widest text-xs border-r border-white/10 pr-6">
+            XP Restante: <span class="text-white text-lg ml-2">{{ character?.experienceTotal - character?.experienceSpent - xpSpent }}</span>
+          </div>
+          <div class="text-gray-400 text-xs font-sans">
+            Gasto no carrinho: <span class="text-white">{{ xpSpent }} XP</span>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <button @click="toggleXpMode" class="px-6 py-2 border border-white/20 text-gray-300 rounded font-serif uppercase tracking-widest text-xs hover:bg-white/5 transition-colors">Cancelar</button>
+          <button @click="confirmXpChanges" class="px-6 py-2 bg-gold-dim text-black font-bold rounded font-serif uppercase tracking-widest text-xs hover:bg-gold transition-colors">Confirmar Evolução</button>
+        </div>
+      </div>
+    </div>
+
 </template>
 
 <script setup lang="ts">
@@ -302,6 +332,74 @@ const character = ref<any>(null)
 const characterId = ref<string>('')
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploading = ref(false)
+
+const isXpMode = ref(false)
+const xpSpent = ref(0)
+const xpCart = ref<any[]>([])
+
+const toggleXpMode = () => {
+  if (isXpMode.value) {
+    xpSpent.value = 0
+    xpCart.value = []
+  }
+  isXpMode.value = !isXpMode.value
+}
+
+const confirmXpChanges = async () => {
+  if (xpCart.value.length === 0) return toggleXpMode()
+  try {
+    const updatedTotalSpent = character.value.experienceSpent + xpSpent.value
+    await api.put('/api/character-vampires/' + characterId.value, {
+      experienceSpent: updatedTotalSpent,
+      attributes: character.value.CharacterVampireAttributes,
+      skills: character.value.CharacterVampireSkills,
+    })
+    
+    character.value.experienceSpent = updatedTotalSpent
+    xpSpent.value = 0
+    xpCart.value = []
+    alert('Evolução salva com sucesso!')
+    toggleXpMode()
+  } catch (e) {
+    alert('Erro ao salvar evolução')
+  }
+}
+
+const handleDotClick = (item: any, type: string, newLevel: number) => {
+  if (!isXpMode.value) return
+  let oldLevel = item.value || 0
+  if (newLevel <= oldLevel) return
+
+  let costMultiplier = 0
+  if (type === 'attribute') costMultiplier = 5
+  else if (type === 'skill') costMultiplier = 3
+  else if (type === 'discipline') costMultiplier = 5
+  else if (type === 'advantage') costMultiplier = 3
+
+  let totalCost = 0
+  for (let l = oldLevel + 1; l <= newLevel; l++) {
+    totalCost += l * costMultiplier
+  }
+
+  const xpAvailable = character.value.experienceTotal - character.value.experienceSpent - xpSpent.value
+  if (totalCost > xpAvailable) {
+    alert('Experiência insuficiente!')
+    return
+  }
+
+  item.value = newLevel
+  xpSpent.value += totalCost
+  
+  xpCart.value.push({
+    name: item.DefinitionAttribute?.name || item.DefinitionSkill?.name || item.DefinitionDiscipline?.name,
+    cost: totalCost,
+    old: oldLevel,
+    new: newLevel,
+    type,
+    ref: item
+  })
+}
+
 
 const triggerFileInput = () => {
   if (fileInput.value) fileInput.value.click()

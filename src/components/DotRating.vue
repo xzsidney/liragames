@@ -5,8 +5,9 @@
       <div 
         v-for="i in max" 
         :key="i"
+        @click="$emit('update:value', i)"
         class="w-3 h-3 rounded-full border transition-all duration-300"
-        :class="getDotClass(i)"
+        :class="[getDotClass(i), { 'cursor-pointer hover:scale-125': interactive }]"
       ></div>
     </template>
     <!-- Se for renderização em caixas quadradas -->
@@ -14,8 +15,9 @@
       <div 
         v-for="i in max" 
         :key="i"
+        @click="$emit('update:value', i)"
         class="w-4 h-4 border transition-all duration-300"
-        :class="getBoxClass(i)"
+        :class="[getBoxClass(i), { 'cursor-pointer hover:scale-125': interactive }]"
       ></div>
     </template>
   </div>
@@ -31,14 +33,18 @@ const props = withDefaults(defineProps<{
   damageSuperficial?: number;
   damageAggravated?: number;
   containerClass?: string;
+  interactive?: boolean;
 }>(), {
   max: 5,
   color: 'gold',
   isBox: false,
   damageSuperficial: 0,
   damageAggravated: 0,
-  containerClass: ''
+  containerClass: '',
+  interactive: false
 })
+
+defineEmits(['update:value'])
 
 const getDotClass = (index: number) => {
   const isFilled = index <= props.value;
