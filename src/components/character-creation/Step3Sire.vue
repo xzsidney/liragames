@@ -5,7 +5,7 @@
       <p class="text-gray-400 font-serif text-sm">Todo neófito tem um criador. Quem o trouxe para a noite?</p>
     </header>
 
-    <div class="space-y-8 max-w-2xl mx-auto">
+    <div class="space-y-8 max-w-4xl mx-auto">
       <!-- Sire -->
       <div class="group bg-black/40 p-6 rounded-xl border border-white/10">
         <label class="block text-xs font-serif uppercase tracking-wider text-gray-400 mb-2 group-focus-within:text-gold transition-colors">Nome do Senhor (Sire)</label>
@@ -43,33 +43,49 @@
           </div>
         </div>
 
-        <div class="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-          <!-- Opção Limpa (Sempre disponível, a menos que digite algo que não bata) -->
-          <label v-if="'nenhum (modo limpo)'.includes(searchQuery.toLowerCase())" class="flex items-center gap-3 p-3 rounded-lg border border-white/10 bg-black/20 hover:bg-black/50 cursor-pointer transition-colors">
-            <input type="radio" v-model="store.form.backgroundId" value="none" class="text-blood-red bg-black border-white/20 focus:ring-blood-red" />
-            <div>
-              <p class="font-serif text-sm text-gray-200">Nenhum (Modo Limpo)</p>
-              <p class="text-xs text-gray-500">Sem recursos extras, mas sem inimigos no seu calcanhar.</p>
-            </div>
-          </label>
-
-          <!-- Pacotes Dinâmicos -->
-          <label 
-            v-for="pkg in filteredBackgrounds" 
-            :key="pkg.id"
-            class="flex flex-col p-3 rounded-lg border transition-colors cursor-pointer"
-            :class="store.form.backgroundId === pkg.id ? 'border-blood-red bg-blood-red/10' : 'border-white/10 bg-black/20 hover:bg-black/50'"
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          <!-- Opção Limpa -->
+          <div 
+            v-if="'nenhum (modo limpo)'.includes(searchQuery.toLowerCase())"
+            @click="store.form.backgroundId = 'none'"
+            class="cursor-pointer relative overflow-hidden rounded-lg border p-3 transition-all duration-300 group/card flex flex-col justify-between"
+            :class="store.form.backgroundId === 'none' ? 'border-blood-red bg-blood-red/10 shadow-[0_0_10px_rgba(139,0,0,0.2)]' : 'border-white/10 bg-black/40 hover:border-white/30 hover:bg-black/60'"
           >
-            <div class="flex items-center gap-3">
-              <input type="radio" v-model="store.form.backgroundId" :value="pkg.id" class="text-blood-red bg-black border-white/20 focus:ring-blood-red" />
-              <div>
-                <p class="font-serif text-sm" :class="store.form.backgroundId === pkg.id ? 'text-white' : 'text-gray-200'">{{ pkg.name }}</p>
-                <p class="text-xs text-gray-500">{{ pkg.description }}</p>
-              </div>
+            <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+            
+            <div>
+              <h3 class="font-serif text-sm font-bold mb-1 leading-tight" :class="store.form.backgroundId === 'none' ? 'text-white' : 'text-gray-300'">Nenhum (Modo Limpo)</h3>
+              <p class="text-[11px] text-gray-500 font-sans line-clamp-3 leading-snug">Sem recursos extras, mas sem inimigos no seu calcanhar.</p>
             </div>
             
+            <div class="mt-2 flex items-center justify-between text-[9px] uppercase tracking-widest border-t border-white/5 pt-2">
+              <span class="text-gold-dim border border-gold-dim/30 px-1.5 py-0.5 rounded-sm">Vantagens</span>
+              <span v-if="store.form.backgroundId === 'none'" class="text-blood-red font-bold">✓ Sel</span>
+            </div>
+          </div>
+
+          <!-- Pacotes Dinâmicos -->
+          <div 
+            v-for="pkg in filteredBackgrounds" 
+            :key="pkg.id"
+            @click="store.form.backgroundId = pkg.id"
+            class="cursor-pointer relative overflow-hidden rounded-lg border p-3 transition-all duration-300 group/card flex flex-col justify-between"
+            :class="store.form.backgroundId === pkg.id ? 'border-blood-red bg-blood-red/10 shadow-[0_0_10px_rgba(139,0,0,0.2)]' : 'border-white/10 bg-black/40 hover:border-white/30 hover:bg-black/60'"
+          >
+            <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+            
+            <div>
+              <h3 class="font-serif text-sm font-bold mb-1 leading-tight" :class="store.form.backgroundId === pkg.id ? 'text-white' : 'text-gray-300'">{{ pkg.name }}</h3>
+              <p class="text-[11px] text-gray-500 font-sans line-clamp-3 leading-snug">{{ pkg.description }}</p>
+            </div>
+            
+            <div class="mt-2 flex items-center justify-between text-[9px] uppercase tracking-widest border-t border-white/5 pt-2">
+              <span class="text-gold-dim border border-gold-dim/30 px-1.5 py-0.5 rounded-sm">Vantagens</span>
+              <span v-if="store.form.backgroundId === pkg.id" class="text-blood-red font-bold">✓ Sel</span>
+            </div>
+
             <!-- Expandable Bonuses Area -->
-            <div v-if="store.form.backgroundId === pkg.id" class="mt-3 pt-3 border-t border-blood-red/30 pl-8 animate-fade-in">
+            <div v-if="store.form.backgroundId === pkg.id" class="mt-3 pt-3 border-t border-blood-red/30 animate-fade-in">
               <p class="text-[10px] text-blood-red uppercase tracking-widest mb-2 font-bold">Conteúdo do Pacote:</p>
               <div v-for="bonus in store.getPackageBonusesSummary(pkg.id)" :key="bonus.group" class="mb-2 last:mb-0">
                 <span class="text-[9px] text-gray-400 uppercase tracking-wider block mb-1">{{ bonus.group }}</span>
@@ -80,9 +96,9 @@
                 </div>
               </div>
             </div>
-          </label>
+          </div>
           
-          <div v-if="filteredBackgrounds.length === 0 && !'nenhum (modo limpo)'.includes(searchQuery.toLowerCase())" class="text-center py-4 text-gray-500 text-sm italic">
+          <div v-if="filteredBackgrounds.length === 0 && !'nenhum (modo limpo)'.includes(searchQuery.toLowerCase())" class="col-span-full text-center py-4 text-gray-500 text-sm italic">
             Nenhum pacote encontrado com este nome.
           </div>
         </div>
