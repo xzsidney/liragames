@@ -106,15 +106,15 @@
           <div class="min-h-[400px]">
             
             <!-- ATRIBUTOS -->
-            <div v-if="activeTab === 'attributes'" class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div v-if="activeTab === 'attributes'" class="space-y-8 max-w-2xl">
               <div v-for="col in attributeColumns" :key="col.title">
-                <div class="font-serif text-xs tracking-[3px] uppercase text-gold-dim mb-4 flex items-center gap-3">
+                <div class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-6 flex items-center gap-4">
                   {{ col.title }}
-                  <div class="flex-1 h-px bg-gradient-to-r from-gold-dim to-transparent"></div>
+                  <div class="flex-1 h-px bg-gradient-to-r from-gold-dim/50 to-transparent"></div>
                 </div>
-                <div class="space-y-2.5">
-                  <div v-for="attr in col.items" :key="attr.id" class="flex justify-between items-center">
-                    <span class="font-serif text-[11px] tracking-wide text-text-main uppercase min-w-[90px]">{{ attr.DefinitionAttribute?.name }}</span>
+                <div class="space-y-3">
+                  <div v-for="attr in col.items" :key="attr.id" class="flex items-center">
+                    <span class="font-serif text-[11px] tracking-widest text-text-main uppercase w-40 shrink-0">{{ attr.DefinitionAttribute?.name }}</span>
                     <DotRating :value="attr.value" :max="5" color="gold" />
                   </div>
                 </div>
