@@ -339,6 +339,10 @@ const xpCart = ref<any[]>([])
 
 const toggleXpMode = () => {
   if (isXpMode.value) {
+    // Revert visual changes if cancelling
+    xpCart.value.forEach(change => {
+      change.ref.value = change.old
+    })
     xpSpent.value = 0
     xpCart.value = []
   }
