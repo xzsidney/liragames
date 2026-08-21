@@ -235,32 +235,7 @@ const handleLogout = () => {
       </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="py-12 px-6 bg-black text-text-muted text-xs">
-      <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between gap-8">
-        <div class="md:w-1/3">
-          <div class="text-white font-bold text-lg mb-4">LiraRPG</div>
-          <p>© 2026 LiraRPG, World of Darkness. Ferramenta gerada internamente para ilustrar narrativas Épicas.</p>
-        </div>
-        <div class="grid grid-cols-2 gap-12">
-          <div>
-            <h4 class="text-white font-bold mb-4 uppercase tracking-wider">Comunidade</h4>
-            <ul class="space-y-2">
-              <li><a href="#" class="hover:text-white">Discord</a></li>
-              <li><a href="#" class="hover:text-white">Instagram</a></li>
-              <li><a href="#" class="hover:text-white">Twitch</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="text-white font-bold mb-4 uppercase tracking-wider">Legal</h4>
-            <ul class="space-y-2">
-              <li><a href="#" class="hover:text-white">Termos de Uso</a></li>
-              <li><a href="#" class="hover:text-white">Privacidade</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </footer>
+
   </div>
 </template>
 
