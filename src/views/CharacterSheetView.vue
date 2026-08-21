@@ -400,6 +400,17 @@ const handleDotClick = (item: any, type: string, newLevel: number) => {
   })
 }
 
+const confirmDelete = async () => {
+  if (confirm('Tem certeza que deseja DELETAR este personagem para sempre?')) {
+    try {
+      await api.delete('/api/character-vampires/' + characterId.value)
+      router.push('/jogador/vampire')
+    } catch (e) {
+      alert('Erro ao deletar personagem')
+    }
+  }
+}
+
 
 const triggerFileInput = () => {
   if (fileInput.value) fileInput.value.click()
