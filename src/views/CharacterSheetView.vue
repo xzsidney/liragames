@@ -151,38 +151,9 @@
               </div>
             </div>
 
-            <!-- HISTÓRICO E OUTROS -->
-            <div v-if="activeTab === 'history'" class="space-y-6">
+            <!-- VANTAGENS E DEFEITOS -->
+            <div v-if="activeTab === 'advantages'" class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- História de Fundo -->
-                <div class="bg-gold/5 border border-border-dark rounded-xl p-6 leading-relaxed text-[0.95rem] text-text-main">
-                  <h3 class="font-serif text-[13px] tracking-wide text-gold mb-2">História de Fundo</h3>
-                  <p>{{ character?.history || 'Sua história ainda será escrita nas sombras.' }}</p>
-                </div>
-                
-                <!-- Qualidades e Defeitos -->
-                <div class="space-y-4">
-                  <div class="bg-blood/5 border border-blood/20 rounded-xl p-6">
-                    <h3 class="font-serif text-[10px] tracking-widest text-blood-bright uppercase mb-2">Fraqueza de Clã</h3>
-                    <p class="font-sans text-[0.88rem] text-text-main">As restrições de sua linhagem amaldiçoada pesam sobre sua alma.</p>
-                  </div>
-                  
-                  <div v-if="character?.CharacterVampireMeritFlaws?.length" class="bg-gold/5 border border-border-dark rounded-xl p-6">
-                    <h3 class="font-serif text-[13px] tracking-wide text-gold mb-4">Qualidades & Defeitos</h3>
-                    <ul class="space-y-2">
-                      <li v-for="mf in character.CharacterVampireMeritFlaws" :key="mf.id" class="flex justify-between items-start border-b border-white/5 pb-2 last:border-0 last:pb-0">
-                        <div>
-                          <span class="font-serif text-[11px] uppercase" :class="mf.DefinitionMeritFlaw?.type === 'QUALIDADE' ? 'text-green-400' : 'text-blood-red'">
-                            {{ mf.DefinitionMeritFlaw?.name }}
-                          </span>
-                          <p class="text-[10px] text-gray-500">{{ mf.DefinitionMeritFlaw?.description }}</p>
-                        </div>
-                        <span class="font-mono text-xs text-gold ml-2">+{{ mf.value }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                
                 <!-- Antecedentes -->
                 <div v-if="character?.CharacterVampireBackgrounds?.length" class="bg-gold/5 border border-border-dark rounded-xl p-6 md:col-span-2">
                   <h3 class="font-serif text-[13px] tracking-wide text-gold mb-4">Antecedentes (Backgrounds)</h3>
@@ -195,6 +166,73 @@
                       <p class="text-[10px] text-gray-500 leading-tight">{{ bg.DefinitionBackground?.description }}</p>
                     </div>
                   </div>
+                </div>
+
+                <!-- Qualidades e Defeitos -->
+                <div v-if="character?.CharacterVampireMeritFlaws?.length" class="bg-gold/5 border border-border-dark rounded-xl p-6 md:col-span-2">
+                  <h3 class="font-serif text-[13px] tracking-wide text-gold mb-4">Qualidades & Defeitos</h3>
+                  <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <li v-for="mf in character.CharacterVampireMeritFlaws" :key="mf.id" class="flex justify-between items-start bg-black/30 p-3 rounded border border-white/5">
+                      <div>
+                        <span class="font-serif text-[11px] uppercase" :class="mf.DefinitionMeritFlaw?.type === 'QUALIDADE' ? 'text-green-400' : 'text-blood-red'">
+                          {{ mf.DefinitionMeritFlaw?.name }}
+                        </span>
+                        <p class="text-[10px] text-gray-500 mt-1 leading-tight">{{ mf.DefinitionMeritFlaw?.description }}</p>
+                      </div>
+                      <span class="font-mono text-xs ml-2" :class="mf.DefinitionMeritFlaw?.type === 'QUALIDADE' ? 'text-green-400' : 'text-blood-red'">
+                        {{ mf.DefinitionMeritFlaw?.type === 'QUALIDADE' ? '+' : '-' }}{{ mf.value }}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- HISTÓRICO E OUTROS -->
+            <div v-if="activeTab === 'history'" class="space-y-8 max-w-4xl">
+              <!-- História -->
+              <div class="space-y-4">
+                <div class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 flex items-center gap-4">
+                  HISTÓRIA
+                  <div class="flex-1 h-px bg-gradient-to-r from-gold-dim/50 to-transparent"></div>
+                </div>
+                <div class="bg-[#0f0a0a] border border-white/5 rounded-xl p-6 leading-relaxed text-[0.95rem] text-gray-300">
+                  <p class="whitespace-pre-wrap font-serif">{{ character?.history || 'Sua história ainda será escrita nas sombras.' }}</p>
+                </div>
+              </div>
+
+              <!-- Dicas de Interpretação -->
+              <div class="space-y-4">
+                <div class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 flex items-center gap-4">
+                  DICAS DE INTERPRETAÇÃO
+                  <div class="flex-1 h-px bg-gradient-to-r from-gold-dim/50 to-transparent"></div>
+                </div>
+                <div class="bg-[#120505] border border-blood-red/20 rounded-xl p-6">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="text-xs">🎭</span>
+                    <h3 class="font-serif text-[10px] tracking-widest text-blood-bright uppercase">COMO INTERPRETAR</h3>
+                  </div>
+                  <div class="space-y-2 text-[0.88rem] text-gray-300 font-serif italic">
+                    <p v-if="character?.concept"><strong class="text-gold-dim not-italic">Conceito:</strong> {{ character.concept }}</p>
+                    <p v-if="character?.ambition"><strong class="text-gold-dim not-italic">Ambição:</strong> {{ character.ambition }}</p>
+                    <p v-if="character?.desire"><strong class="text-gold-dim not-italic">Desejo:</strong> {{ character.desire }}</p>
+                    <p v-if="!character?.concept && !character?.ambition && !character?.desire">Siga os instintos da sua Besta interior.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fraqueza de Clã -->
+              <div v-if="character?.DefinitionClan?.weakness" class="space-y-4">
+                <div class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim mb-4 flex items-center gap-4">
+                  FRAQUEZA DE CLÃ
+                  <div class="flex-1 h-px bg-gradient-to-r from-gold-dim/50 to-transparent"></div>
+                </div>
+                <div class="bg-[#0c0812] border border-purple-900/30 rounded-xl p-6">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="text-xs text-purple-400">⚠</span>
+                    <h3 class="font-serif text-[10px] tracking-widest text-purple-400 uppercase">A MALDIÇÃO DO SANGUE</h3>
+                  </div>
+                  <p class="font-serif text-[0.88rem] text-gray-300 leading-relaxed whitespace-pre-wrap">{{ character.DefinitionClan.weakness }}</p>
                 </div>
               </div>
             </div>
@@ -259,6 +297,7 @@ const tabs = [
   { id: 'attributes', label: 'ATRIBUTOS' },
   { id: 'skills', label: 'HABILIDADES' },
   { id: 'disciplines', label: 'DISCIPLINAS' },
+  { id: 'advantages', label: 'VANTAGENS' },
   { id: 'history', label: 'HISTÓRICO' }
 ]
 
