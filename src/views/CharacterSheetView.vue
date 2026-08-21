@@ -122,16 +122,15 @@
             </div>
 
             <!-- HABILIDADES -->
-            <div v-if="activeTab === 'skills'" class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-              <div v-for="col in skillColumns" :key="col.title">
-                <div class="font-serif text-xs tracking-[3px] uppercase text-gold-dim mb-4 flex items-center gap-3">
-                  {{ col.title }}
-                  <div class="flex-1 h-px bg-gradient-to-r from-gold-dim to-transparent"></div>
-                </div>
-                <div class="space-y-2">
-                  <div v-for="skill in col.items" :key="skill.id" class="flex justify-between items-center bg-gold/5 border border-border-dark rounded-md px-3 py-2">
-                    <span class="font-serif text-[11px] tracking-wide text-text-main capitalize">{{ skill.DefinitionSkill?.name }}</span>
-                    <DotRating :value="skill.value" :max="5" color="gold" />
+            <div v-if="activeTab === 'skills'" class="max-w-4xl">
+              <div class="w-full h-px bg-gradient-to-r from-blood-red/80 via-blood-red/40 to-transparent mb-8"></div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-6">
+                <div v-for="col in skillColumns" :key="col.title" class="space-y-3">
+                  <div v-for="skill in col.items" :key="skill.id" class="flex items-center">
+                    <span class="font-serif text-[11px] tracking-wide text-text-main capitalize truncate mr-2">{{ skill.DefinitionSkill?.name }}</span>
+                    <!-- Border dashed for leader -->
+                    <div class="flex-1 border-b border-dashed border-white/20 mx-2 self-end mb-1"></div>
+                    <DotRating :value="skill.value" :max="5" color="gold" class="shrink-0" />
                   </div>
                 </div>
               </div>
@@ -278,14 +277,25 @@ const attributeColumns = computed(() => {
   ]
 })
 
+const physicalSkillNames = ['Armas Brancas', 'Armas de Fogo', 'Atletismo', 'Briga', 'Condução', 'Furtividade', 'Ladroagem', 'Ofícios', 'Sobrevivência']
+const socialSkillNames = ['Empatia com Animais', 'Etiqueta', 'Intimidação', 'Liderança', 'Manha', 'Performance', 'Persuasão', 'Sagacidade', 'Subterfúgio']
+const mentalSkillNames = ['Ciência', 'Erudição', 'Finanças', 'Investigação', 'Medicina', 'Ocultismo', 'Percepção', 'Política', 'Tecnologia']
+
 const skillColumns = computed(() => {
   if (!character.value?.CharacterVampireSkills) return []
-  const skills = character.value.CharacterVampireSkills
+  let skills = character.value.CharacterVampireSkills
+  
+  // Sort alphabetically by name
+  skills = [...skills].sort((a: any, b: any) => {
+    const nameA = a.DefinitionSkill?.name || ''
+    const nameB = b.DefinitionSkill?.name || ''
+    return nameA.localeCompare(nameB)
+  })
   
   return [
-    { title: 'Talentos', items: skills.filter((s: any) => s.DefinitionSkill?.type === 'TALENTOS') },
-    { title: 'Perícias', items: skills.filter((s: any) => s.DefinitionSkill?.type === 'PERICIAS') },
-    { title: 'Conhecimentos', items: skills.filter((s: any) => s.DefinitionSkill?.type === 'CONHECIMENTOS') }
+    { title: 'Físicas', items: skills.filter((s: any) => physicalSkillNames.includes(s.DefinitionSkill?.name)) },
+    { title: 'Sociais', items: skills.filter((s: any) => socialSkillNames.includes(s.DefinitionSkill?.name)) },
+    { title: 'Mentais', items: skills.filter((s: any) => mentalSkillNames.includes(s.DefinitionSkill?.name)) }
   ]
 })
 
