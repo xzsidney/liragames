@@ -10,6 +10,8 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
     predators: [] as any[],
     attributesList: [] as any[],
     skillsList: [] as any[],
+    backgroundsList: [] as any[],
+    meritsFlawsList: [] as any[],
     bloodPotencies: [] as any[],
     resonances: [] as any[],
 
@@ -179,6 +181,7 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
       if (!pkg || !pkg.CreationPackageItems) return null;
 
       const summary: Record<string, string[]> = {
+        'Tipo de Predador': [],
         'Atributos': [],
         'Perícias': [],
         'Antecedentes': [],
@@ -198,20 +201,26 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
         } else if (item.itemType === 'SKILL') {
           const skill = this.skillsList.find(s => s.id === item.referenceId);
           if (skill) { name = skill.name; typeGroup = 'Perícias'; }
+        } else if (item.itemType === 'PREDATOR') {
+          const pred = this.predators.find(p => p.id === item.referenceId);
+          if (pred) { name = pred.name; typeGroup = 'Tipo de Predador'; amount = ''; prefix = ''; }
         } else if (item.itemType === 'BACKGROUND') {
           typeGroup = 'Antecedentes';
-          name = 'Um Antecedente'; // We don't load backgroundsList in store directly yet, we can't map names perfectly without a fetch, wait, we do fetch something!
+          const bg = this.backgroundsList.find(b => b.id === item.referenceId);
+          if (bg) name = bg.name;
         } else if (item.itemType === 'MERIT') {
           typeGroup = 'Qualidades';
-          name = 'Uma Qualidade';
+          const merit = this.meritsFlawsList.find(m => m.id === item.referenceId);
+          if (merit) name = merit.name;
         } else if (item.itemType === 'FLAW') {
           typeGroup = 'Defeitos';
-          name = 'Um Defeito';
-          prefix = '-'; // Flaws can be represented differently if needed
+          const flaw = this.meritsFlawsList.find(m => m.id === item.referenceId);
+          if (flaw) name = flaw.name;
+          prefix = '-'; 
         }
 
         if (typeGroup && name !== 'Desconhecido') {
-          summary[typeGroup].push(`${name} ${prefix}${amount}`);
+          summary[typeGroup].push(`${name} ${prefix}${amount}`.trim());
         }
       });
 
@@ -249,7 +258,7 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
     async fetchLibraries() {
       this.isLoading = true
       try {
-        const [pkgRes, clanRes, predRes, archRes, resRes, bpRes, attrRes, skRes] = await Promise.all([
+        const [pkgRes, clanRes, predRes, archRes, resRes, bpRes, attrRes, skRes, bgRes, mfRes] = await Promise.all([
           api.get('/api/creation-packages'),
           api.get('/api/definition-clans'),
           api.get('/api/definition-predators'),
@@ -257,7 +266,9 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
           api.get('/api/definition-resonances'),
           api.get('/api/definition-blood-potencies'),
           api.get('/api/definition-attributes'),
-          api.get('/api/definition-skills')
+          api.get('/api/definition-skills'),
+          api.get('/api/definition-backgrounds'),
+          api.get('/api/definition-merit-flaws')
         ])
         this.packages = pkgRes.data
         this.clans = clanRes.data
@@ -267,6 +278,8 @@ export const useCharacterCreationStore = defineStore('characterCreation', {
         this.bloodPotencies = bpRes.data
         this.attributesList = attrRes.data
         this.skillsList = skRes.data
+        this.backgroundsList = bgRes.data
+        this.meritsFlawsList = mfRes.data
       } catch (err: any) {
         console.error('Erro ao carregar bibliotecas:', err)
         if (err.response && err.response.status === 401) {
