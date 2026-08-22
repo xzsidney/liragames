@@ -216,7 +216,7 @@
                     <div v-for="bg in character.CharacterVampireBackgrounds" :key="bg.id" class="bg-black/30 p-3 rounded border border-white/5">
                       <div class="flex justify-between items-center mb-1">
                         <span class="font-serif text-[11px] uppercase text-gray-200">{{ bg.DefinitionBackground?.name }}</span>
-                        <DotRating :value="bg.value" :max="5" color="gold" />
+                        <DotRating :value="bg.value" :max="5" color="gold" :interactive="isXpMode" @update:value="val => handleDotClick(bg, 'advantage', val)" />
                       </div>
                       <p class="text-[10px] text-gray-500 leading-tight">{{ bg.DefinitionBackground?.description }}</p>
                     </div>
@@ -316,6 +316,55 @@
       </div>
     </div>
 
+
+    <!-- Modal Add Item -->
+    <div v-if="showAddModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+      <div class="bg-bg-deep border border-border-dark rounded-xl w-full max-w-md max-h-[80vh] flex flex-col shadow-2xl">
+        <div class="p-4 border-b border-border-dark flex justify-between items-center bg-black/40">
+          <h3 class="font-serif text-gold text-lg uppercase tracking-widest">
+            Adicionar {{ showAddModal === 'discipline' ? 'Disciplina' : 'Vantagem' }}
+          </h3>
+          <button @click="showAddModal = null" class="text-gray-500 hover:text-white">✕</button>
+        </div>
+        
+        <div class="p-4 overflow-y-auto flex-1 space-y-2 custom-scrollbar">
+          <template v-if="showAddModal === 'discipline'">
+            <div v-for="disc in allDisciplines" :key="disc.id" 
+                 @click="addNewDiscipline(disc)"
+                 class="p-3 border border-white/5 rounded bg-white/5 hover:bg-blood/20 cursor-pointer transition-colors group">
+              <h4 class="font-serif text-blood-bright text-sm tracking-wide group-hover:text-white">{{ disc.name }}</h4>
+              <p class="text-xs text-gray-400 mt-1 truncate">{{ disc.description }}</p>
+            </div>
+          </template>
+
+          <template v-if="showAddModal === 'advantage'">
+            <div class="mb-4">
+              <h4 class="font-serif text-gold-dim text-xs tracking-widest uppercase mb-2 border-b border-white/10 pb-1">Antecedentes</h4>
+              <div v-for="bg in allBackgrounds" :key="'bg'+bg.id" 
+                   @click="addNewAdvantage(bg, 'background')"
+                   class="p-3 border border-white/5 rounded bg-white/5 hover:bg-gold-dim/20 cursor-pointer transition-colors group mb-2">
+                <h4 class="font-serif text-gold text-sm tracking-wide group-hover:text-white">{{ bg.name }}</h4>
+                <p class="text-xs text-gray-400 mt-1 truncate">{{ bg.description }}</p>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="font-serif text-gold-dim text-xs tracking-widest uppercase mb-2 border-b border-white/10 pb-1">Qualidades e Defeitos</h4>
+              <div v-for="mf in allMerits" :key="'mf'+mf.id" 
+                   @click="addNewAdvantage(mf, 'merit')"
+                   class="p-3 border border-white/5 rounded bg-white/5 hover:bg-gold-dim/20 cursor-pointer transition-colors group mb-2">
+                <h4 class="font-serif text-sm tracking-wide group-hover:text-white" :class="mf.type === 'QUALIDADE' ? 'text-green-400' : 'text-blood-red'">
+                  [{{ mf.type }}] {{ mf.name }}
+                </h4>
+                <p class="text-xs text-gray-400 mt-1 truncate">{{ mf.description }}</p>
+              </div>
+            </div>
+          </template>
+
+</div>
+</div>
+</div>
+
 </template>
 
 <script setup lang="ts">
@@ -332,6 +381,74 @@ const character = ref<any>(null)
 const characterId = ref<string>('')
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploading = ref(false)
+
+
+const showAddModal = ref<'discipline' | 'advantage' | null>(null)
+const allDisciplines = ref<any[]>([])
+const allBackgrounds = ref<any[]>([])
+const allMerits = ref<any[]>([])
+
+const fetchDefinitions = async (type: 'discipline' | 'advantage') => {
+  try {
+    if (type === 'discipline' && allDisciplines.value.length === 0) {
+      const res = await api.get('/api/definition-disciplines');
+      allDisciplines.value = res.data;
+    }
+    if (type === 'advantage' && allBackgrounds.value.length === 0) {
+      const [bgRes, mfRes] = await Promise.all([
+        api.get('/api/definition-backgrounds'),
+        api.get('/api/definition-merits-flaws')
+      ]);
+      allBackgrounds.value = bgRes.data;
+      allMerits.value = mfRes.data;
+    }
+    showAddModal.value = type;
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+const addNewDiscipline = (def: any) => {
+  if (!character.value.CharacterVampireDisciplines) character.value.CharacterVampireDisciplines = [];
+  // Verifica se ja tem
+  if (character.value.CharacterVampireDisciplines.find((d:any) => d.definitionDisciplineId === def.id)) {
+    showAddModal.value = null;
+    return;
+  }
+  
+  character.value.CharacterVampireDisciplines.push({
+    definitionDisciplineId: def.id,
+    value: 0,
+    DefinitionDiscipline: def
+  });
+  showAddModal.value = null;
+}
+
+const addNewAdvantage = (def: any, type: 'background' | 'merit') => {
+  if (type === 'background') {
+    if (!character.value.CharacterVampireBackgrounds) character.value.CharacterVampireBackgrounds = [];
+    if (character.value.CharacterVampireBackgrounds.find((b:any) => b.definitionBackgroundId === def.id)) {
+      showAddModal.value = null; return;
+    }
+    character.value.CharacterVampireBackgrounds.push({
+      definitionBackgroundId: def.id,
+      value: 1, // Backgrounds can be leveled
+      DefinitionBackground: def
+    });
+  } else {
+    if (!character.value.CharacterVampireMeritFlaws) character.value.CharacterVampireMeritFlaws = [];
+    if (character.value.CharacterVampireMeritFlaws.find((m:any) => m.definitionMeritFlawId === def.id)) {
+      showAddModal.value = null; return;
+    }
+    character.value.CharacterVampireMeritFlaws.push({
+      definitionMeritFlawId: def.id,
+      details: '',
+      DefinitionMeritFlaw: def
+    });
+  }
+  showAddModal.value = null;
+}
+
 
 const isXpMode = ref(false)
 const xpSpent = ref(0)
@@ -357,7 +474,9 @@ const confirmXpChanges = async () => {
       experienceSpent: updatedTotalSpent,
       attributes: character.value.CharacterVampireAttributes,
       skills: character.value.CharacterVampireSkills,
-      disciplines: character.value.CharacterVampireDisciplines
+      disciplines: character.value.CharacterVampireDisciplines,
+      backgrounds: character.value.CharacterVampireBackgrounds,
+      meritsFlaws: character.value.CharacterVampireMeritFlaws
     })
     
     character.value.experienceSpent = updatedTotalSpent
