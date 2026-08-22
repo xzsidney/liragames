@@ -193,8 +193,15 @@
 
             <!-- DISCIPLINAS -->
             <div v-if="activeTab === 'disciplines'" class="space-y-4">
-              <div v-if="!character?.CharacterVampireDisciplines?.length" class="text-parchment-dim italic text-center py-10">
+              <div v-if="!character?.CharacterVampireDisciplines?.length && !isXpMode" class="text-parchment-dim italic text-center py-10">
                 Nenhuma Disciplina manifestada.
+              </div>
+
+              <!-- Add Button -->
+              <div v-if="isXpMode" class="mt-6 flex justify-center">
+                <button @click="fetchDefinitions('discipline')" class="px-6 py-2 border border-dashed border-blood-red/50 text-blood-bright hover:bg-blood-red/10 rounded font-serif text-xs tracking-widest uppercase transition-colors">
+                  + Despertar Nova Disciplina
+                </button>
               </div>
 
               <div v-for="disc in character?.CharacterVampireDisciplines" :key="disc.id" 
@@ -208,6 +215,16 @@
 
             <!-- VANTAGENS E DEFEITOS -->
             <div v-if="activeTab === 'advantages'" class="space-y-6">
+              <div v-if="!(character?.CharacterVampireBackgrounds?.length || character?.CharacterVampireMeritFlaws?.length) && !isXpMode" class="text-parchment-dim italic text-center py-10">
+                Nenhuma Vantagem registrada.
+              </div>
+
+              <div v-if="isXpMode" class="mt-4 flex justify-center">
+                <button @click="fetchDefinitions('advantage')" class="px-6 py-2 border border-dashed border-gold-dim/50 text-gold-dim hover:bg-gold-dim/10 rounded font-serif text-xs tracking-widest uppercase transition-colors">
+                  + Adicionar Vantagem
+                </button>
+              </div>
+
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Antecedentes -->
                 <div v-if="character?.CharacterVampireBackgrounds?.length" class="bg-gold/5 border border-border-dark rounded-xl p-6 md:col-span-2">
