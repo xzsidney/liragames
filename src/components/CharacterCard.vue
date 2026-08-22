@@ -8,6 +8,7 @@
       <img 
         :src="character.avatarUrl ? (character.avatarUrl.startsWith('http') ? character.avatarUrl : API_BASE_URL + character.avatarUrl) : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'600\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%231a0b12\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23c9a84c\' font-family=\'serif\' font-size=\'48\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3E%E2%98%A5%3C/text%3E%3C/svg%3E'" 
         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 saturate-[0.85] group-hover:saturate-100"
+        @error="handleImageError"
       />
       <!-- Gradiente por cima da imagem -->
       <div class="absolute bottom-0 left-0 right-0 h-3/5 bg-gradient-to-t from-bg-deep via-bg-deep/80 to-transparent pointer-events-none"></div>
@@ -48,6 +49,11 @@
 </template>
 
 <script setup lang="ts">
+const handleImageError = (e: Event) => {
+  const target = e.target as HTMLImageElement;
+  if (target) target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'600\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%231a0b12\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23c9a84c\' font-family=\'serif\' font-size=\'48\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3E%E2%98%A5%3C/text%3E%3C/svg%3E';
+}
+
 import { API_BASE_URL } from '../services/api'
 
 defineProps<{
