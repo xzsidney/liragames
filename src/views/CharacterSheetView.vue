@@ -252,7 +252,7 @@
                         <p class="text-[10px] text-gray-500 mt-1 leading-tight">{{ mf.DefinitionMeritFlaw?.description }}</p>
                       </div>
                       <span class="font-mono text-xs ml-2" :class="mf.DefinitionMeritFlaw?.type === 'QUALIDADE' ? 'text-green-400' : 'text-blood-red'">
-                        {{ mf.DefinitionMeritFlaw?.type === 'QUALIDADE' ? '+' : '-' }}{{ mf.value }}
+                        {{ mf.DefinitionMeritFlaw?.type === 'QUALIDADE' ? '+' : '-' }}{{ mf.DefinitionMeritFlaw?.cost }}
                       </span>
                     </li>
                   </ul>
@@ -414,7 +414,7 @@ const fetchDefinitions = async (type: 'discipline' | 'advantage') => {
     if (type === 'advantage' && allBackgrounds.value.length === 0) {
       const [bgRes, mfRes] = await Promise.all([
         api.get('/api/definition-backgrounds'),
-        api.get('/api/definition-merits-flaws')
+        api.get('/api/definition-merit-flaws')
       ]);
       allBackgrounds.value = bgRes.data;
       allMerits.value = mfRes.data;
@@ -427,17 +427,16 @@ const fetchDefinitions = async (type: 'discipline' | 'advantage') => {
 
 const addNewDiscipline = (def: any) => {
   if (!character.value.CharacterVampireDisciplines) character.value.CharacterVampireDisciplines = [];
-  // Verifica se ja tem
   if (character.value.CharacterVampireDisciplines.find((d:any) => d.definitionDisciplineId === def.id)) {
-    showAddModal.value = null;
-    return;
+    showAddModal.value = null; return;
   }
-  
-  character.value.CharacterVampireDisciplines.push({
+  const newItem = {
     definitionDisciplineId: def.id,
     value: 0,
     DefinitionDiscipline: def
-  });
+  };
+  character.value.CharacterVampireDisciplines.push(newItem);
+  xpCart.value.push({ isNewItem: true, arrayRef: character.value.CharacterVampireDisciplines, item: newItem });
   showAddModal.value = null;
 }
 
@@ -447,21 +446,36 @@ const addNewAdvantage = (def: any, type: 'background' | 'merit') => {
     if (character.value.CharacterVampireBackgrounds.find((b:any) => b.definitionBackgroundId === def.id)) {
       showAddModal.value = null; return;
     }
-    character.value.CharacterVampireBackgrounds.push({
+    const newItem = {
       definitionBackgroundId: def.id,
-      value: 1, // Backgrounds can be leveled
+      value: 0,
       DefinitionBackground: def
-    });
+    };
+    character.value.CharacterVampireBackgrounds.push(newItem);
+    xpCart.value.push({ isNewItem: true, arrayRef: character.value.CharacterVampireBackgrounds, item: newItem });
   } else {
     if (!character.value.CharacterVampireMeritFlaws) character.value.CharacterVampireMeritFlaws = [];
     if (character.value.CharacterVampireMeritFlaws.find((m:any) => m.definitionMeritFlawId === def.id)) {
       showAddModal.value = null; return;
     }
-    character.value.CharacterVampireMeritFlaws.push({
+    
+    // Deduct XP immediately for merits
+    if (def.type === 'QUALIDADE') {
+      const cost = def.cost * 3;
+      if (character.value.experienceTotal - character.value.experienceSpent - xpSpent.value < cost) {
+         alert('Experiência insuficiente para essa Qualidade!');
+         return;
+      }
+      xpSpent.value += cost;
+    }
+    
+    const newItem = {
       definitionMeritFlawId: def.id,
       details: '',
       DefinitionMeritFlaw: def
-    });
+    };
+    character.value.CharacterVampireMeritFlaws.push(newItem);
+    xpCart.value.push({ isNewItem: true, arrayRef: character.value.CharacterVampireMeritFlaws, item: newItem });
   }
   showAddModal.value = null;
 }
@@ -475,7 +489,12 @@ const toggleXpMode = () => {
   if (isXpMode.value) {
     // Revert visual changes if cancelling
     xpCart.value.forEach(change => {
-      change.ref.value = change.old
+      if (change.isNewItem) {
+         const idx = change.arrayRef.indexOf(change.item);
+         if (idx > -1) change.arrayRef.splice(idx, 1);
+      } else {
+         change.ref.value = change.old
+      }
     })
     xpSpent.value = 0
     xpCart.value = []
