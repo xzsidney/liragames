@@ -192,16 +192,26 @@ const fetchCharacterAndInventory = async () => {
   }
 }
 
-const toggleEquip = (item: any) => {
-  item.equipped = item.equipped ? 0 : 1
+const toggleEquip = async (item: any) => {
+  try {
+    const res = await api.put(`/api/character-vampires/${characterId.value}/equipments/${item.definitionEquipmentId}/equip`);
+    item.equipped = res.data.equipped ? 1 : 0;
+  } catch (err) {
+    console.error('Erro ao equipar:', err);
+    alert('Erro ao equipar o item.');
+  }
 }
 
 const buyItem = async (equipment: any) => {
   try {
-    // Adiciona ao inventario local do personagem
-    const existing = inventoryItems.value.find(i => i.definitionEquipmentId === equipment.id)
+    const res = await api.post(`/api/character-vampires/${characterId.value}/equipments`, {
+      definitionEquipmentId: equipment.id
+    });
+    
+    // Atualiza o inventário local
+    const existing = inventoryItems.value.find(i => i.definitionEquipmentId === equipment.id);
     if (existing) {
-      existing.quantity += 1
+      existing.quantity = res.data.quantity;
     } else {
       inventoryItems.value.push({
         characterVampireId: characterId.value,
@@ -209,12 +219,13 @@ const buyItem = async (equipment: any) => {
         quantity: 1,
         equipped: 0,
         DefinitionEquipment: equipment
-      })
+      });
     }
-    activeTab.value = 'inventario'
-    alert(`"${equipment.name}" foi adicionado ao seu inventário!`)
+    activeTab.value = 'inventario';
+    alert(`"${equipment.name}" foi adicionado ao seu inventário!`);
   } catch (err) {
-    console.error('Erro ao comprar item:', err)
+    console.error('Erro ao comprar item:', err);
+    alert('Erro ao processar a compra.');
   }
 }
 

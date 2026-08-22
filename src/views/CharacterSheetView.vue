@@ -611,7 +611,8 @@ const tabs = [
   { id: 'skills', label: 'HABILIDADES' },
   { id: 'disciplines', label: 'DISCIPLINAS' },
   { id: 'advantages', label: 'VANTAGENS' },
-  { id: 'history', label: 'HISTÓRICO' }
+  { id: 'history', label: 'HISTÓRICO' },
+    { id: 'equipment', label: 'COMBATE' }
 ]
 
 const physicalAttrNames = ['Força', 'Destreza', 'Vigor', 'Strength', 'Dexterity', 'Stamina']
