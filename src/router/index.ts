@@ -7,6 +7,7 @@ import VampireDashboardView from '../views/VampireDashboardView.vue'
 import CharacterVampireCreateView from '../views/CharacterVampireCreateView.vue'
 import CharacterHubView from '../views/CharacterHubView.vue'
 import RadarNocturnaView from '../views/RadarNocturnaView.vue'
+import CharacterHuntingView from '../views/CharacterHuntingView.vue'
 import CharacterSheetView from '../views/CharacterSheetView.vue'
 import CharacterInventoryStoreView from '../views/CharacterInventoryStoreView.vue'
 import CharacterNewsView from '../views/CharacterNewsView.vue'
@@ -52,6 +53,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/personagem/radar',
     name: 'RadarNocturna',
     component: RadarNocturnaView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/personagem/cacada',
+    name: 'CharacterHunting',
+    component: CharacterHuntingView,
     meta: { requiresAuth: true }
   },
   {
