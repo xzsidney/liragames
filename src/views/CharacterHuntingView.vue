@@ -6,7 +6,7 @@
       <div class="flex items-center gap-3">
         <span class="text-cyan-400 text-2xl drop-shadow-[0_0_10px_rgba(0,255,255,0.8)]">âšœ</span>
         <div>
-          <h1 class="text-cyan-400 font-serif text-xl tracking-widest uppercase">Caçada TÃ¡tico</h1>
+          <h1 class="text-cyan-400 font-serif text-xl tracking-widest uppercase">CaÃ§ada TÃ¡tico</h1>
           <span class="text-[rgba(0,150,255,0.8)] text-xs tracking-widest uppercase">Nocturna</span>
         </div>
       </div>
@@ -23,7 +23,7 @@
     <!-- MAPA E DOSSIÃŠ -->
     <main v-else class="mapa-container relative w-full h-[calc(100vh-85px)] overflow-hidden flex items-center justify-center bg-[#02050a]" @click="closeSidebarIfClickOutside">
       
-      <div class="Caçada relative w-[85vh] h-[85vh] max-w-[800px] max-h-[800px] rounded-full border-2 border-[rgba(0,150,255,0.4)] bg-[radial-gradient(circle_at_center,rgba(0,50,100,0.1)_0%,rgba(0,10,20,0.8)_100%)] shadow-[0_0_40px_rgba(0,150,255,0.1),inset_0_0_60px_rgba(0,150,255,0.15)] overflow-hidden">
+      <div class="radar relative w-[85vh] h-[85vh] max-w-[800px] max-h-[800px] rounded-full border-2 border-[rgba(0,150,255,0.4)] bg-[radial-gradient(circle_at_center,rgba(0,50,100,0.1)_0%,rgba(0,10,20,0.8)_100%)] shadow-[0_0_40px_rgba(0,150,255,0.1),inset_0_0_60px_rgba(0,150,255,0.15)] overflow-hidden">
         
         <!-- Crosshairs & Grid -->
         <div class="absolute inset-y-0 left-1/2 w-px bg-[rgba(0,150,255,0.3)] -translate-x-1/2"></div>
@@ -36,10 +36,10 @@
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-[rgba(0,150,255,0.25)] rounded-full pointer-events-none w-2/4 h-2/4"></div>
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-[rgba(0,150,255,0.25)] rounded-full pointer-events-none w-3/4 h-3/4"></div>
 
-        <!-- Caçada Sweep -->
+        <!-- CaÃ§ada Sweep -->
         <div class="absolute inset-0 origin-center rounded-full pointer-events-none z-10 animate-sweep" style="background: conic-gradient(from 0deg, transparent 70%, rgba(0, 200, 255, 0.1) 90%, rgba(0, 255, 255, 0.6) 100%);"></div>
         
-        <!-- Caçada Center -->
+        <!-- CaÃ§ada Center -->
         <div class="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400 shadow-[0_0_15px_#00ffff] z-20"></div>
 
         <!-- Blips Content -->
@@ -198,7 +198,7 @@ const seededRandom = () => {
 const fetchLocations = async () => {
   try {
     characterId.value = (route.query.id as string) || localStorage.getItem('lira_active_character_id') || ''
-    const res = await api.get('/api/Caçada/locations')
+    const res = await api.get('/api/radar/locations')
     const zones = res.data
 
     const nodes: any[] = []
@@ -280,7 +280,7 @@ const closeSidebar = () => {
 
 const closeSidebarIfClickOutside = (e: MouseEvent) => {
   const target = e.target as HTMLElement
-  if (target.closest('.mapa-container') && !target.closest('.Caçada') && !target.closest('aside')) {
+  if (target.closest('.mapa-container') && !target.closest('.radar') && !target.closest('aside')) {
     closeSidebar()
   }
 }
