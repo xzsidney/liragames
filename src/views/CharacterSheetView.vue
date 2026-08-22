@@ -185,7 +185,7 @@
                     <span class="font-serif text-[11px] tracking-wide text-text-main capitalize truncate mr-2">{{ skill.DefinitionSkill?.name }}</span>
                     <!-- Border dashed for leader -->
                     <div class="flex-1 border-b border-dashed border-white/20 mx-2 self-end mb-1"></div>
-                    <DotRating :value="skill.value" :max="5" color="gold" class="shrink-0" />
+                    <DotRating :value="skill.value" :max="5" color="gold" class="shrink-0" :interactive="isXpMode" @update:value="val => handleDotClick(skill, 'skill', val)" />
                   </div>
                 </div>
               </div>
@@ -202,7 +202,7 @@
                 <span class="font-serif text-[13px] tracking-wide text-parchment capitalize flex-1">
                   {{ disc.DefinitionDiscipline?.name }}
                 </span>
-                <DotRating :value="disc.value" :max="5" color="blue" />
+                <DotRating :value="disc.value" :max="5" color="blue" :interactive="isXpMode" @update:value="val => handleDotClick(disc, 'discipline', val)" />
               </div>
             </div>
 
@@ -357,6 +357,7 @@ const confirmXpChanges = async () => {
       experienceSpent: updatedTotalSpent,
       attributes: character.value.CharacterVampireAttributes,
       skills: character.value.CharacterVampireSkills,
+      disciplines: character.value.CharacterVampireDisciplines
     })
     
     character.value.experienceSpent = updatedTotalSpent
