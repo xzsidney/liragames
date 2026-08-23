@@ -70,7 +70,7 @@ const huntMessage = ref('')
 
 const fetchHunts = async () => {
   try {
-    const res = await api.get('/api/idle-missions?category=HUNT')
+    const res = await api.get('/api/missions-idle?category=HUNT')
     missions.value = res.data
   } catch (e) {
     console.error(e)
