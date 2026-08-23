@@ -149,11 +149,7 @@
           <div class="p-5 border-t border-vamp-border bg-black/60 mt-auto rounded-b-lg">
             <div class="text-[10px] uppercase tracking-widest text-parchment-dim mb-4 font-serif text-center">Ações Operacionais</div>
             <div class="grid grid-cols-2 gap-4">
-              <button @click="router.push('/personagem/cacada?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-vamp-bg hover:border-vamp-c2 hover:shadow-[0_0_20px_rgba(192,57,43,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px]">
-                <div class="text-xl mb-2 text-vamp-c2 group-hover:scale-110 transition-transform">🩸</div>
-                <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Caçada Urbana</div>
-                <div class="text-[9px] text-parchment-dim/60 uppercase">Zonas de Alimentação</div>
-              </button>
+              
               <button @click="router.push('/personagem/radar?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-blue-900/80 hover:shadow-[0_0_20px_rgba(30,58,138,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px]">
                 <div class="text-xl mb-2 text-blue-700/80 group-hover:scale-110 transition-transform">📡</div>
                 <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Varredura Tática</div>
@@ -169,10 +165,10 @@
                 <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Acessar Gazeta</div>
                 <div class="text-[9px] text-parchment-dim/60 uppercase">Informações da Noite</div>
               </button>
-              <button @click="router.push('/personagem/aventuras?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-cyan-900/80 hover:shadow-[0_0_20px_rgba(0,150,255,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px] col-span-2 md:col-span-1">
-                <div class="text-xl mb-2 text-cyan-600 group-hover:scale-110 transition-transform">⏱️</div>
-                <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Missões (AFK)</div>
-                <div class="text-[9px] text-parchment-dim/60 uppercase">Infiltração e Operações</div>
+              <button @click="router.push('/personagem/aventuras?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-vamp-bg hover:border-vamp-c2 hover:shadow-[0_0_20px_rgba(192,57,43,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px]">
+                <div class="text-xl mb-2 text-vamp-c2 group-hover:scale-110 transition-transform">🩸</div>
+                <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Incursões e Caçadas</div>
+                <div class="text-[9px] text-parchment-dim/60 uppercase">Missões de Campo e Alimentação</div>
               </button>
             </div>
           </div>

@@ -1,102 +1,195 @@
 <template>
-  <div class="min-h-screen demiplane-bg text-parchment font-sans relative overflow-x-hidden selection:bg-blood-red selection:text-white pb-20">
-    <!-- SUBTLE NOISE/TEXTURE -->
-    <div class="fixed inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay z-0" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
-
-    <!-- NAVBAR -->
-    <nav class="relative z-20 border-b border-vamp-border bg-black/80 backdrop-blur-md sticky top-0">
+  <div class="min-h-screen bg-[#050505] text-parchment font-sans pb-20">
+    <nav class="border-b border-vamp-border bg-black/80 backdrop-blur-md sticky top-0 z-20">
       <div class="max-w-[1200px] mx-auto px-4 h-12 flex items-center justify-between">
         <button @click="router.push(`/personagem/hub?id=${characterId}`)" class="text-[10px] text-gray-400 hover:text-white flex items-center gap-1 font-serif uppercase tracking-widest transition-colors">
-          <span>←</span> Voltar ao Hub
+          <span>←</span> VOLTAR AO HUB
         </button>
-
-        <div class="flex items-center gap-4 text-[10px] font-serif tracking-widest uppercase">
-          <span class="text-gray-500">HUB DE AVENTURA</span>
+        <div class="text-[10px] font-serif tracking-widest uppercase text-vamp-c2">
+          INCURSÕES DA NOITE
         </div>
       </div>
     </nav>
 
-    <!-- MAIN CONTENT -->
-    <main class="relative z-10 max-w-[1200px] mx-auto px-4 py-8 space-y-10">
-      <!-- HEADER -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-vamp-border">
-        <div>
-          <h1 class="demiplane-title text-3xl md:text-5xl text-white">
-            Caçada & Investigações da Semana
-          </h1>
-          <h2 class="demiplane-text text-vamp-c2 mt-1">
-            Escolha uma missão para consumir seu ponto de ação diário e avançar na narrativa.
-          </h2>
-        </div>
-
-        <div class="bg-black/60 border border-vamp-c2 rounded px-6 py-4 text-center">
-          <span class="text-[10px] font-sans font-bold uppercase tracking-widest text-vamp-c2 block">Energia Diária</span>
-          <span class="text-xl font-serif text-white mt-1 block">1 / 1 Ponto</span>
-        </div>
-      </div>
-
-      <!-- MISSÃO PRINCIPAL DA SEMANA (CARD DE DESTAQUE) -->
-      <div class="demiplane-box rounded-sm p-8 hover:border-vamp-c2/80 transition-all duration-300 relative overflow-hidden bg-gradient-to-tr from-black to-vamp-c2/5">
-        <div class="absolute top-0 right-0 w-80 h-80 bg-vamp-c2/10 blur-[100px] rounded-full pointer-events-none"></div>
-
-        <div class="flex items-center gap-3 mb-4">
-          <span class="px-3 py-1 bg-vamp-c2 text-black text-[10px] font-sans uppercase tracking-widest font-bold rounded-sm">
-            Missão Principal
-          </span>
-          <span class="text-[11px] text-gray-400 font-sans tracking-widest uppercase">Dificuldade: Média • V5</span>
-        </div>
-
-        <h2 class="font-sans font-bold text-2xl md:text-3xl text-white uppercase tracking-wider mb-3">
-          Capítulo 1: O Segredo debaixo do Anhangabaú
-        </h2>
-        <p class="text-sm text-gray-300 font-sans leading-relaxed mb-6">
-          Um mensageiro do Primógeno Nosferatu foi interceptado nas galerias subterrâneas de São Paulo. Você foi encarregado de investigar o local antes que os Caçadores da Segunda Inquisição descubram o refúgio.
+    <main class="max-w-[1200px] mx-auto px-4 py-8 space-y-10">
+      <header class="text-center border-b border-vamp-border pb-6">
+        <h1 class="font-serif text-3xl md:text-5xl text-vamp-c2 mb-2 uppercase tracking-widest">Incursões & Caçadas</h1>
+        <p class="text-xs text-parchment-dim uppercase tracking-widest font-serif max-w-2xl mx-auto">
+          Escolha uma área de atuação. Suas estatísticas definirão seu sucesso.
         </p>
+      </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-xs bg-black/60 p-4 rounded border border-vamp-border font-sans">
-          <div>Recompensa: <strong class="text-vamp-c2">+10 XP</strong></div>
-          <div>Itens Possíveis: <strong class="text-white">Chave Antiga, Relatório</strong></div>
-          <div>Custo: <strong class="text-vamp-c1">1 Ponto de Ação</strong></div>
-        </div>
-
-        <button 
-          @click="startSoloAdventure('cap1')"
-          class="w-full md:w-auto px-8 py-3 bg-black hover:bg-vamp-c2 text-vamp-c2 hover:text-black border border-vamp-c2 font-sans font-bold text-sm uppercase tracking-widest rounded-sm transition-all duration-300 flex items-center justify-center gap-3"
-        >
-          <span>Iniciar Aventura Solo</span>
-          <span>→</span>
-        </button>
+      <div v-if="loading" class="text-center py-20 text-vamp-c2 text-sm uppercase tracking-widest font-serif animate-pulse">
+        Sincronizando com a rede...
       </div>
 
-      <!-- HISTÓRICO DE DIÁRIOS DE BORDO CONCLUÍDOS -->
-      <div class="demiplane-box p-6 md:p-8 rounded-sm">
-        <h3 class="font-sans font-bold text-lg text-white uppercase tracking-wider border-b border-vamp-border pb-3 mb-6">
-          📜 Diário de Bordo & Registro de Caçadas
-        </h3>
+      <div v-else-if="activeMission" class="border border-vamp-c2 bg-black/60 p-6 rounded-md">
+        <h2 class="text-xl font-serif text-vamp-c2 uppercase tracking-widest mb-4">Missão em Andamento: {{ activeMission.currentReport?.title || 'Desconhecida' }}</h2>
+        
+        <div class="space-y-6">
+          <div class="bg-vamp-bg border border-vamp-border p-4 rounded text-sm font-sans space-y-2">
+            <div class="flex justify-between text-xs text-gray-400 uppercase font-bold tracking-widest mb-2">
+              <span>Etapa {{ activeMission.currentStage }} / {{ activeMission.totalStages }}</span>
+              <span v-if="!activeMission.readyToResolve" class="text-vamp-c2 animate-pulse">Em progresso...</span>
+              <span v-else class="text-green-500">Concluído</span>
+            </div>
+            
+            <div class="w-full bg-black h-2 rounded overflow-hidden">
+              <div class="bg-vamp-c2 h-full transition-all duration-1000" :style="{ width: (activeMission.currentStage / activeMission.totalStages) * 100 + '%' }"></div>
+            </div>
+          </div>
 
-        <div class="space-y-4">
-          <div class="bg-black/50 border border-vamp-border rounded p-4 text-[11px] text-gray-400 font-sans uppercase tracking-widest text-center py-8">
-            Nenhuma missão foi concluída anteriormente por este personagem. Sua jornada começa hoje nas sombras.
+          <div class="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+            <div v-for="(step, index) in activeMission.currentReport?.steps || []" :key="index" class="bg-black/80 border-l-2 p-3 text-sm" :class="step.passed ? 'border-l-green-600' : 'border-l-vamp-c2'">
+              <div class="font-bold uppercase tracking-widest text-xs mb-1" :class="step.passed ? 'text-green-500' : 'text-vamp-c2'">
+                {{ step.actionName }} ({{ step.pool }})
+              </div>
+              <div class="text-gray-300">{{ step.narrative }}</div>
+              <div class="text-[10px] text-gray-500 mt-2">Dados rolados: {{ step.rolls.join(', ') }} -> {{ step.successes }} sucessos</div>
+            </div>
+          </div>
+
+          <button v-if="activeMission.readyToResolve" @click="resolveActiveMission" class="w-full bg-vamp-c2 text-black p-4 font-serif font-bold uppercase tracking-widest hover:bg-white transition-colors mt-4">
+            Encerrar Missão e Ver Resultados Finais
+          </button>
+        </div>
+      </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div v-for="mission in missions" :key="mission.id" class="border border-vamp-border bg-black/40 p-6 hover:border-vamp-c2 transition-colors flex flex-col">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="font-serif text-lg text-white uppercase tracking-widest">{{ mission.title }}</h3>
+            <span class="text-[10px] px-2 py-1 bg-vamp-bg border border-vamp-border text-vamp-c2 uppercase font-bold">{{ mission.category === 'HUNT' ? 'Caçada' : 'Operação' }}</span>
+          </div>
+          <p class="text-sm text-parchment-dim mb-4 italic">{{ mission.description }}</p>
+          <div class="text-xs text-gray-400 mb-6 font-mono space-y-1">
+            <div>⏱ Duração Total: {{ mission.durationMinutes }} minutos</div>
+            <div>⚠️ Dificuldade Base: {{ mission.baseDifficulty }}</div>
+            <div>🎯 Ações: {{ mission.Actions?.length || 0 }} etapas</div>
+          </div>
+          
+          <div class="mt-auto space-y-3">
+            <button v-if="mission.category === 'HUNT'" v-for="action in mission.Actions" :key="action.id" @click="startMission(mission.id, action.id)" class="w-full border border-vamp-border bg-vamp-bg hover:border-vamp-c2 hover:text-vamp-c2 transition-colors p-3 flex justify-between items-center group text-xs uppercase tracking-widest font-serif">
+              <span>{{ action.name }}</span>
+              <span class="text-[9px] text-gray-500 group-hover:text-vamp-c2">{{ action.attributeReq }} + {{ action.skillReq }}</span>
+            </button>
+
+            <button v-if="mission.category === 'OPERATION'" @click="startMission(mission.id)" class="w-full border border-vamp-c2 bg-black hover:bg-vamp-c2 hover:text-black transition-colors p-3 text-center text-xs uppercase tracking-widest font-serif font-bold text-vamp-c2">
+              Iniciar Infiltração Completa
+            </button>
           </div>
         </div>
       </div>
     </main>
+
+    <!-- Modal Resultados -->
+    <div v-if="showResultModal && finalReport" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+      <div class="border border-vamp-c2 bg-vamp-bg p-8 max-w-lg w-full relative">
+        <h3 class="font-serif text-2xl mb-4 text-center uppercase tracking-widest" :class="finalReport.isSuccess ? 'text-green-500' : 'text-vamp-c2'">
+          {{ finalReport.title }}
+        </h3>
+        
+        <div class="space-y-2 mb-8 text-sm text-parchment font-mono">
+          <div v-for="(change, i) in finalReport.finalChanges" :key="i" class="p-2 bg-black border border-vamp-border">
+            {{ change }}
+          </div>
+        </div>
+        
+        <button @click="closeModal" class="w-full bg-vamp-c2 text-black p-3 font-serif uppercase tracking-widest font-bold hover:bg-white transition-colors">
+          Compreendido
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import api from '../services/api'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 const characterId = ref<string>('')
+const loading = ref(true)
 
-const startSoloAdventure = (adventureId: string) => {
-  router.push(`/aventura/inicio?id=${adventureId}&characterId=${characterId.value}`)
+const missions = ref<any[]>([])
+const activeMission = ref<any>(null)
+const showResultModal = ref(false)
+const finalReport = ref<any>(null)
+
+let pollInterval: any = null
+
+const fetchMissions = async () => {
+  try {
+    const res = await api.get('/api/missions-idle')
+    missions.value = res.data
+  } catch (e) {
+    console.error(e)
+  }
 }
 
-onMounted(() => {
+const fetchActiveMission = async () => {
+  try {
+    if (!characterId.value) return
+    const res = await api.get(`/api/missions-idle/active/${characterId.value}`)
+    activeMission.value = res.data || null
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const startMission = async (missionId: string, forcedActionId?: string) => {
+  try {
+    loading.value = true
+    await api.post('/api/missions-idle/start', {
+      characterId: characterId.value,
+      definitionMissionIdleId: missionId,
+      forcedActionId
+    })
+    await fetchActiveMission()
+  } catch (e: any) {
+    alert(e.response?.data?.error || 'Erro ao iniciar missão')
+  } finally {
+    loading.value = false
+  }
+}
+
+const resolveActiveMission = async () => {
+  try {
+    loading.value = true
+    const res = await api.post('/api/missions-idle/resolve', {
+      activeMissionId: activeMission.value.id
+    })
+    finalReport.value = res.data.report
+    showResultModal.value = true
+    activeMission.value = null
+  } catch (e: any) {
+    alert(e.response?.data?.error || 'Erro ao resolver')
+  } finally {
+    loading.value = false
+  }
+}
+
+const closeModal = () => {
+  showResultModal.value = false
+  finalReport.value = null
+}
+
+onMounted(async () => {
   characterId.value = (route.query.id as string) || localStorage.getItem('lira_active_character_id') || ''
+  await Promise.all([fetchMissions(), fetchActiveMission()])
+  loading.value = false
+  
+  // Poll every 5 seconds for updates if active mission exists
+  pollInterval = setInterval(() => {
+    if (activeMission.value && !activeMission.value.readyToResolve) {
+      fetchActiveMission()
+    }
+  }, 5000)
+})
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval)
 })
 </script>
