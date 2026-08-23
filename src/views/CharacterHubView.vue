@@ -170,6 +170,11 @@
                 <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Incursões e Caçadas</div>
                 <div class="text-[9px] text-parchment-dim/60 uppercase">Missões de Campo e Alimentação</div>
               </button>
+              <button @click="router.push('/personagem/cronicas?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-black hover:border-gold hover:shadow-[0_0_20px_rgba(201,168,76,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px] col-span-2">
+                <div class="text-xl mb-2 text-gold group-hover:scale-110 transition-transform">📖</div>
+                <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Crônicas Narrativas</div>
+                <div class="text-[9px] text-parchment-dim/60 uppercase">Livro-Jogo Interativo (Solo)</div>
+              </button>
             </div>
           </div>
         </div>

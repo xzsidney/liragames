@@ -12,6 +12,7 @@ import CharacterSheetView from '../views/CharacterSheetView.vue'
 import CharacterInventoryStoreView from '../views/CharacterInventoryStoreView.vue'
 import CharacterNewsView from '../views/CharacterNewsView.vue'
 import CharacterAdventuresView from '../views/CharacterAdventuresView.vue'
+import CharacterVisualNovelView from '../views/CharacterVisualNovelView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -89,6 +90,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/personagem/aventuras',
     name: 'character-adventures',
     component: CharacterAdventuresView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/personagem/cronicas',
+    name: 'character-visual-novel',
+    component: CharacterVisualNovelView,
     meta: { requiresAuth: true }
   }
 ]
