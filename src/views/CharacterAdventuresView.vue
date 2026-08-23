@@ -92,7 +92,18 @@
           {{ finalReport.title }}
         </h3>
         
-        <div class="space-y-2 mb-8 text-sm text-parchment font-mono">
+        <div class="space-y-4 mb-6 max-h-[250px] overflow-y-auto pr-2">
+            <div v-for="(step, index) in finalReport.steps" :key="index" class="bg-black/80 border-l-2 p-3 text-sm" :class="step.passed ? 'border-l-green-600' : 'border-l-vamp-c2'">
+              <div class="font-bold uppercase tracking-widest text-xs mb-1" :class="step.passed ? 'text-green-500' : 'text-vamp-c2'">
+                {{ step.actionName }} ({{ step.pool }})
+              </div>
+              <div class="text-gray-300 mb-1">{{ step.narrative }}</div>
+              <div class="text-[10px] text-gray-500">Dados rolados: [{{ step.rolls.join(', ') }}] -> {{ step.successes }} sucessos</div>
+            </div>
+          </div>
+
+          <h4 class="text-vamp-c2 font-serif uppercase tracking-widest text-xs mb-2">Recompensas e Penalidades</h4>
+          <div class="space-y-2 mb-6 text-sm text-parchment font-mono">
           <div v-for="(change, i) in finalReport.finalChanges" :key="i" class="p-2 bg-black border border-vamp-border">
             {{ change }}
           </div>
