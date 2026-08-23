@@ -169,6 +169,11 @@
                 <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Acessar Gazeta</div>
                 <div class="text-[9px] text-parchment-dim/60 uppercase">Informações da Noite</div>
               </button>
+              <button @click="router.push('/personagem/aventuras?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-cyan-900/80 hover:shadow-[0_0_20px_rgba(0,150,255,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px] col-span-2 md:col-span-1">
+                <div class="text-xl mb-2 text-cyan-600 group-hover:scale-110 transition-transform">⏱️</div>
+                <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Missões (AFK)</div>
+                <div class="text-[9px] text-parchment-dim/60 uppercase">Infiltração e Operações</div>
+              </button>
             </div>
           </div>
         </div>
