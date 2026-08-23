@@ -28,11 +28,14 @@
         
         <div class="space-y-6">
           <div class="bg-vamp-bg border border-vamp-border p-4 rounded text-sm font-sans space-y-2">
-            <div class="flex justify-between text-xs text-gray-400 uppercase font-bold tracking-widest mb-2">
-              <span>Etapa {{ activeMission.currentStage }} / {{ activeMission.totalStages }}</span>
-              <span v-if="!activeMission.readyToResolve" class="text-vamp-c2 animate-pulse">Em progresso...</span>
-              <span v-else class="text-green-500">Concluído</span>
-            </div>
+                          <div class="flex justify-between text-xs text-gray-400 uppercase font-bold tracking-widest mb-2">
+                <span>Etapa {{ activeMission.currentStage }} / {{ activeMission.totalStages }}</span>
+                <span v-if="!activeMission.readyToResolve" class="text-vamp-c2 flex gap-2 items-center">
+                  <span class="animate-pulse">Em progresso...</span>
+                  <span class="text-white bg-vamp-c2/20 px-2 py-0.5 rounded">{{ timeRemainingDisplay }}</span>
+                </span>
+                <span v-else class="text-green-500">Concluído</span>
+              </div>
             
             <div class="w-full bg-black h-2 rounded overflow-hidden">
               <div class="bg-vamp-c2 h-full transition-all duration-1000" :style="{ width: (activeMission.currentStage / activeMission.totalStages) * 100 + '%' }"></div>
@@ -133,8 +136,9 @@ const fetchActiveMission = async () => {
   try {
     if (!characterId.value) return
     const res = await api.get(`/api/missions-idle/active/${characterId.value}`)
-    activeMission.value = res.data || null
-  } catch (e) {
+        activeMission.value = res.data || null
+      updateTimer()
+    } catch (e) {
     console.error(e)
   }
 }
@@ -176,20 +180,45 @@ const closeModal = () => {
   finalReport.value = null
 }
 
-onMounted(async () => {
+
+  const timeRemainingDisplay = ref<string>('00:00')
+  let timerInterval: any = null
+
+  const updateTimer = () => {
+    if (!activeMission.value || activeMission.value.readyToResolve) {
+      timeRemainingDisplay.value = '00:00'
+      return
+    }
+    const now = new Date().getTime()
+    const expiresAt = new Date(activeMission.value.expiresAt).getTime()
+    const diff = Math.max(0, Math.floor((expiresAt - now) / 1000))
+    
+    const minutes = Math.floor(diff / 60)
+    const seconds = diff % 60
+    timeRemainingDisplay.value = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  }
+
+  onMounted(async () => {
+
   characterId.value = (route.query.id as string) || localStorage.getItem('lira_active_character_id') || ''
   await Promise.all([fetchMissions(), fetchActiveMission()])
   loading.value = false
   
-  // Poll every 5 seconds for updates if active mission exists
-  pollInterval = setInterval(() => {
-    if (activeMission.value && !activeMission.value.readyToResolve) {
-      fetchActiveMission()
-    }
-  }, 5000)
+  
+    // Poll every 5 seconds for updates if active mission exists
+    pollInterval = setInterval(() => {
+      if (activeMission.value && !activeMission.value.readyToResolve) {
+        fetchActiveMission()
+      }
+    }, 5000)
+
+    // Fast timer for UI countdown
+    timerInterval = setInterval(updateTimer, 1000)
+
 })
 
 onUnmounted(() => {
-  if (pollInterval) clearInterval(pollInterval)
-})
+    if (pollInterval) clearInterval(pollInterval)
+    if (timerInterval) clearInterval(timerInterval)
+  })
 </script>
