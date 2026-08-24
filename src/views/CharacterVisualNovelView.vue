@@ -85,7 +85,8 @@
 
       <!-- 2. Character Sprites -->
       <div class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end pb-0">
-        <div class="w-full max-w-5xl flex justify-between items-end px-4">
+        <!-- max-w-7xl (1280px) gives enough room for sprites to stand on the sides of the max-w-4xl (896px) text box -->
+        <div class="w-full max-w-[1400px] flex justify-between items-end px-4">
           <!-- Left Sprite -->
           <div class="w-full max-w-[350px] flex justify-start items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.leftCharacterImageUrl, 'opacity-0 -translate-x-10': !currentNode.leftCharacterImageUrl}">
             <img v-if="currentNode.leftCharacterImageUrl" :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" class="max-h-[60vh] md:max-h-[85vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] border-4 border-blue-500" />
@@ -98,12 +99,12 @@
       </div>
 
       <!-- 3. Bottom Dialog/Interaction Box (The 'Letterbox') -->
-      <div class="relative z-20 w-full min-h-[35vh] flex flex-col justify-end">
-        <!-- Text Box Background (Dark gradient behind text only) -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-none -z-10"></div>
-        <div class="absolute inset-0 bg-black/60 pointer-events-none -z-10 border-t border-vamp-border/30"></div>
+      <div class="relative z-20 w-full min-h-[35vh] flex flex-col justify-end pointer-events-none">
+        <!-- Soft gradient background for the bottom of the screen -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none -z-10"></div>
         
-        <div class="w-full max-w-4xl mx-auto space-y-8 pt-8 pb-8 px-4 md:px-12 border border-vamp-border/50 bg-black/60 rounded-lg backdrop-blur-sm mb-4">
+        <!-- The actual text box -->
+        <div class="pointer-events-auto w-full max-w-4xl mx-auto space-y-8 pt-8 pb-8 px-4 md:px-12 border border-vamp-border/50 bg-black/60 rounded-lg backdrop-blur-sm mb-8">
           
           <!-- Speaker Name & Narrative Text -->
           <div class="text-center space-y-4">
