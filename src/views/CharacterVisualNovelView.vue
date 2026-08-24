@@ -70,7 +70,7 @@
       
       <!-- 1. Background Image -->
       <div class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
-           :style="{ backgroundImage: currentNode.backgroundImageUrl ? `url('${currentNode.backgroundImageUrl}')` : 'none', opacity: transitionOpacity }">
+           :style="{ backgroundImage: currentNode.backgroundImageUrl ? `url('${resolveImageUrl(currentNode.backgroundImageUrl)}')` : 'none', opacity: transitionOpacity }">
       </div>
       <!-- Vignette / Darkening overlay for contrast -->
       <div class="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/40 to-black/60 pointer-events-none mix-blend-multiply"></div>
@@ -80,11 +80,11 @@
       <div class="absolute inset-0 z-10 pointer-events-none flex justify-between items-end px-10 pb-[250px] md:pb-[300px]">
         <!-- Left Sprite -->
         <div class="w-1/3 max-w-[400px] h-[70vh] flex items-end justify-start transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.leftCharacterImageUrl, 'opacity-0 -translate-x-10': !currentNode.leftCharacterImageUrl}">
-          <img v-if="currentNode.leftCharacterImageUrl" :src="currentNode.leftCharacterImageUrl" class="max-h-full object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
+          <img v-if="currentNode.leftCharacterImageUrl" :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" class="max-h-full object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
         </div>
         <!-- Right Sprite -->
         <div class="w-1/3 max-w-[400px] h-[80vh] flex items-end justify-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.rightCharacterImageUrl, 'opacity-0 translate-x-10': !currentNode.rightCharacterImageUrl}">
-          <img v-if="currentNode.rightCharacterImageUrl" :src="currentNode.rightCharacterImageUrl" class="max-h-full object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
+          <img v-if="currentNode.rightCharacterImageUrl" :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" class="max-h-full object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
         </div>
       </div>
 
@@ -205,6 +205,19 @@ const lastResult = ref<any>(null)
 // Animation states
 const transitionOpacity = ref(1)
 const animateText = ref(true)
+
+const resolveImageUrl = (url: string) => {
+  if (!url) return '';
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  
+  // Se for upload persistente do backend da Hostinger, precisa pegar a API_BASE_URL
+  if (url.startsWith('/uploads/')) {
+    return API_BASE_URL + url;
+  }
+  
+  // Se for asset local (/story_assets/...)
+  return url;
+}
 
 const fetchCharacter = async () => {
   try {

@@ -52,9 +52,14 @@
             </div>
           </div>
 
-          <button v-if="activeMission.readyToResolve" @click="resolveActiveMission" class="w-full bg-vamp-c2 text-black p-4 font-serif font-bold uppercase tracking-widest hover:bg-white transition-colors mt-4">
-            Encerrar Missão e Ver Resultados Finais
-          </button>
+          <div class="flex flex-col md:flex-row gap-4 mt-4">
+            <button v-if="activeMission.readyToResolve" @click="resolveActiveMission" class="flex-1 bg-vamp-c2 text-black p-4 font-serif font-bold uppercase tracking-widest hover:bg-white transition-colors">
+              Encerrar Missão e Ver Resultados
+            </button>
+            <button v-else @click="cancelActiveMission" class="flex-1 border border-vamp-c2 text-vamp-c2 p-4 font-serif uppercase tracking-widest hover:bg-vamp-c2 hover:text-black transition-colors font-bold opacity-80">
+              Abortar Missão (Desistir)
+            </button>
+          </div>
         </div>
       </div>
 
@@ -181,6 +186,22 @@ const resolveActiveMission = async () => {
     activeMission.value = null
   } catch (e: any) {
     alert(e.response?.data?.error || 'Erro ao resolver')
+  } finally {
+    loading.value = false
+  }
+}
+
+const cancelActiveMission = async () => {
+  if (!confirm('Tem certeza que deseja abortar esta missão? Todo o progresso será perdido e nenhuma recompensa será ganha.')) return;
+  
+  try {
+    loading.value = true
+    await api.post('/api/missions-idle/cancel', {
+      activeMissionId: activeMission.value.id
+    })
+    activeMission.value = null
+  } catch (e: any) {
+    alert(e.response?.data?.error || 'Erro ao cancelar missão')
   } finally {
     loading.value = false
   }
