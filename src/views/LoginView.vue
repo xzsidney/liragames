@@ -46,8 +46,12 @@ const handleLogin = async () => {
     
     successMessage.value = 'Login realizado com sucesso! Redirecionando...'
     
-    // Redirecionar para o painel principal
-    router.push('/dashboard')
+    // Redirecionamento por Perfil (Role)
+    if (user && user.role === 'MESTRE') {
+      router.push('/mestre')
+    } else {
+      router.push('/dashboard')
+    }
     
   } catch (error: any) {
     if (error.response && error.response.status === 401) {

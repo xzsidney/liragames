@@ -13,6 +13,7 @@ import CharacterInventoryStoreView from '../views/CharacterInventoryStoreView.vu
 import CharacterNewsView from '../views/CharacterNewsView.vue'
 import CharacterAdventuresView from '../views/CharacterAdventuresView.vue'
 import CharacterVisualNovelView from '../views/CharacterVisualNovelView.vue'
+import GmDashboardView from '../views/GmDashboardView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -30,6 +31,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'dashboard',
     component: DashboardView,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/mestre',
+    name: 'gm-dashboard',
+    component: GmDashboardView,
+    meta: { requiresAuth: true, role: 'MESTRE' }
   },
   {
     path: '/jogador/vampire',
@@ -108,11 +115,30 @@ const router = createRouter({
 // Navigation Guard
 router.beforeEach((to, _from, next) => {
   const token = sessionStorage.getItem('lira_token') || localStorage.getItem('token') || localStorage.getItem('lira_token')
+  const userStr = sessionStorage.getItem('lira_user') || localStorage.getItem('lira_user')
+  let user: any = null
+  if (userStr) {
+    try {
+      user = JSON.parse(userStr)
+    } catch (e) {
+      user = null
+    }
+  }
   
   if (to.meta.requiresAuth && !token) {
     next({ name: 'login' })
   } else if (to.name === 'login' && token) {
-    next({ name: 'dashboard' })
+    if (user && user.role === 'MESTRE') {
+      next({ name: 'gm-dashboard' })
+    } else {
+      next({ name: 'dashboard' })
+    }
+  } else if (to.meta.role === 'MESTRE') {
+    if (user && user.role === 'MESTRE') {
+      next()
+    } else {
+      next({ name: 'dashboard' })
+    }
   } else {
     next()
   }
