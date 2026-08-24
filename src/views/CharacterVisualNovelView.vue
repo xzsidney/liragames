@@ -101,7 +101,7 @@
         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-none -z-10"></div>
         <div class="absolute inset-0 bg-black/60 pointer-events-none -z-10 border-t border-vamp-border/30"></div>
         
-        <div class="w-full max-w-4xl mx-auto space-y-8 pt-10 pb-8 px-4 md:px-20">
+        <div class="w-full max-w-4xl mx-auto space-y-8 pt-8 pb-8 px-4 md:px-12 border border-vamp-border/50 bg-black/60 rounded-lg backdrop-blur-sm mb-4">
           
           <!-- Speaker Name & Narrative Text -->
           <div class="text-center space-y-4">
