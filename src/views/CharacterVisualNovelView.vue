@@ -1,30 +1,37 @@
 <template>
   <div class="h-screen w-full bg-black text-parchment font-sans relative overflow-hidden flex flex-col">
-    <!-- Navbar / Menu (Visible only when not in an active node, or overlay on top) -->
-    <nav class="absolute top-0 w-full z-40 bg-gradient-to-b from-black/80 to-transparent p-4 flex justify-between items-center">
+    <!-- Navbar / Menu (Visible only when not in an active node) -->
+    <nav v-if="!activeAdventure" class="absolute top-0 w-full z-40 bg-gradient-to-b from-black/80 to-transparent p-4 flex justify-between items-center">
       <button @click="handleBack" class="text-xs text-gray-300 hover:text-white flex items-center gap-2 font-serif uppercase tracking-widest transition-colors">
-        <span>←</span> {{ activeAdventure ? 'VOLTAR AO MENU' : 'VOLTAR AO HUB' }}
+        <span>←</span> VOLTAR AO HUB
       </button>
-      <div v-if="character && activeAdventure" class="flex gap-4">
-        <!-- Minimal HUD based on screenshots -->
-        <div class="flex items-center gap-2">
-          <div class="w-10 h-10 rounded-full border-2 border-vamp-border bg-bg-deep overflow-hidden relative">
-            <img :src="character.avatarUrl ? (character.avatarUrl.startsWith('http') ? character.avatarUrl : API_BASE_URL + character.avatarUrl) : ''" class="w-full h-full object-cover" />
-            <div class="absolute bottom-0 left-0 w-full h-1/3 bg-black/60 flex items-center justify-center">
-              <span class="text-[8px] font-bold text-vamp-c2">{{ character.hunger }}</span>
-            </div>
+    </nav>
+
+    <!-- In-Game HUD (Visible only when in active node) -->
+    <div v-if="character && activeAdventure" class="absolute top-0 left-0 w-full z-50 p-4 flex justify-between items-start pointer-events-none">
+      <!-- Minimal HUD based on screenshots -->
+      <div class="flex items-center gap-2 pointer-events-auto">
+        <div class="w-10 h-10 rounded-full border-2 border-vamp-border bg-bg-deep overflow-hidden relative shadow-[0_0_10px_rgba(0,0,0,0.8)]">
+          <img :src="character.avatarUrl ? (character.avatarUrl.startsWith('http') ? character.avatarUrl : API_BASE_URL + character.avatarUrl) : ''" class="w-full h-full object-cover" />
+          <div class="absolute bottom-0 left-0 w-full h-1/3 bg-black/60 flex items-center justify-center">
+            <span class="text-[8px] font-bold text-vamp-c2">{{ character.hunger }}</span>
           </div>
-          <div class="flex flex-col gap-1 w-24">
-            <div class="flex gap-0.5">
-              <div v-for="i in 5" :key="i" class="h-1 flex-1 bg-black/80 border border-vamp-c2/30" :class="i <= character.hunger ? 'bg-vamp-c2 shadow-[0_0_5px_rgba(192,57,43,0.8)]' : ''"></div>
-            </div>
-            <div class="flex gap-0.5">
-              <div v-for="i in 5" :key="i" class="h-1 flex-1 bg-black/80 border border-blue-900/50" :class="i <= (character.willpowerMax - character.willpowerDamageSuperficial - character.willpowerDamageAggravated) ? 'bg-blue-600/80 shadow-[0_0_5px_rgba(37,99,235,0.8)]' : ''"></div>
-            </div>
+        </div>
+        <div class="flex flex-col gap-1 w-24">
+          <div class="flex gap-0.5">
+            <div v-for="i in 5" :key="i" class="h-1 flex-1 bg-black/80 border border-vamp-c2/30" :class="i <= character.hunger ? 'bg-vamp-c2 shadow-[0_0_5px_rgba(192,57,43,0.8)]' : ''"></div>
+          </div>
+          <div class="flex gap-0.5">
+            <div v-for="i in 5" :key="i" class="h-1 flex-1 bg-black/80 border border-blue-900/50" :class="i <= (character.willpowerMax - character.willpowerDamageSuperficial - character.willpowerDamageAggravated) ? 'bg-blue-600/80 shadow-[0_0_5px_rgba(37,99,235,0.8)]' : ''"></div>
           </div>
         </div>
       </div>
-    </nav>
+
+      <!-- Close Button -->
+      <button @click="handleBack" class="pointer-events-auto w-8 h-8 rounded-full bg-black/50 border border-vamp-border/50 text-gray-400 hover:text-white hover:border-white hover:bg-black flex items-center justify-center transition-all shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+        ✕
+      </button>
+    </div>
 
     <!-- LOADING STATE -->
     <div v-if="loading" class="flex-1 flex items-center justify-center bg-bg-deep z-30">
@@ -77,41 +84,44 @@
       <div class="absolute inset-0 z-0 bg-black opacity-30 pointer-events-none"></div>
 
       <!-- 2. Character Sprites -->
-      <div class="absolute inset-0 z-10 pointer-events-none flex justify-between items-end px-4 md:px-20 pb-[250px] md:pb-[300px]">
+      <div class="absolute inset-0 z-10 pointer-events-none flex justify-between items-end px-4 md:px-20 pb-0">
         <!-- Left Sprite -->
         <div class="w-full max-w-[350px] flex justify-start items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.leftCharacterImageUrl, 'opacity-0 -translate-x-10': !currentNode.leftCharacterImageUrl}">
-          <img v-if="currentNode.leftCharacterImageUrl" :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" class="max-h-[60vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
+          <img v-if="currentNode.leftCharacterImageUrl" :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" class="max-h-[60vh] md:max-h-[85vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
         </div>
         <!-- Right Sprite -->
         <div class="w-full max-w-[350px] flex justify-end items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.rightCharacterImageUrl, 'opacity-0 translate-x-10': !currentNode.rightCharacterImageUrl}">
-          <img v-if="currentNode.rightCharacterImageUrl" :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" class="max-h-[60vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
+          <img v-if="currentNode.rightCharacterImageUrl" :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" class="max-h-[60vh] md:max-h-[85vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
         </div>
       </div>
 
       <!-- 3. Bottom Dialog/Interaction Box (The 'Letterbox') -->
-      <div class="relative z-20 w-full bg-gradient-to-t from-black via-black/95 to-transparent pt-32 pb-8 px-4 md:px-20 min-h-[40vh] flex flex-col items-center">
+      <div class="relative z-20 w-full min-h-[35vh] flex flex-col justify-end">
+        <!-- Text Box Background (Dark gradient behind text only) -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-none -z-10"></div>
+        <div class="absolute inset-0 bg-black/60 pointer-events-none -z-10 border-t border-vamp-border/30"></div>
         
-        <div class="max-w-4xl w-full mx-auto space-y-8">
+        <div class="w-full max-w-4xl mx-auto space-y-8 pt-10 pb-8 px-4 md:px-20">
           
           <!-- Speaker Name & Narrative Text -->
           <div class="text-center space-y-4">
             <div v-if="currentNode.speakerName" class="inline-block relative">
-              <div class="absolute top-1/2 left-0 w-full h-px bg-vamp-border -translate-y-1/2 -z-10"></div>
-              <span class="bg-black px-4 font-serif text-sm uppercase tracking-[0.2em] text-gold-dim font-bold drop-shadow-md">
+              <span class="font-serif text-lg md:text-xl uppercase tracking-[0.2em] text-white font-bold drop-shadow-md">
                 {{ currentNode.speakerName }}
               </span>
+              <div class="w-full h-px bg-gradient-to-r from-transparent via-vamp-c2 to-transparent mt-1 opacity-60"></div>
             </div>
             
-            <div class="text-base md:text-xl font-serif leading-loose text-parchment whitespace-pre-line drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" :class="{'animate-fade-in': animateText}">
+            <div class="text-base md:text-lg font-serif leading-relaxed text-gray-200 whitespace-pre-line drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" :class="{'animate-fade-in': animateText}">
               {{ currentNode.narrativeText }}
             </div>
           </div>
 
           <!-- Ending Controls -->
-          <div v-if="currentNode.isEnding" class="pt-10 text-center animate-fade-in">
+          <div v-if="currentNode.isEnding" class="pt-6 text-center animate-fade-in">
             <div class="w-32 h-px bg-vamp-c2 mx-auto mb-6 opacity-50"></div>
             <button @click="activeAdventure = null; currentNode = null" class="border border-gold-dim text-gold-dim px-8 py-3 uppercase tracking-[0.2em] text-xs hover:bg-gold-dim hover:text-black transition-colors font-bold shadow-[0_0_15px_rgba(201,168,76,0.1)]">
-              Encerrar e Retornar
+              Encerrar Crônica
             </button>
           </div>
 
