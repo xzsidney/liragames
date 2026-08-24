@@ -93,11 +93,11 @@
           
           <!-- Left Sprite -->
           <div class="w-1/4 max-w-[350px] flex justify-start items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.leftCharacterImageUrl, 'opacity-0 -translate-x-10': !currentNode.leftCharacterImageUrl}">
-            <img v-if="currentNode.leftCharacterImageUrl" :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" class="max-h-[50vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] border-4 border-blue-500" />
+            <img v-if="currentNode.leftCharacterImageUrl" :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" class="max-h-[50vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
           </div>
 
           <!-- Text Box -->
-          <div class="flex-1 pointer-events-auto max-w-4xl space-y-8 pt-8 pb-8 px-4 md:px-12 border border-vamp-border/50 bg-black/60 rounded-lg backdrop-blur-sm shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+          <div class="flex-1 pointer-events-auto max-w-4xl space-y-8 pt-8 pb-8 px-4 md:px-12">
             
             <!-- Speaker Name & Narrative Text -->
             <div class="text-center space-y-4">
@@ -153,7 +153,7 @@
           
           <!-- Right Sprite -->
           <div class="w-1/4 max-w-[350px] flex justify-end items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.rightCharacterImageUrl, 'opacity-0 translate-x-10': !currentNode.rightCharacterImageUrl}">
-            <img v-if="currentNode.rightCharacterImageUrl" :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" class="max-h-[50vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] border-4 border-red-500" />
+            <img v-if="currentNode.rightCharacterImageUrl" :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" class="max-h-[50vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
           </div>
 
         </div>
