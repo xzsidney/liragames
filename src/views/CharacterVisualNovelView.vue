@@ -83,79 +83,79 @@
       <div class="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/40 to-black/60 pointer-events-none mix-blend-multiply"></div>
       <div class="absolute inset-0 z-0 bg-black opacity-30 pointer-events-none"></div>
 
-      <!-- 2. Character Sprites -->
-      <div class="absolute inset-0 z-10 pointer-events-none flex justify-center items-end pb-0">
-        <!-- max-w-7xl (1280px) gives enough room for sprites to stand on the sides of the max-w-4xl (896px) text box -->
-        <div class="w-full max-w-[1400px] flex justify-between items-end px-4">
-          <!-- Left Sprite -->
-          <div class="w-full max-w-[350px] flex justify-start items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.leftCharacterImageUrl, 'opacity-0 -translate-x-10': !currentNode.leftCharacterImageUrl}">
-            <img v-if="currentNode.leftCharacterImageUrl" :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" class="max-h-[60vh] md:max-h-[85vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] border-4 border-blue-500" />
-          </div>
-          <!-- Right Sprite -->
-          <div class="w-full max-w-[350px] flex justify-end items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.rightCharacterImageUrl, 'opacity-0 translate-x-10': !currentNode.rightCharacterImageUrl}">
-            <img v-if="currentNode.rightCharacterImageUrl" :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" class="max-h-[60vh] md:max-h-[85vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] border-4 border-red-500" />
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. Bottom Dialog/Interaction Box (The 'Letterbox') -->
-      <div class="relative z-20 w-full min-h-[35vh] flex flex-col justify-end pointer-events-none">
+      <!-- 2. Main Game UI: Sprites and Text Box in a single Flex Row -->
+      <div class="relative z-20 w-full min-h-[40vh] flex flex-col justify-end pb-8 pointer-events-none">
         <!-- Soft gradient background for the bottom of the screen -->
         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none -z-10"></div>
         
-        <!-- The actual text box -->
-        <div class="pointer-events-auto w-full max-w-4xl mx-auto space-y-8 pt-8 pb-8 px-4 md:px-12 border border-vamp-border/50 bg-black/60 rounded-lg backdrop-blur-sm mb-8">
+        <!-- Horizontal Container: Left Sprite, Text Box, Right Sprite -->
+        <div class="w-full max-w-[1600px] mx-auto flex flex-row justify-between items-end px-4 gap-4 md:gap-8">
           
-          <!-- Speaker Name & Narrative Text -->
-          <div class="text-center space-y-4">
-            <div v-if="currentNode.speakerName" class="inline-block relative">
-              <span class="font-serif text-lg md:text-xl uppercase tracking-[0.2em] text-white font-bold drop-shadow-md">
-                {{ currentNode.speakerName }}
-              </span>
-              <div class="w-full h-px bg-gradient-to-r from-transparent via-vamp-c2 to-transparent mt-1 opacity-60"></div>
+          <!-- Left Sprite -->
+          <div class="w-1/4 max-w-[350px] flex justify-start items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.leftCharacterImageUrl, 'opacity-0 -translate-x-10': !currentNode.leftCharacterImageUrl}">
+            <img v-if="currentNode.leftCharacterImageUrl" :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" class="max-h-[50vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] border-4 border-blue-500" />
+          </div>
+
+          <!-- Text Box -->
+          <div class="flex-1 pointer-events-auto max-w-4xl space-y-8 pt-8 pb-8 px-4 md:px-12 border border-vamp-border/50 bg-black/60 rounded-lg backdrop-blur-sm shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+            
+            <!-- Speaker Name & Narrative Text -->
+            <div class="text-center space-y-4">
+              <div v-if="currentNode.speakerName" class="inline-block relative">
+                <span class="font-serif text-lg md:text-xl uppercase tracking-[0.2em] text-white font-bold drop-shadow-md">
+                  {{ currentNode.speakerName }}
+                </span>
+                <div class="w-full h-px bg-gradient-to-r from-transparent via-vamp-c2 to-transparent mt-1 opacity-60"></div>
+              </div>
+              
+              <div class="text-base md:text-lg font-serif leading-relaxed text-gray-200 whitespace-pre-line drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" :class="{'animate-fade-in': animateText}">
+                {{ currentNode.narrativeText }}
+              </div>
+            </div>
+
+            <!-- Ending Controls -->
+            <div v-if="currentNode.isEnding" class="pt-6 text-center animate-fade-in">
+              <div class="w-32 h-px bg-vamp-c2 mx-auto mb-6 opacity-50"></div>
+              <button @click="activeAdventure = null; currentNode = null" class="border border-gold-dim text-gold-dim px-8 py-3 uppercase tracking-[0.2em] text-xs hover:bg-gold-dim hover:text-black transition-colors font-bold shadow-[0_0_15px_rgba(201,168,76,0.1)]">
+                Encerrar Crônica
+              </button>
+            </div>
+
+            <!-- Choices List -->
+            <div v-else class="flex flex-col items-center gap-3 w-full max-w-2xl mx-auto pt-6 animate-fade-in">
+              <button 
+                v-for="choice in currentNode.choices" 
+                :key="choice.id" 
+                @click="makeChoice(choice)"
+                :disabled="processingChoice"
+                class="w-full text-center p-3 md:p-4 transition-all duration-300 relative group overflow-hidden border-b border-transparent hover:border-vamp-border"
+                :class="[
+                  choice.customStyle === 'DISCIPLINE' || choice.customStyle === 'RED' 
+                    ? 'text-vamp-c2 hover:text-red-400 hover:bg-vamp-c2/5' 
+                    : 'text-parchment-dim hover:text-parchment hover:bg-white/5'
+                ]"
+              >
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                
+                <div class="flex flex-col items-center gap-1 relative z-10">
+                  <span class="font-serif text-sm md:text-base tracking-wider uppercase">
+                    {{ choice.choiceText }}
+                  </span>
+                  <span v-if="choice.attributeReq || choice.skillReq" class="text-[9px] uppercase font-bold tracking-widest font-sans opacity-60 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full" :class="choice.customStyle === 'DISCIPLINE' ? 'bg-vamp-c2' : 'bg-gray-400'"></span>
+                    Teste de {{ choice.attributeReq }}<span v-if="choice.skillReq"> + {{ choice.skillReq }}</span> (Dif: {{ choice.difficulty || 1 }})
+                  </span>
+                </div>
+              </button>
             </div>
             
-            <div class="text-base md:text-lg font-serif leading-relaxed text-gray-200 whitespace-pre-line drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" :class="{'animate-fade-in': animateText}">
-              {{ currentNode.narrativeText }}
-            </div>
-          </div>
-
-          <!-- Ending Controls -->
-          <div v-if="currentNode.isEnding" class="pt-6 text-center animate-fade-in">
-            <div class="w-32 h-px bg-vamp-c2 mx-auto mb-6 opacity-50"></div>
-            <button @click="activeAdventure = null; currentNode = null" class="border border-gold-dim text-gold-dim px-8 py-3 uppercase tracking-[0.2em] text-xs hover:bg-gold-dim hover:text-black transition-colors font-bold shadow-[0_0_15px_rgba(201,168,76,0.1)]">
-              Encerrar Crônica
-            </button>
-          </div>
-
-          <!-- Choices List -->
-          <div v-else class="flex flex-col items-center gap-3 w-full max-w-2xl mx-auto pt-6 animate-fade-in">
-            <button 
-              v-for="choice in currentNode.choices" 
-              :key="choice.id" 
-              @click="makeChoice(choice)"
-              :disabled="processingChoice"
-              class="w-full text-center p-3 md:p-4 transition-all duration-300 relative group overflow-hidden border-b border-transparent hover:border-vamp-border"
-              :class="[
-                choice.customStyle === 'DISCIPLINE' || choice.customStyle === 'RED' 
-                  ? 'text-vamp-c2 hover:text-red-400 hover:bg-vamp-c2/5' 
-                  : 'text-parchment-dim hover:text-parchment hover:bg-white/5'
-              ]"
-            >
-              <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              
-              <div class="flex flex-col items-center gap-1 relative z-10">
-                <span class="font-serif text-sm md:text-base tracking-wider uppercase">
-                  {{ choice.choiceText }}
-                </span>
-                <span v-if="choice.attributeReq || choice.skillReq" class="text-[9px] uppercase font-bold tracking-widest font-sans opacity-60 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                  <span class="inline-block w-1.5 h-1.5 rounded-full" :class="choice.customStyle === 'DISCIPLINE' ? 'bg-vamp-c2' : 'bg-gray-400'"></span>
-                  Teste de {{ choice.attributeReq }}<span v-if="choice.skillReq"> + {{ choice.skillReq }}</span> (Dif: {{ choice.difficulty || 1 }})
-                </span>
-              </div>
-            </button>
           </div>
           
+          <!-- Right Sprite -->
+          <div class="w-1/4 max-w-[350px] flex justify-end items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.rightCharacterImageUrl, 'opacity-0 translate-x-10': !currentNode.rightCharacterImageUrl}">
+            <img v-if="currentNode.rightCharacterImageUrl" :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" class="max-h-[50vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)] border-4 border-red-500" />
+          </div>
+
         </div>
       </div>
     </div>
