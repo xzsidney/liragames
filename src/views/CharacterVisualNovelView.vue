@@ -77,14 +77,14 @@
       <div class="absolute inset-0 z-0 bg-black opacity-30 pointer-events-none"></div>
 
       <!-- 2. Character Sprites -->
-      <div class="absolute inset-0 z-10 pointer-events-none flex justify-between items-end px-10 pb-[250px] md:pb-[300px]">
+      <div class="absolute inset-0 z-10 pointer-events-none flex justify-between items-end px-4 md:px-20 pb-[250px] md:pb-[300px]">
         <!-- Left Sprite -->
-        <div class="w-1/3 max-w-[400px] h-[70vh] flex items-end justify-start transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.leftCharacterImageUrl, 'opacity-0 -translate-x-10': !currentNode.leftCharacterImageUrl}">
-          <img v-if="currentNode.leftCharacterImageUrl" :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" class="max-h-full object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
+        <div class="w-full max-w-[350px] flex justify-start items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.leftCharacterImageUrl, 'opacity-0 -translate-x-10': !currentNode.leftCharacterImageUrl}">
+          <img v-if="currentNode.leftCharacterImageUrl" :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" class="max-h-[60vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
         </div>
         <!-- Right Sprite -->
-        <div class="w-1/3 max-w-[400px] h-[80vh] flex items-end justify-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.rightCharacterImageUrl, 'opacity-0 translate-x-10': !currentNode.rightCharacterImageUrl}">
-          <img v-if="currentNode.rightCharacterImageUrl" :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" class="max-h-full object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
+        <div class="w-full max-w-[350px] flex justify-end items-end transition-all duration-700 transform" :class="{'opacity-100 translate-x-0': currentNode.rightCharacterImageUrl, 'opacity-0 translate-x-10': !currentNode.rightCharacterImageUrl}">
+          <img v-if="currentNode.rightCharacterImageUrl" :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" class="max-h-[60vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]" />
         </div>
       </div>
 
