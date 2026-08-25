@@ -187,16 +187,16 @@
               <button 
                 v-if="isMissionExpired(activeMission.expiresAt) || activeMission.readyToResolve"
                 @click="resolveActiveMission"
-                class="flex-1 py-2 rounded bg-gold hover:bg-gold-light text-black text-xs font-serif font-bold uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)] animate-bounce"
+                class="flex-1 py-2.5 rounded bg-gold hover:bg-gold-light text-black text-xs font-serif font-bold uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)] animate-bounce"
               >
                 🏆 Coletar Recompensas & Sangue
               </button>
               <button 
                 v-else
-                @click="router.push('/personagem/aventuras?id=' + characterId)"
-                class="flex-1 py-2 rounded border border-white/20 bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-serif uppercase tracking-wider transition-all"
+                @click="router.push('/personagem/radar?id=' + characterId)"
+                class="flex-1 py-2 rounded border border-cyan-500/40 bg-cyan-950/20 hover:bg-cyan-900/40 text-cyan-300 text-xs font-serif uppercase tracking-wider transition-all"
               >
-                Inspecionar Relatório Tático
+                Ver Operação no Radar Tático
               </button>
             </div>
           </div>
@@ -206,28 +206,23 @@
             <div class="text-[10px] uppercase tracking-widest text-parchment-dim mb-4 font-serif text-center">Ações Operacionais</div>
             <div class="grid grid-cols-2 gap-4">
               
-              <button @click="router.push('/personagem/radar?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-blue-900/80 hover:shadow-[0_0_20px_rgba(30,58,138,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px]">
-                <div class="text-xl mb-2 text-blue-700/80 group-hover:scale-110 transition-transform">📡</div>
+              <button @click="router.push('/personagem/radar?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-cyan-500/60 hover:shadow-[0_0_20px_rgba(0,255,255,0.15)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
+                <div class="text-2xl mb-2 text-cyan-400 group-hover:scale-110 transition-transform">📡</div>
                 <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Varredura Tática</div>
-                <div class="text-[9px] text-parchment-dim/60 uppercase">Mapa da Cidade</div>
+                <div class="text-[9px] text-parchment-dim/60 uppercase">Mapa & Incursões Urbanas</div>
               </button>
-              <button @click="router.push('/personagem/inventario?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-gold-dim hover:shadow-[0_0_20px_rgba(201,168,76,0.15)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px]">
-                <div class="text-xl mb-2 text-gold-dim group-hover:scale-110 transition-transform">💼</div>
+              <button @click="router.push('/personagem/inventario?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-gold-dim hover:shadow-[0_0_20px_rgba(201,168,76,0.15)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
+                <div class="text-2xl mb-2 text-gold-dim group-hover:scale-110 transition-transform">💼</div>
                 <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Contatar Lacaios</div>
-                <div class="text-[9px] text-parchment-dim/60 uppercase">Finanças e Itens</div>
+                <div class="text-[9px] text-parchment-dim/60 uppercase">Finanças e Arsenal</div>
               </button>
-              <button @click="router.push('/personagem/noticias?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-gray-700 hover:shadow-[0_0_20px_rgba(156,163,175,0.1)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px]">
-                <div class="text-xl mb-2 text-gray-500 group-hover:scale-110 transition-transform">🗞️</div>
+              <button @click="router.push('/personagem/noticias?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-gray-700 hover:shadow-[0_0_20px_rgba(156,163,175,0.1)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
+                <div class="text-2xl mb-2 text-gray-400 group-hover:scale-110 transition-transform">🗞️</div>
                 <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Acessar Gazeta</div>
                 <div class="text-[9px] text-parchment-dim/60 uppercase">Informações da Noite</div>
               </button>
-              <button @click="router.push('/personagem/aventuras?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-vamp-bg hover:border-vamp-c2 hover:shadow-[0_0_20px_rgba(192,57,43,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px]">
-                <div class="text-xl mb-2 text-vamp-c2 group-hover:scale-110 transition-transform">🩸</div>
-                <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Incursões e Caçadas</div>
-                <div class="text-[9px] text-parchment-dim/60 uppercase">Missões de Campo e Alimentação</div>
-              </button>
-              <button @click="router.push('/personagem/cronicas?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-black hover:border-gold hover:shadow-[0_0_20px_rgba(201,168,76,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[100px] col-span-2">
-                <div class="text-xl mb-2 text-gold group-hover:scale-110 transition-transform">📖</div>
+              <button @click="router.push('/personagem/cronicas?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-black hover:border-gold hover:shadow-[0_0_20px_rgba(201,168,76,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
+                <div class="text-2xl mb-2 text-gold group-hover:scale-110 transition-transform">📖</div>
                 <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Crônicas Narrativas</div>
                 <div class="text-[9px] text-parchment-dim/60 uppercase">Livro-Jogo Interativo (Solo)</div>
               </button>
@@ -301,6 +296,49 @@
 
     </main>
     
+    <!-- MODAL GÓTICO DE RESULTADO / RECOMPENSAS DA OPERAÇÃO -->
+    <div v-if="showResultModal && finalReport" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-md">
+      <div class="border-2 border-red-700/80 bg-[#0a0507] p-6 sm:p-8 max-w-lg w-full relative rounded-xl shadow-[0_0_50px_rgba(255,0,0,0.35)] space-y-6 max-h-[90vh] overflow-y-auto font-sans">
+        <div class="text-center space-y-1">
+          <div class="text-2xl font-serif" :class="finalReport.isSuccess ? 'text-green-400' : 'text-red-500'">
+            {{ finalReport.isSuccess ? '🏆 OPERAÇÃO CONCLUÍDA COM SUCESSO' : '💀 OPERAÇÃO INTERROMPIDA' }}
+          </div>
+          <h3 class="font-serif text-lg text-parchment font-bold uppercase tracking-wider">
+            {{ finalReport.title }}
+          </h3>
+        </div>
+        
+        <!-- ETAPAS E ROLAGENS DE DADOS -->
+        <div class="space-y-3 max-h-[220px] overflow-y-auto pr-2">
+          <div v-for="(step, index) in finalReport.steps || []" :key="index" class="bg-black/70 border-l-2 p-3 text-xs space-y-1 rounded-r" :class="step.passed ? 'border-l-green-500' : 'border-l-red-600'">
+            <div class="font-bold uppercase tracking-widest text-[11px] font-mono" :class="step.passed ? 'text-green-400' : 'text-red-400'">
+              {{ step.actionName }} ({{ step.pool || 'Teste' }})
+            </div>
+            <div class="text-gray-300 leading-relaxed">{{ step.narrative }}</div>
+            <div v-if="step.rolls && Array.isArray(step.rolls)" class="text-[10px] text-gray-500 font-mono">
+              🎲 Dados: [{{ step.rolls?.join ? step.rolls.join(', ') : step.rolls }}] → <strong :class="step.passed ? 'text-green-400' : 'text-red-400'">{{ step.successes || 0 }} sucessos</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECOMPENSAS E IMPACTOS -->
+        <div v-if="finalReport.finalChanges && finalReport.finalChanges.length > 0" class="border-t border-white/10 pt-3">
+          <h4 class="text-gold font-serif uppercase tracking-widest text-xs mb-2 font-bold flex items-center gap-1.5">
+            <span>✨</span> Recompensas & Impactos na Ficha
+          </h4>
+          <div class="space-y-1.5 text-xs text-parchment font-mono">
+            <div v-for="(change, i) in finalReport.finalChanges" :key="i" class="p-2.5 bg-black/60 border border-white/10 rounded flex items-center gap-2">
+              <span>{{ change }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <button @click="closeResultModal" class="w-full bg-vamp-c2 hover:bg-red-600 text-white p-3 font-serif uppercase tracking-widest font-bold transition-all rounded shadow-[0_0_15px_rgba(192,57,43,0.5)]">
+          Compreendido
+        </button>
+      </div>
+    </div>
+
     <!-- BARRA INFERIOR / DOCK DO CICLO NOTURNO -->
     <NightClockWidget 
       v-if="characterId" 
@@ -405,14 +443,22 @@ const isMissionExpired = (expiresAtStr: string) => {
   return now.value.getTime() >= exp
 }
 
+const showResultModal = ref(false)
+const finalReport = ref<any>(null)
+
+const closeResultModal = () => {
+  showResultModal.value = false
+  finalReport.value = null
+}
+
 const resolveActiveMission = async () => {
   if (!activeMission.value) return
   try {
     const res = await api.post('/api/missions-idle/resolve', {
       activeMissionId: activeMission.value.id
     })
-    const report = res.data.report
-    alert(`🎉 Operação Finalizada!\nResultado: ${report.isSuccess ? 'SUCESSO' : 'FALHA'}\n${report.finalChanges?.join('\n') || ''}`)
+    finalReport.value = res.data.report
+    showResultModal.value = true
     activeMission.value = null
     await fetchCharacter()
     await nightClockRef.value?.fetchStatus()

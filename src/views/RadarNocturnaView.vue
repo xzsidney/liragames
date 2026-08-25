@@ -188,6 +188,49 @@
       </aside>
     </main>
 
+    <!-- MODAL GÓTICO DE RESULTADO / RECOMPENSAS DA OPERAÇÃO -->
+    <div v-if="showResultModal && finalReport" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-md">
+      <div class="border-2 border-red-700/80 bg-[#0a0507] p-6 sm:p-8 max-w-lg w-full relative rounded-xl shadow-[0_0_50px_rgba(255,0,0,0.35)] space-y-6 max-h-[90vh] overflow-y-auto font-sans">
+        <div class="text-center space-y-1">
+          <div class="text-2xl font-serif" :class="finalReport.isSuccess ? 'text-green-400' : 'text-red-500'">
+            {{ finalReport.isSuccess ? '🏆 OPERAÇÃO CONCLUÍDA COM SUCESSO' : '💀 OPERAÇÃO INTERROMPIDA' }}
+          </div>
+          <h3 class="font-serif text-lg text-parchment font-bold uppercase tracking-wider">
+            {{ finalReport.title }}
+          </h3>
+        </div>
+        
+        <!-- ETAPAS E ROLAGENS DE DADOS -->
+        <div class="space-y-3 max-h-[220px] overflow-y-auto pr-2">
+          <div v-for="(step, index) in finalReport.steps || []" :key="index" class="bg-black/70 border-l-2 p-3 text-xs space-y-1 rounded-r" :class="step.passed ? 'border-l-green-500' : 'border-l-red-600'">
+            <div class="font-bold uppercase tracking-widest text-[11px] font-mono" :class="step.passed ? 'text-green-400' : 'text-red-400'">
+              {{ step.actionName }} ({{ step.pool || 'Teste' }})
+            </div>
+            <div class="text-gray-300 leading-relaxed">{{ step.narrative }}</div>
+            <div v-if="step.rolls && Array.isArray(step.rolls)" class="text-[10px] text-gray-500 font-mono">
+              🎲 Dados: [{{ step.rolls?.join ? step.rolls.join(', ') : step.rolls }}] → <strong :class="step.passed ? 'text-green-400' : 'text-red-400'">{{ step.successes || 0 }} sucessos</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECOMPENSAS E IMPACTOS -->
+        <div v-if="finalReport.finalChanges && finalReport.finalChanges.length > 0" class="border-t border-white/10 pt-3">
+          <h4 class="text-gold font-serif uppercase tracking-widest text-xs mb-2 font-bold flex items-center gap-1.5">
+            <span>✨</span> Recompensas & Impactos na Ficha
+          </h4>
+          <div class="space-y-1.5 text-xs text-parchment font-mono">
+            <div v-for="(change, i) in finalReport.finalChanges" :key="i" class="p-2.5 bg-black/60 border border-white/10 rounded flex items-center gap-2">
+              <span>{{ change }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <button @click="closeResultModal" class="w-full bg-vamp-c2 hover:bg-red-600 text-white p-3 font-serif uppercase tracking-widest font-bold transition-all rounded shadow-[0_0_15px_rgba(192,57,43,0.5)]">
+          Compreendido
+        </button>
+      </div>
+    </div>
+
     <!-- BARRA INFERIOR / DOCK DO CICLO NOTURNO -->
     <NightClockWidget 
       v-if="characterId" 
@@ -221,6 +264,13 @@ const onNightStatusUpdated = (status: any) => {
 const mapNodes = ref<any[]>([])
 const sidebarNode = ref<any>(null)
 const activeMission = ref<any>(null)
+const showResultModal = ref(false)
+const finalReport = ref<any>(null)
+
+const closeResultModal = () => {
+  showResultModal.value = false
+  finalReport.value = null
+}
 
 const tooltip = ref({
   visible: false,
@@ -378,8 +428,8 @@ const resolveActiveMission = async () => {
     const res = await api.post('/api/missions-idle/resolve', {
       activeMissionId: activeMission.value.id
     })
-    const report = res.data.report
-    alert(`Missão Finalizada!\nResultado: ${report.isSuccess ? 'SUCESSO' : 'FALHA'}\n${report.finalChanges?.join('\n') || ''}`)
+    finalReport.value = res.data.report
+    showResultModal.value = true
     activeMission.value = null
     await fetchActiveMission()
     await nightClockRef.value?.fetchStatus()
