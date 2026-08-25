@@ -1,750 +1,860 @@
 <template>
-  <div class="min-h-screen bg-[#050505] text-parchment font-sans relative overflow-x-hidden selection:bg-blood-red selection:text-white pb-24">
-    <!-- NOISE OVERLAY -->
+  <div class="min-h-screen bg-[#030304] text-parchment font-sans relative overflow-x-hidden selection:bg-blood-red selection:text-white flex flex-col">
+    <!-- NOISE & GLOW OVERLAYS -->
     <div class="fixed inset-0 pointer-events-none opacity-20 mix-blend-overlay z-0" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
-    
-    <!-- GLOW EFFECT -->
-    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[400px] bg-blood-red/10 blur-[160px] rounded-full pointer-events-none z-0"></div>
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-blood-red/10 blur-[180px] rounded-full pointer-events-none z-0"></div>
 
-    <!-- NAVBAR -->
-    <nav class="relative z-20 border-b border-white/5 bg-black/60 backdrop-blur-md sticky top-0">
-      <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full border border-gold-dim flex items-center justify-center bg-black shadow-[0_0_15px_rgba(212,175,55,0.15)]">
-            <span class="text-gold font-serif text-xl">L</span>
+    <!-- TOPBAR HEADER -->
+    <header class="relative z-30 border-b border-white/5 bg-black/80 backdrop-blur-md sticky top-0 h-16 flex items-center px-6 justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center bg-black shadow-[0_0_12px_rgba(212,175,55,0.2)]">
+          <span class="text-gold font-serif text-lg font-bold">L</span>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2">
+            <span class="font-serif text-base tracking-widest text-parchment font-bold">LIRA<span class="text-blood-red">RPG</span></span>
+            <span class="px-2 py-0.5 rounded bg-gold/10 border border-gold/30 text-[9px] font-serif uppercase tracking-widest text-gold font-bold">GM Studio</span>
           </div>
-          <div class="flex flex-col">
-            <span class="font-serif text-xl tracking-widest text-parchment">LIRA<span class="text-blood-red">RPG</span></span>
-            <span class="text-[9px] font-serif uppercase tracking-[3px] text-gold-dim">Painel do Narrador (GM)</span>
-          </div>
+          <span class="text-[9px] uppercase tracking-[2px] text-gray-500 font-serif">Central de Controle do Mundo Vivo</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- LEAD MASTER BADGE -->
+        <div v-if="isLeadMaster" class="flex items-center gap-2 px-3 py-1 rounded-full border border-gold/40 bg-gold/10 text-gold text-xs font-serif tracking-widest shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+          <span class="w-2 h-2 rounded-full bg-gold animate-pulse"></span>
+          <span>👑 SUPER MESTRE: {{ masterInfo?.name || 'Sid' }}</span>
+        </div>
+        <div v-else class="flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-gray-300 text-xs font-serif tracking-widest">
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          <span>MESTRE: {{ masterInfo?.name || 'Narrador' }}</span>
         </div>
 
-        <div class="flex items-center gap-4">
-          <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded border border-gold/20 bg-gold/5 text-gold text-xs font-serif tracking-widest">
-            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            MESTRE: {{ masterInfo?.name || 'Carregando...' }}
+        <button @click="handleLogout" class="font-serif text-[10px] tracking-[2px] uppercase text-gray-400 hover:text-white transition-colors border border-white/10 px-3 py-1.5 rounded bg-black/40 hover:bg-black/80">
+          Sair
+        </button>
+      </div>
+    </header>
+
+    <!-- WORKSPACE BODY WITH SIDEBAR -->
+    <div class="flex-1 flex relative z-10">
+      
+      <!-- SIDEBAR -->
+      <aside class="w-64 border-r border-white/5 bg-black/60 backdrop-blur-sm flex flex-col justify-between p-4 hidden md:flex shrink-0">
+        <div class="space-y-1">
+          <div class="px-3 py-2 text-[10px] font-serif uppercase tracking-[2px] text-gray-500 font-bold">
+            Mundo &amp; Campanhas
           </div>
           
-          <button @click="handleLogout" class="font-serif text-[11px] tracking-[2px] uppercase text-gray-400 hover:text-white transition-colors border border-white/10 px-4 py-2 rounded bg-black/40 hover:bg-black/80">
-            Desconectar
+          <button 
+            @click="setTab('overview')"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-serif uppercase tracking-wider transition-all text-left"
+            :class="activeTab === 'overview' ? 'bg-gold/10 text-gold border border-gold/30 font-bold shadow-[0_0_10px_rgba(212,175,55,0.15)]' : 'text-gray-400 hover:text-parchment hover:bg-white/5'"
+          >
+            <span>📊</span>
+            <span>Visão Geral</span>
           </button>
-        </div>
-      </div>
-    </nav>
 
-    <!-- SUB-NAV / TABS (Shown when not inside detail mode) -->
-    <div v-if="!activeAdventureDetail && !activeMissionDetail" class="relative z-10 border-b border-white/5 bg-black/40">
-      <div class="max-w-7xl mx-auto px-6 flex gap-8">
-        <button 
-          @click="activeTab = 'stories'"
-          class="py-4 text-xs font-serif uppercase tracking-[2px] border-b-2 transition-all relative"
-          :class="activeTab === 'stories' ? 'border-gold text-gold font-bold shadow-[0_2px_10px_rgba(212,175,55,0.3)]' : 'border-transparent text-gray-400 hover:text-parchment'"
-        >
-          📖 Crônicas &amp; Aventuras Solo (Livro-Jogo)
-        </button>
+          <button 
+            @click="setTab('stories')"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-serif uppercase tracking-wider transition-all text-left"
+            :class="activeTab === 'stories' ? 'bg-gold/10 text-gold border border-gold/30 font-bold shadow-[0_0_10px_rgba(212,175,55,0.15)]' : 'text-gray-400 hover:text-parchment hover:bg-white/5'"
+          >
+            <span>📖</span>
+            <span class="flex-1">Crônicas (Livro-Jogo)</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-300 font-sans">{{ adventures.length }}</span>
+          </button>
 
-        <button 
-          @click="activeTab = 'missions'"
-          class="py-4 text-xs font-serif uppercase tracking-[2px] border-b-2 transition-all relative"
-          :class="activeTab === 'missions' ? 'border-blood-red text-blood-red font-bold shadow-[0_2px_10px_rgba(192,57,43,0.3)]' : 'border-transparent text-gray-400 hover:text-parchment'"
-        >
-          ⏳ Incursões &amp; Caçadas (Missões AFK)
-        </button>
-      </div>
-    </div>
+          <button 
+            @click="setTab('missions')"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-serif uppercase tracking-wider transition-all text-left"
+            :class="activeTab === 'missions' ? 'bg-blood-red/10 text-blood-red border border-blood-red/30 font-bold shadow-[0_0_10px_rgba(192,57,43,0.15)]' : 'text-gray-400 hover:text-parchment hover:bg-white/5'"
+          >
+            <span>⏳</span>
+            <span class="flex-1">Incursões &amp; Caçadas</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-300 font-sans">{{ missions.length }}</span>
+          </button>
 
-    <!-- MAIN CONTENT -->
-    <main class="relative z-10 max-w-7xl mx-auto px-6 py-8">
-      
-      <!-- FEEDBACK ALERTS -->
-      <div v-if="successMsg" class="mb-6 p-4 rounded bg-green-950/60 border border-green-500/50 text-green-300 text-xs font-serif tracking-wider flex justify-between items-center">
-        <span>✓ {{ successMsg }}</span>
-        <button @click="successMsg = ''" class="text-gray-400 hover:text-white">✕</button>
-      </div>
-      <div v-if="errorMsg" class="mb-6 p-4 rounded bg-red-950/60 border border-red-500/50 text-red-300 text-xs font-serif tracking-wider flex justify-between items-center">
-        <span>✕ {{ errorMsg }}</span>
-        <button @click="errorMsg = ''" class="text-gray-400 hover:text-white">✕</button>
-      </div>
-
-      <!-- ========================================================================= -->
-      <!-- VIEW 1: CRÔNICAS NARRATIVAS (LISTA) -->
-      <!-- ========================================================================= -->
-      <div v-if="activeTab === 'stories' && !activeAdventureDetail" class="space-y-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-white/5">
-          <div>
-            <h1 class="font-serif text-3xl text-parchment tracking-wide">Crônicas Narrativas (Livro-Jogo)</h1>
-            <p class="text-xs text-gray-400 font-light mt-1">Crie histórias com nós ramificados, diálogos, sprites e testes de dados V5.</p>
+          <div class="pt-4 px-3 py-2 text-[10px] font-serif uppercase tracking-[2px] text-gray-500 font-bold">
+            Jogadores &amp; Acervo
           </div>
-          <button @click="openAdventureModal()" class="px-5 py-2.5 rounded bg-gold/10 border border-gold/40 text-gold hover:bg-gold hover:text-black font-serif text-xs uppercase tracking-widest font-bold transition-all shadow-[0_0_15px_rgba(212,175,55,0.15)] flex items-center gap-2">
-            <span>+</span> Nova Crônica
+
+          <button 
+            @click="setTab('players')"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-serif uppercase tracking-wider transition-all text-left"
+            :class="activeTab === 'players' ? 'bg-white/10 text-parchment border border-white/20 font-bold' : 'text-gray-400 hover:text-parchment hover:bg-white/5'"
+          >
+            <span>👥</span>
+            <span>Monitor de Jogadores</span>
+          </button>
+
+          <button 
+            @click="setTab('compendium')"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-serif uppercase tracking-wider transition-all text-left"
+            :class="activeTab === 'compendium' ? 'bg-gold/10 text-gold border border-gold/30 font-bold' : 'text-gray-400 hover:text-parchment hover:bg-white/5'"
+          >
+            <span>📚</span>
+            <span>Compêndio de Nocturna</span>
           </button>
         </div>
 
-        <div v-if="loading" class="text-center py-20 text-gold text-xs font-serif uppercase tracking-widest animate-pulse">
-          Carregando crônicas...
+        <div class="border-t border-white/5 pt-4">
+          <div class="p-3 rounded-lg bg-black/40 border border-white/5 text-[11px] text-gray-400 space-y-1">
+            <div class="text-gold font-serif font-bold uppercase tracking-wider text-[10px]">Nocturna V5 CORE</div>
+            <p class="text-[10px] text-gray-500 leading-tight">Campanha viva interligada por nós e testes de atributos.</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN VIEWPORT -->
+      <main class="flex-1 flex flex-col overflow-y-auto p-6 md:p-8 max-w-7xl mx-auto w-full">
+        
+        <!-- MOBILE TABS -->
+        <div class="flex md:hidden gap-2 pb-4 overflow-x-auto border-b border-white/5 mb-6 shrink-0">
+          <button @click="setTab('overview')" :class="activeTab === 'overview' ? 'bg-gold text-black font-bold' : 'bg-black/60 text-gray-400'" class="px-3 py-1.5 rounded text-xs font-serif uppercase whitespace-nowrap">Overview</button>
+          <button @click="setTab('stories')" :class="activeTab === 'stories' ? 'bg-gold text-black font-bold' : 'bg-black/60 text-gray-400'" class="px-3 py-1.5 rounded text-xs font-serif uppercase whitespace-nowrap">Crônicas</button>
+          <button @click="setTab('missions')" :class="activeTab === 'missions' ? 'bg-blood-red text-white font-bold' : 'bg-black/60 text-gray-400'" class="px-3 py-1.5 rounded text-xs font-serif uppercase whitespace-nowrap">Incursões</button>
+          <button @click="setTab('players')" :class="activeTab === 'players' ? 'bg-white/20 text-white' : 'bg-black/60 text-gray-400'" class="px-3 py-1.5 rounded text-xs font-serif uppercase whitespace-nowrap">Jogadores</button>
+          <button @click="setTab('compendium')" :class="activeTab === 'compendium' ? 'bg-gold/30 text-gold' : 'bg-black/60 text-gray-400'" class="px-3 py-1.5 rounded text-xs font-serif uppercase whitespace-nowrap">Compêndio</button>
         </div>
 
-        <div v-else-if="adventures.length === 0" class="border border-white/5 bg-black/40 p-12 rounded-xl text-center space-y-4">
-          <div class="text-4xl">📜</div>
-          <h3 class="font-serif text-lg text-parchment">Nenhuma crônica criada ainda</h3>
-          <p class="text-xs text-gray-400 max-w-md mx-auto">Você ainda não possui crônicas associadas ao seu Mestre. Comece criando sua primeira aventura interativa.</p>
-          <button @click="openAdventureModal()" class="px-4 py-2 rounded bg-gold/10 border border-gold/40 text-gold hover:bg-gold hover:text-black font-serif text-xs uppercase tracking-widest font-bold">
-            Criar Minha Primeira Crônica
-          </button>
+        <!-- ALERTS -->
+        <div v-if="successMsg" class="mb-6 p-4 rounded-lg bg-green-950/60 border border-green-500/50 text-green-300 text-xs font-serif tracking-wider flex justify-between items-center animate-fade-in shadow-lg">
+          <span>✓ {{ successMsg }}</span>
+          <button @click="successMsg = ''" class="text-gray-400 hover:text-white">✕</button>
+        </div>
+        <div v-if="errorMsg" class="mb-6 p-4 rounded-lg bg-red-950/60 border border-red-500/50 text-red-300 text-xs font-serif tracking-wider flex justify-between items-center animate-fade-in shadow-lg">
+          <span>✕ {{ errorMsg }}</span>
+          <button @click="errorMsg = ''" class="text-gray-400 hover:text-white">✕</button>
         </div>
 
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="adv in adventures" :key="adv.id" class="border border-white/10 bg-black/60 hover:border-gold/50 rounded-xl p-6 flex flex-col justify-between transition-all group">
-            <div>
-              <div class="flex items-center justify-between text-[10px] font-serif uppercase tracking-widest text-gold-dim mb-3">
-                <span>{{ adv.nodes?.length || 0 }} Cenas / Nós</span>
-                <span v-if="adv.maxCompletions" class="text-gray-400">Max: {{ adv.maxCompletions }}x</span>
-                <span v-else class="text-gray-500">Ilimitada</span>
+        <!-- ========================================================================= -->
+        <!-- TAB 1: VISÃO GERAL (DASHBOARD) -->
+        <!-- ========================================================================= -->
+        <section v-if="activeTab === 'overview'" class="space-y-8 animate-fade-in">
+          <!-- WELCOME BANNER -->
+          <div class="border border-gold/30 bg-gradient-to-r from-black via-zinc-950 to-black p-8 rounded-2xl relative overflow-hidden shadow-[0_0_30px_rgba(212,175,55,0.08)]">
+            <div class="relative z-10 max-w-3xl space-y-3">
+              <div class="flex items-center gap-2 text-gold font-serif uppercase tracking-[3px] text-xs font-bold">
+                <span>🏙️ Campanha Canônica em Andamento</span>
               </div>
-              <h3 class="font-serif text-xl text-parchment group-hover:text-gold transition-colors mb-2 font-bold">{{ adv.title }}</h3>
-              <p class="text-xs text-gray-400 line-clamp-3 leading-relaxed mb-6">{{ adv.description }}</p>
+              <h1 class="font-serif text-3xl md:text-4xl text-parchment font-bold leading-tight">
+                Estúdio de Criação de <span class="text-gold">Nocturna</span>
+              </h1>
+              <p class="text-xs md:text-sm text-gray-400 leading-relaxed font-light">
+                Bem-vindo ao centro de comando narrativo. Aqui você cria histórias interativas com testes mecânicos de Vampiro V5, gerencia caçadas urbanas e monitora as consequências das escolhas dos jogadores.
+              </p>
+              <div class="flex flex-wrap gap-3 pt-3">
+                <button @click="setTab('stories'); openAdventureModal()" class="px-4 py-2 rounded-lg bg-gold text-black font-serif text-xs uppercase tracking-widest font-bold hover:bg-gold-dim transition-all shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+                  + Nova Crônica
+                </button>
+                <button @click="setTab('missions'); openMissionModal()" class="px-4 py-2 rounded-lg bg-blood-red/20 border border-blood-red/50 text-blood-red hover:bg-blood-red hover:text-white font-serif text-xs uppercase tracking-widest font-bold transition-all">
+                  + Nova Incursão / Caçada
+                </button>
+                <button @click="setTab('compendium')" class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 font-serif text-xs uppercase tracking-widest transition-all">
+                  Explorar Compêndio →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- METRICS GRID -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div class="border border-white/10 bg-black/60 p-4 rounded-xl flex flex-col justify-between hover:border-gold/40 transition-all">
+              <span class="text-[10px] font-serif uppercase tracking-widest text-gray-400">Crônicas</span>
+              <div class="font-serif text-2xl font-bold text-gold mt-2">{{ overviewStats?.adventuresCount ?? adventures.length }}</div>
+              <span class="text-[9px] text-gray-500 mt-1">Histórias Ativas</span>
             </div>
 
-            <div class="space-y-3 pt-4 border-t border-white/5">
-              <button @click="openAdventureDetail(adv.id)" class="w-full py-2 rounded bg-gold/10 border border-gold/30 hover:bg-gold hover:text-black text-gold text-xs font-serif uppercase tracking-widest font-bold transition-all">
-                Abrir Editor de Cenas →
+            <div class="border border-white/10 bg-black/60 p-4 rounded-xl flex flex-col justify-between hover:border-gold/40 transition-all">
+              <span class="text-[10px] font-serif uppercase tracking-widest text-gray-400">Cenas / Nós</span>
+              <div class="font-serif text-2xl font-bold text-parchment mt-2">{{ overviewStats?.nodesCount ?? 0 }}</div>
+              <span class="text-[9px] text-gray-500 mt-1">Nós Narrativos</span>
+            </div>
+
+            <div class="border border-white/10 bg-black/60 p-4 rounded-xl flex flex-col justify-between hover:border-blood-red/40 transition-all">
+              <span class="text-[10px] font-serif uppercase tracking-widest text-gray-400">Incursões AFK</span>
+              <div class="font-serif text-2xl font-bold text-blood-red mt-2">{{ overviewStats?.missionsCount ?? missions.length }}</div>
+              <span class="text-[9px] text-gray-500 mt-1">Caçadas &amp; Despachos</span>
+            </div>
+
+            <div class="border border-white/10 bg-black/60 p-4 rounded-xl flex flex-col justify-between hover:border-white/30 transition-all">
+              <span class="text-[10px] font-serif uppercase tracking-widest text-gray-400">NPCs V5</span>
+              <div class="font-serif text-2xl font-bold text-purple-400 mt-2">{{ overviewStats?.npcsCount ?? 25 }}</div>
+              <span class="text-[9px] text-gray-500 mt-1">Acervo Canônico</span>
+            </div>
+
+            <div class="border border-white/10 bg-black/60 p-4 rounded-xl flex flex-col justify-between hover:border-white/30 transition-all">
+              <span class="text-[10px] font-serif uppercase tracking-widest text-gray-400">Bairros</span>
+              <div class="font-serif text-2xl font-bold text-blue-400 mt-2">{{ overviewStats?.locationsCount ?? 35 }}</div>
+              <span class="text-[9px] text-gray-500 mt-1">Zonas de Nocturna</span>
+            </div>
+
+            <div class="border border-white/10 bg-black/60 p-4 rounded-xl flex flex-col justify-between hover:border-white/30 transition-all">
+              <span class="text-[10px] font-serif uppercase tracking-widest text-gray-400">Armas &amp; Itens</span>
+              <div class="font-serif text-2xl font-bold text-emerald-400 mt-2">{{ overviewStats?.equipmentsCount ?? 55 }}</div>
+              <span class="text-[9px] text-gray-500 mt-1">Equipamentos</span>
+            </div>
+          </div>
+
+          <!-- RECENT ACTIVITY FEED -->
+          <div class="border border-white/10 bg-black/60 rounded-2xl p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-white/5">
+              <div class="flex items-center gap-2">
+                <span class="text-base font-serif font-bold text-parchment">📜 Registro de Atividades em Nocturna</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-white/10 text-gray-400">Últimas Conclusões</span>
+              </div>
+            </div>
+
+            <div v-if="recentLogs.length === 0" class="text-center py-8 text-xs text-gray-500 font-serif">
+              Nenhuma jogada concluída recentemente registrada no servidor.
+            </div>
+
+            <div v-else class="divide-y divide-white/5">
+              <div v-for="log in recentLogs" :key="log.id" class="py-3 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full border border-white/10 bg-zinc-900 overflow-hidden shrink-0 flex items-center justify-center">
+                    <img v-if="log.character?.avatarUrl" :src="log.character.avatarUrl" class="w-full h-full object-cover" />
+                    <span v-else class="text-xs">🦇</span>
+                  </div>
+                  <div>
+                    <span class="font-bold text-parchment">{{ log.character?.name || 'Vampiro Anônimo' }}</span>
+                    <span class="text-gray-500 ml-2">concluiu</span>
+                    <span class="text-gold font-serif ml-1">{{ log.activityType === 'STORY_ADVENTURE' ? 'uma Crônica Narrativa' : 'uma Incursão / Caçada' }}</span>
+                  </div>
+                </div>
+                <span class="text-[10px] text-gray-500">{{ formatDate(log.createdAt) }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 2: CRÔNICAS NARRATIVAS (LISTA E ESTÚDIO DIVIDIDO) -->
+        <!-- ========================================================================= -->
+        <section v-if="activeTab === 'stories'" class="space-y-6 animate-fade-in">
+          
+          <!-- LIST VIEW (WHEN NO CHRONICLE SELECTED) -->
+          <div v-if="!activeAdventureDetail" class="space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-white/5">
+              <div>
+                <h1 class="font-serif text-2xl md:text-3xl text-parchment font-bold tracking-wide">Crônicas Narrativas (Livro-Jogo)</h1>
+                <p class="text-xs text-gray-400 font-light mt-1">Crie histórias com nós ramificados, diálogos com sprites e testes mecânicos de V5.</p>
+              </div>
+              <button @click="openAdventureModal()" class="px-5 py-2.5 rounded-lg bg-gold text-black hover:bg-gold-dim font-serif text-xs uppercase tracking-widest font-bold transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)] flex items-center gap-2">
+                <span>+</span> Nova Crônica
               </button>
-              
-              <div class="flex gap-2">
-                <button @click="openAdventureModal(adv)" class="flex-1 py-1.5 rounded bg-white/5 border border-white/10 hover:border-white/30 text-[10px] font-serif uppercase tracking-widest text-gray-300">
-                  Editar Info
-                </button>
-                <button @click="confirmDeleteAdventure(adv)" class="px-3 py-1.5 rounded bg-red-950/40 border border-red-500/30 hover:bg-red-900/60 text-[10px] font-serif uppercase tracking-widest text-red-300">
-                  Excluir
-                </button>
-              </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ========================================================================= -->
-      <!-- VIEW 1.2: EDITOR DE CENAS & ESCOLHAS DA AVENTURA (DETALHE) -->
-      <!-- ========================================================================= -->
-      <div v-else-if="activeTab === 'stories' && activeAdventureDetail" class="space-y-8">
-        <!-- HEADER DETALHE -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-white/10">
-          <div class="space-y-1">
-            <button @click="closeAdventureDetail" class="text-[10px] text-gray-400 hover:text-gold flex items-center gap-1 font-serif uppercase tracking-widest transition-colors mb-2">
-              <span>←</span> VOLTAR PARA A LISTA DE CRÔNICAS
-            </button>
-            <div class="flex items-center gap-3">
-              <h1 class="font-serif text-2xl md:text-3xl text-gold font-bold">{{ activeAdventureDetail.title }}</h1>
-              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-serif uppercase tracking-widest text-gray-400">
-                {{ activeAdventureDetail.nodes?.length || 0 }} Cenas
-              </span>
+            <div v-if="loading" class="text-center py-20 text-gold text-xs font-serif uppercase tracking-widest animate-pulse">
+              Carregando crônicas...
             </div>
-            <p class="text-xs text-gray-400 max-w-3xl">{{ activeAdventureDetail.description }}</p>
-          </div>
 
-          <div class="flex gap-3">
-            <button @click="openNodeModal()" class="px-4 py-2 rounded bg-gold/10 border border-gold/40 text-gold hover:bg-gold hover:text-black font-serif text-xs uppercase tracking-widest font-bold transition-all flex items-center gap-2">
-              <span>+</span> Adicionar Cena
-            </button>
-          </div>
-        </div>
+            <div v-else-if="adventures.length === 0" class="border border-white/5 bg-black/40 p-12 rounded-2xl text-center space-y-4">
+              <div class="text-5xl">📜</div>
+              <h3 class="font-serif text-lg text-parchment font-bold">Nenhuma crônica criada ainda</h3>
+              <p class="text-xs text-gray-400 max-w-md mx-auto">Você ainda não possui crônicas associadas ao seu Mestre. Comece criando sua primeira aventura interativa.</p>
+              <button @click="openAdventureModal()" class="px-5 py-2.5 rounded-lg bg-gold text-black font-serif text-xs uppercase tracking-widest font-bold">
+                Criar Minha Primeira Crônica
+              </button>
+            </div>
 
-        <!-- SELETOR DE NÓ INICIAL -->
-        <div class="p-4 rounded-xl border border-white/10 bg-black/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div class="text-xs font-serif tracking-wider">
-            <span class="text-gold-dim uppercase font-bold">Cena de Abertura (Nó Inicial):</span>
-            <span class="text-parchment ml-2">
-              {{ getNodeSnippet(activeAdventureDetail.firstNodeId) || 'Nenhuma cena definida como inicial' }}
-            </span>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <select v-model="selectedFirstNodeId" @change="saveFirstNodeId" class="bg-black border border-white/20 text-xs text-parchment px-3 py-1.5 rounded focus:border-gold outline-none">
-              <option :value="undefined">Selecionar Cena Inicial...</option>
-              <option v-for="(node, idx) in activeAdventureDetail.nodes" :key="node.id" :value="node.id">
-                Cena #{{ Number(idx) + 1 }}: {{ node.speakerName ? `[${node.speakerName}] ` : '' }}{{ node.narrativeText.substring(0, 40) }}...
-              </option>
-            </select>
-          </div>
-        </div>
-
-        <!-- LISTA DE CENAS / NÓS -->
-        <div v-if="!activeAdventureDetail.nodes || activeAdventureDetail.nodes.length === 0" class="text-center py-16 border border-white/5 rounded-xl bg-black/40 space-y-3">
-          <p class="text-xs text-gray-400 font-serif uppercase tracking-widest">Nenhuma cena cadastrada nesta crônica.</p>
-          <button @click="openNodeModal()" class="px-4 py-2 rounded bg-gold/10 border border-gold text-gold font-serif text-xs uppercase tracking-widest font-bold">
-            Criar Primeira Cena
-          </button>
-        </div>
-
-        <div v-else class="space-y-6">
-          <div v-for="(node, index) in activeAdventureDetail.nodes" :key="node.id" class="border border-white/10 bg-black/60 rounded-xl p-6 space-y-6 relative overflow-hidden">
-            
-            <!-- HEADER DA CENA -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pb-4 border-b border-white/5">
-              <div class="flex items-center gap-3">
-                <span class="w-8 h-8 rounded-full border border-gold/30 bg-gold/10 text-gold flex items-center justify-center font-serif font-bold text-xs">
-                  #{{ Number(index) + 1 }}
-                </span>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span v-if="node.speakerName" class="text-xs font-serif text-gold font-bold uppercase tracking-wider">
-                      🗣️ {{ node.speakerName }}
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div v-for="adv in adventures" :key="adv.id" class="border border-white/10 bg-gradient-to-b from-zinc-950 to-black hover:border-gold/60 rounded-2xl overflow-hidden flex flex-col justify-between transition-all group shadow-xl">
+                <!-- CARD HEADER BANNER -->
+                <div class="h-28 bg-zinc-900 relative p-4 flex flex-col justify-between border-b border-white/5 overflow-hidden">
+                  <div class="absolute inset-0 bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-500" style="background-image: url('https://images.unsplash.com/photo-1518002171953-a080ee817e1f?q=80&w=600&auto=format&fit=crop');"></div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent"></div>
+                  
+                  <div class="relative z-10 flex justify-between items-start">
+                    <span class="px-2 py-0.5 rounded bg-black/70 border border-white/10 text-[9px] font-serif uppercase tracking-widest text-gold font-bold backdrop-blur-sm">
+                      {{ adv.nodes?.length || 0 }} Cenas
                     </span>
-                    <span v-else class="text-xs font-serif text-gray-400 uppercase tracking-wider">
-                      Narrativa Neutra
+                    <span v-if="adv.firstNodeId" class="px-2 py-0.5 rounded bg-green-950/80 border border-green-500/40 text-[9px] font-serif uppercase tracking-widest text-green-300 font-bold backdrop-blur-sm">
+                      ● Nó Inicial Ativo
                     </span>
-                    <span v-if="node.isEnding" class="px-2 py-0.5 rounded bg-red-950/80 border border-red-500/50 text-red-300 text-[9px] font-serif uppercase tracking-widest">
-                      🏁 Cena de Desfecho / Fim
-                    </span>
-                    <span v-if="activeAdventureDetail.firstNodeId === node.id" class="px-2 py-0.5 rounded bg-gold/10 border border-gold/40 text-gold text-[9px] font-serif uppercase tracking-widest font-bold">
-                      ⭐ Nó Inicial
+                    <span v-else class="px-2 py-0.5 rounded bg-red-950/80 border border-red-500/40 text-[9px] font-serif uppercase tracking-widest text-red-300 font-bold backdrop-blur-sm">
+                      ⚠️ Sem Nó Inicial
                     </span>
                   </div>
-                  <div class="text-[10px] text-gray-500 font-mono">ID: {{ node.id }}</div>
+
+                  <h3 class="relative z-10 font-serif text-lg text-parchment font-bold group-hover:text-gold transition-colors truncate">
+                    {{ adv.title }}
+                  </h3>
+                </div>
+
+                <!-- CARD BODY -->
+                <div class="p-5 space-y-4 flex-1 flex flex-col justify-between">
+                  <p class="text-xs text-gray-400 line-clamp-3 leading-relaxed font-light">
+                    {{ adv.description || 'Sem descrição informada.' }}
+                  </p>
+
+                  <div class="space-y-2 pt-3 border-t border-white/5">
+                    <button @click="openAdventureDetail(adv.id)" class="w-full py-2.5 rounded-lg bg-gold text-black hover:bg-gold-dim text-xs font-serif uppercase tracking-widest font-bold transition-all shadow-[0_0_15px_rgba(212,175,55,0.15)] flex items-center justify-center gap-2">
+                      <span>🎮 Abrir Estúdio de Cenas</span>
+                    </button>
+                    
+                    <div class="flex gap-2">
+                      <button @click="openAdventureModal(adv)" class="flex-1 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-white/30 text-[10px] font-serif uppercase tracking-widest text-gray-300">
+                        Editar Dados
+                      </button>
+                      <button @click="confirmDeleteAdventure(adv)" class="px-3 py-1.5 rounded-lg bg-red-950/30 border border-red-500/30 hover:bg-red-900/50 text-[10px] font-serif uppercase tracking-widest text-red-300">
+                        Excluir
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SPLIT-SCREEN CHRONICLE STUDIO (WHEN DETAIL OPEN) -->
+          <div v-else class="space-y-6">
+            <!-- STUDIO BREADCRUMB & HEADER -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-white/10">
+              <div class="space-y-1">
+                <button @click="closeAdventureDetail" class="text-[10px] text-gray-400 hover:text-gold flex items-center gap-1 font-serif uppercase tracking-widest transition-colors">
+                  <span>←</span> Voltar para Todas as Crônicas
+                </button>
+                <div class="flex items-center gap-3">
+                  <h1 class="font-serif text-2xl md:text-3xl text-gold font-bold">{{ activeAdventureDetail.title }}</h1>
+                  <span class="px-2.5 py-0.5 rounded-full bg-gold/10 border border-gold/30 text-[10px] font-serif uppercase tracking-widest text-gold font-bold">
+                    {{ activeAdventureDetail.nodes?.length || 0 }} Cenas Criadas
+                  </span>
                 </div>
               </div>
 
               <div class="flex items-center gap-2">
-                <button @click="openChoiceModal(node.id)" class="px-3 py-1 rounded bg-gold/10 border border-gold/30 hover:bg-gold hover:text-black text-gold text-[10px] font-serif uppercase tracking-widest font-bold">
-                  + Adicionar Escolha
-                </button>
-                <button @click="openNodeModal(node)" class="px-3 py-1 rounded bg-white/5 border border-white/10 hover:border-white/30 text-gray-300 text-[10px] font-serif uppercase tracking-widest">
-                  Editar Cena
-                </button>
-                <button @click="confirmDeleteNode(node.id)" class="px-3 py-1 rounded bg-red-950/40 border border-red-500/30 hover:bg-red-900/60 text-red-300 text-[10px] font-serif uppercase tracking-widest">
-                  Excluir
+                <button @click="openNodeModal()" class="px-4 py-2 rounded-lg bg-gold text-black hover:bg-gold-dim font-serif text-xs uppercase tracking-widest font-bold transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)] flex items-center gap-2">
+                  <span>+</span> Adicionar Nova Cena
                 </button>
               </div>
             </div>
 
-            <!-- CORPO NARRATIVO E PREVIEWS -->
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              <div class="lg:col-span-3 space-y-3">
-                <p class="text-sm text-parchment leading-relaxed whitespace-pre-line bg-black/40 p-4 rounded-lg border border-white/5 italic">
-                  "{{ node.narrativeText }}"
-                </p>
-              </div>
-
-              <!-- PREVIEW DE IMAGENS -->
-              <div class="space-y-2 text-[10px] text-gray-400 font-serif uppercase tracking-wider">
-                <div v-if="node.backgroundImageUrl" class="border border-white/10 rounded p-2 bg-black/80">
-                  <div class="mb-1 text-gray-500">Fundo:</div>
-                  <div class="h-16 rounded overflow-hidden relative">
-                    <img :src="node.backgroundImageUrl" class="w-full h-full object-cover" />
-                  </div>
-                </div>
-                <div v-if="node.leftCharacterImageUrl || node.rightCharacterImageUrl" class="flex gap-2">
-                  <div v-if="node.leftCharacterImageUrl" class="flex-1 border border-white/10 rounded p-1 text-center bg-black/80">
-                    <div class="text-[8px] text-gray-500 mb-1">Sprite Esq.</div>
-                    <img :src="node.leftCharacterImageUrl" class="h-12 mx-auto object-contain" />
-                  </div>
-                  <div v-if="node.rightCharacterImageUrl" class="flex-1 border border-white/10 rounded p-1 text-center bg-black/80">
-                    <div class="text-[8px] text-gray-500 mb-1">Sprite Dir.</div>
-                    <img :src="node.rightCharacterImageUrl" class="h-12 mx-auto object-contain" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- SEÇÃO DE ESCOLHAS DESTA CENA -->
-            <div class="pt-4 border-t border-white/5 space-y-3">
-              <div class="text-xs font-serif uppercase tracking-widest text-gold-dim font-bold flex items-center justify-between">
-                <span>Escolhas / Ramificações ({{ node.choices?.length || 0 }}):</span>
-              </div>
-
-              <div v-if="!node.choices || node.choices.length === 0" class="text-xs text-gray-500 italic p-3 border border-white/5 rounded bg-black/30">
-                <span v-if="node.isEnding">Esta cena encerra a história. Nenhuma escolha necessária.</span>
-                <span v-else>Nenhuma escolha cadastrada. Jogadores ficarão travados nesta cena a menos que adicione uma escolha ou marque como final.</span>
-              </div>
-
-              <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div v-for="ch in node.choices" :key="ch.id" class="p-3 rounded-lg border border-white/10 bg-black/80 hover:border-gold/40 transition-colors flex flex-col justify-between">
-                  <div class="space-y-1 mb-2">
-                    <div class="font-serif text-xs text-parchment font-bold flex items-center justify-between">
-                      <span>🔘 {{ ch.choiceText }}</span>
-                    </div>
-
-                    <!-- TESTE DE DADOS -->
-                    <div v-if="ch.attributeReq || ch.skillReq" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-red-950/60 border border-red-500/40 text-[10px] text-red-300 font-mono">
-                      <span>🎲 Teste:</span>
-                      <span class="font-bold text-white">{{ ch.attributeReq || '' }} {{ ch.attributeReq && ch.skillReq ? '+' : '' }} {{ ch.skillReq || '' }}</span>
-                      <span>(Dif. {{ ch.difficulty || 1 }})</span>
-                    </div>
-                    <div v-else class="text-[10px] text-gray-500">
-                      ⚡ Avanço Automático (Sem Teste)
-                    </div>
-
-                    <!-- DESTINOS -->
-                    <div class="text-[10px] text-gray-400 space-y-0.5 pt-1">
-                      <div class="flex items-center gap-1">
-                        <span class="text-green-400 font-bold">↳ Sucesso:</span>
-                        <span class="truncate">{{ getNodeSnippet(ch.successNodeId) || 'Não configurado' }}</span>
-                      </div>
-                      <div v-if="ch.failureNodeId" class="flex items-center gap-1">
-                        <span class="text-red-400 font-bold">↳ Falha:</span>
-                        <span class="truncate">{{ getNodeSnippet(ch.failureNodeId) }}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex justify-end gap-2 pt-2 border-t border-white/5">
-                    <button @click="openChoiceModal(node.id, ch)" class="text-[9px] font-serif uppercase tracking-widest text-gold hover:underline">
-                      Editar
-                    </button>
-                    <button @click="confirmDeleteChoice(ch.id)" class="text-[9px] font-serif uppercase tracking-widest text-red-400 hover:underline">
-                      Excluir
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- ========================================================================= -->
-      <!-- VIEW 2: INCURSÕES & CAÇADAS AFK (LISTA) -->
-      <!-- ========================================================================= -->
-      <div v-else-if="activeTab === 'missions' && !activeMissionDetail" class="space-y-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-white/5">
-          <div>
-            <h1 class="font-serif text-3xl text-parchment tracking-wide">Incursões &amp; Caçadas (Missões AFK)</h1>
-            <p class="text-xs text-gray-400 font-light mt-1">Crie despachos com tempos de espera, etapas sequenciais de testes de dados e recompensas de sangue/experiência.</p>
-          </div>
-          <button @click="openMissionModal()" class="px-5 py-2.5 rounded bg-blood-red/20 border border-blood-red text-blood-red hover:bg-blood-red hover:text-white font-serif text-xs uppercase tracking-widest font-bold transition-all shadow-[0_0_15px_rgba(192,57,43,0.2)] flex items-center gap-2">
-            <span>+</span> Nova Missão AFK
-          </button>
-        </div>
-
-        <div v-if="loading" class="text-center py-20 text-blood-red text-xs font-serif uppercase tracking-widest animate-pulse">
-          Carregando missões...
-        </div>
-
-        <div v-else-if="missions.length === 0" class="border border-white/5 bg-black/40 p-12 rounded-xl text-center space-y-4">
-          <div class="text-4xl">⏳</div>
-          <h3 class="font-serif text-lg text-parchment">Nenhuma missão criada ainda</h3>
-          <p class="text-xs text-gray-400 max-w-md mx-auto">Crie operações urbanas ou zonas de caçada para os membros explorarem no radar.</p>
-          <button @click="openMissionModal()" class="px-4 py-2 rounded bg-blood-red/20 border border-blood-red text-blood-red hover:bg-blood-red hover:text-white font-serif text-xs uppercase tracking-widest font-bold">
-            Criar Minha Primeira Missão
-          </button>
-        </div>
-
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="m in missions" :key="m.id" class="border border-white/10 bg-black/60 hover:border-blood-red/50 rounded-xl p-6 flex flex-col justify-between transition-all group">
-            <div>
-              <div class="flex items-center justify-between text-[10px] font-serif uppercase tracking-widest mb-3">
-                <span :class="m.category === 'HUNT' ? 'text-red-400 bg-red-950/60 px-2 py-0.5 rounded border border-red-500/30' : 'text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-500/30'">
-                  {{ m.category === 'HUNT' ? '🩸 Caçada de Sangue' : '⚔️ Operação Tática' }}
-                </span>
-                <span class="text-gray-400 font-mono">⏱️ {{ m.durationMinutes }} min</span>
-              </div>
-              <h3 class="font-serif text-xl text-parchment group-hover:text-blood-red transition-colors mb-2 font-bold">{{ m.title }}</h3>
-              <p class="text-xs text-gray-400 line-clamp-3 leading-relaxed mb-4">{{ m.description }}</p>
-
-              <!-- RECOMPENSAS / PENALIDADES -->
-              <div class="bg-black/50 p-2.5 rounded border border-white/5 mb-6 text-[10px] font-mono space-y-1">
-                <div class="text-gray-400">Recompensas: <span class="text-green-400 font-bold">{{ formatJson(m.rewardsJson) }}</span></div>
-                <div v-if="m.penaltiesJson && Object.keys(m.penaltiesJson).length > 0" class="text-gray-400">Penalidades: <span class="text-red-400">{{ formatJson(m.penaltiesJson) }}</span></div>
-              </div>
-            </div>
-
-            <div class="space-y-3 pt-4 border-t border-white/5">
-              <button @click="openMissionDetail(m.id)" class="w-full py-2 rounded bg-blood-red/10 border border-blood-red/40 hover:bg-blood-red hover:text-white text-blood-red text-xs font-serif uppercase tracking-widest font-bold transition-all">
-                Gerenciar Etapas ({{ m.Actions?.length || 0 }}) →
-              </button>
+            <!-- SPLIT VIEW CONTAINER -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[650px]">
               
-              <div class="flex gap-2">
-                <button @click="openMissionModal(m)" class="flex-1 py-1.5 rounded bg-white/5 border border-white/10 hover:border-white/30 text-[10px] font-serif uppercase tracking-widest text-gray-300">
-                  Editar Info
-                </button>
-                <button @click="confirmDeleteMission(m)" class="px-3 py-1.5 rounded bg-red-950/40 border border-red-500/30 hover:bg-red-900/60 text-[10px] font-serif uppercase tracking-widest text-red-300">
-                  Excluir
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+              <!-- LEFT PANEL: SCENE SELECTOR LIST (4 COLS) -->
+              <div class="lg:col-span-4 border border-white/10 bg-black/60 rounded-2xl p-4 flex flex-col space-y-3 overflow-hidden">
+                <div class="flex justify-between items-center pb-2 border-b border-white/5">
+                  <span class="text-xs font-serif font-bold uppercase tracking-widest text-gray-400">Navegador de Cenas</span>
+                  <span class="text-[10px] text-gray-500">{{ activeAdventureDetail.nodes?.length || 0 }} nós</span>
+                </div>
 
-      <!-- ========================================================================= -->
-      <!-- VIEW 2.2: GERENCIADOR DE ETAPAS DA MISSÃO AFK (DETALHE) -->
-      <!-- ========================================================================= -->
-      <div v-else-if="activeTab === 'missions' && activeMissionDetail" class="space-y-8">
-        <!-- HEADER DETALHE -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-white/10">
-          <div class="space-y-1">
-            <button @click="closeMissionDetail" class="text-[10px] text-gray-400 hover:text-blood-red flex items-center gap-1 font-serif uppercase tracking-widest transition-colors mb-2">
-              <span>←</span> VOLTAR PARA A LISTA DE MISSÕES
-            </button>
-            <div class="flex items-center gap-3">
-              <h1 class="font-serif text-2xl md:text-3xl text-blood-red font-bold">{{ activeMissionDetail.title }}</h1>
-              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-serif uppercase tracking-widest text-gray-400">
-                {{ activeMissionDetail.Actions?.length || 0 }} Etapas
-              </span>
-            </div>
-            <p class="text-xs text-gray-400 max-w-3xl">{{ activeMissionDetail.description }}</p>
-          </div>
+                <div v-if="!activeAdventureDetail.nodes || activeAdventureDetail.nodes.length === 0" class="p-8 text-center text-gray-500 text-xs font-serif">
+                  Nenhuma cena adicionada. Clique em "+ Adicionar Nova Cena".
+                </div>
 
-          <div class="flex gap-3">
-            <button @click="openActionModal()" class="px-4 py-2 rounded bg-blood-red/20 border border-blood-red text-blood-red hover:bg-blood-red hover:text-white font-serif text-xs uppercase tracking-widest font-bold transition-all flex items-center gap-2">
-              <span>+</span> Adicionar Etapa
-            </button>
-          </div>
-        </div>
+                <div v-else class="flex-1 overflow-y-auto space-y-2 pr-1">
+                  <div 
+                    v-for="(node, index) in activeAdventureDetail.nodes" 
+                    :key="node.id"
+                    @click="selectNode(node)"
+                    class="p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2"
+                    :class="selectedNode?.id === node.id 
+                      ? 'border-gold bg-gold/10 shadow-[0_0_15px_rgba(212,175,55,0.15)]' 
+                      : 'border-white/5 bg-zinc-950/60 hover:border-white/20 hover:bg-white/5'"
+                  >
+                    <div class="flex justify-between items-center">
+                      <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-serif font-bold px-1.5 py-0.5 rounded" :class="selectedNode?.id === node.id ? 'bg-gold text-black' : 'bg-white/10 text-gray-400'">
+                          #{{ Number(index) + 1 }}
+                        </span>
+                        <span class="text-xs font-serif font-bold truncate text-parchment">
+                          {{ node.speakerName || 'Narrativa' }}
+                        </span>
+                      </div>
 
-        <!-- LISTA DE ETAPAS DA MISSÃO -->
-        <div v-if="!activeMissionDetail.Actions || activeMissionDetail.Actions.length === 0" class="text-center py-16 border border-white/5 rounded-xl bg-black/40 space-y-3">
-          <p class="text-xs text-gray-400 font-serif uppercase tracking-widest">Nenhuma etapa cadastrada nesta missão.</p>
-          <button @click="openActionModal()" class="px-4 py-2 rounded bg-blood-red/20 border border-blood-red text-blood-red font-serif text-xs uppercase tracking-widest font-bold">
-            Adicionar Primeira Etapa
-          </button>
-        </div>
+                      <div class="flex items-center gap-1.5">
+                        <span v-if="activeAdventureDetail.firstNodeId === node.id" class="px-1.5 py-0.5 rounded bg-green-950 border border-green-500 text-[8px] text-green-300 font-bold uppercase tracking-wider">
+                          Início
+                        </span>
+                        <span v-if="node.isEnding" class="px-1.5 py-0.5 rounded bg-red-950 border border-red-500 text-[8px] text-red-300 font-bold uppercase tracking-wider">
+                          Fim
+                        </span>
+                      </div>
+                    </div>
 
-        <div v-else class="space-y-4">
-          <div v-for="act in activeMissionDetail.Actions" :key="act.id" class="border border-white/10 bg-black/60 rounded-xl p-6 space-y-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pb-3 border-b border-white/5">
-              <div class="flex items-center gap-3">
-                <span class="w-8 h-8 rounded-full border border-blood-red/40 bg-blood-red/10 text-blood-red flex items-center justify-center font-serif font-bold text-xs">
-                  #{{ act.stepOrder }}
-                </span>
-                <div>
-                  <h4 class="font-serif text-base text-parchment font-bold">{{ act.name }}</h4>
-                  <div class="text-[10px] text-gray-400 font-mono">
-                    🎲 Teste: <span class="text-gold font-bold">{{ act.attributeReq || '' }} + {{ act.skillReq || '' }}</span> (Dif. {{ act.difficulty || 6 }})
+                    <p class="text-[11px] text-gray-400 line-clamp-2 font-light leading-snug">
+                      {{ node.narrativeText }}
+                    </p>
+
+                    <div class="flex justify-between items-center text-[9px] text-gray-500 pt-2 border-t border-white/5">
+                      <span>{{ node.choices?.length || 0 }} Escolhas</span>
+                      <span class="text-gold-dim">Clique para editar →</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="flex gap-2">
-                <button @click="openActionModal(act)" class="px-3 py-1 rounded bg-white/5 border border-white/10 hover:border-white/30 text-gray-300 text-[10px] font-serif uppercase tracking-widest">
-                  Editar
-                </button>
-                <button @click="confirmDeleteAction(act.id)" class="px-3 py-1 rounded bg-red-950/40 border border-red-500/30 hover:bg-red-900/60 text-red-300 text-[10px] font-serif uppercase tracking-widest">
-                  Excluir
-                </button>
+              <!-- RIGHT PANEL: ACTIVE SCENE STUDIO & CHOICES (8 COLS) -->
+              <div class="lg:col-span-8 border border-white/10 bg-black/60 rounded-2xl p-6 flex flex-col space-y-6">
+                
+                <div v-if="!selectedNode" class="flex-1 flex flex-col items-center justify-center text-center p-12 text-gray-500 space-y-3">
+                  <span class="text-4xl">🎬</span>
+                  <h3 class="font-serif text-lg text-parchment font-bold">Nenhuma Cena Selecionada</h3>
+                  <p class="text-xs max-w-sm">Selecione uma cena no menu à esquerda para editar seus diálogos, imagens e opções de ramificação.</p>
+                </div>
+
+                <div v-else class="space-y-6">
+                  <!-- SCENE TOOLBAR -->
+                  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                      <span class="font-serif text-xl font-bold text-gold">Editor da Cena</span>
+                      <span class="text-xs text-gray-400 font-mono">ID: {{ selectedNode.id }}</span>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                      <button 
+                        v-if="activeAdventureDetail.firstNodeId !== selectedNode.id"
+                        @click="setAsStartingNode(selectedNode.id)" 
+                        class="px-3 py-1.5 rounded-lg bg-green-950/60 border border-green-500/40 text-green-300 hover:bg-green-900/60 text-xs font-serif uppercase tracking-wider font-bold transition-all"
+                      >
+                        ✓ Definir Como Cena Inicial
+                      </button>
+                      <button @click="openNodeModal(selectedNode)" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-white/30 text-xs font-serif uppercase tracking-wider text-gray-300">
+                        Editar Cena
+                      </button>
+                      <button @click="confirmDeleteNode(selectedNode)" class="px-3 py-1.5 rounded-lg bg-red-950/40 border border-red-500/30 hover:bg-red-900/60 text-xs font-serif uppercase tracking-wider text-red-300">
+                        Excluir Cena
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- SCENE VISUAL PREVIEW & NARRATIVE -->
+                  <div class="border border-white/10 rounded-xl overflow-hidden bg-zinc-950">
+                    <!-- BACKGROUND WITH SPRITES -->
+                    <div class="h-48 bg-zinc-900 relative flex items-end justify-between px-8 pb-2 overflow-hidden border-b border-white/5">
+                      <div class="absolute inset-0 bg-cover bg-center opacity-60" :style="selectedNode.backgroundImageUrl ? `background-image: url('${selectedNode.backgroundImageUrl}')` : `background-image: url('https://images.unsplash.com/photo-1518002171953-a080ee817e1f?q=80&w=1200&auto=format&fit=crop')`"></div>
+                      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+
+                      <!-- SPRITE ESQUERDA -->
+                      <div class="relative z-10 w-24 h-36 flex items-end justify-center">
+                        <img v-if="selectedNode.leftCharacterImageUrl" :src="selectedNode.leftCharacterImageUrl" class="max-h-full object-contain filter drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]" />
+                        <span v-else class="text-[9px] text-gray-500 bg-black/70 px-2 py-0.5 rounded border border-white/10">Sem Sprite Esq.</span>
+                      </div>
+
+                      <!-- SPEAKER CENTER BADGE -->
+                      <div class="relative z-10 mb-2">
+                        <span class="px-3 py-1 rounded-full bg-gold/20 border border-gold/50 text-gold text-xs font-serif font-bold uppercase tracking-widest backdrop-blur-md">
+                          {{ selectedNode.speakerName || 'O Narrador' }}
+                        </span>
+                      </div>
+
+                      <!-- SPRITE DIREITA -->
+                      <div class="relative z-10 w-24 h-36 flex items-end justify-center">
+                        <img v-if="selectedNode.rightCharacterImageUrl" :src="selectedNode.rightCharacterImageUrl" class="max-h-full object-contain filter drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]" />
+                        <span v-else class="text-[9px] text-gray-500 bg-black/70 px-2 py-0.5 rounded border border-white/10">Sem Sprite Dir.</span>
+                      </div>
+                    </div>
+
+                    <!-- NARRATIVE TEXT BOX -->
+                    <div class="p-5 bg-black/80 space-y-2">
+                      <p class="text-sm text-parchment font-serif leading-relaxed font-light whitespace-pre-wrap">
+                        {{ selectedNode.narrativeText }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- CHOICES & BRANCHING SECTION -->
+                  <div class="space-y-4">
+                    <div class="flex justify-between items-center pb-2 border-b border-white/5">
+                      <div class="flex items-center gap-2">
+                        <span class="font-serif text-sm font-bold text-parchment uppercase tracking-wider">🔀 Escolhas &amp; Testes de Dados V5</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-white/10 text-gray-400">{{ selectedNode.choices?.length || 0 }} botões</span>
+                      </div>
+                      <button @click="openChoiceModal(null, selectedNode.id)" class="px-3 py-1 rounded-lg bg-gold/10 border border-gold/30 hover:bg-gold hover:text-black text-gold text-xs font-serif uppercase tracking-wider font-bold transition-all">
+                        + Nova Escolha
+                      </button>
+                    </div>
+
+                    <div v-if="!selectedNode.choices || selectedNode.choices.length === 0" class="p-6 rounded-xl border border-dashed border-white/10 text-center text-xs text-gray-500 font-serif">
+                      <p v-if="selectedNode.isEnding" class="text-red-400">Esta cena é marcada como Desfecho (Fim de História). Não requer botões de escolha.</p>
+                      <p v-else>Nenhuma escolha configurada para esta cena. Adicione uma escolha para permitir que o jogador continue a história.</p>
+                    </div>
+
+                    <div v-else class="grid grid-cols-1 gap-3">
+                      <div v-for="choice in selectedNode.choices" :key="choice.id" class="p-4 rounded-xl border border-white/10 bg-zinc-950/80 flex flex-col justify-between gap-3 hover:border-gold/40 transition-all">
+                        <div class="flex justify-between items-start">
+                          <div class="space-y-1">
+                            <span class="font-serif text-sm text-parchment font-bold">{{ choice.choiceText }}</span>
+                            <div class="flex flex-wrap gap-2 text-[10px]">
+                              <span v-if="choice.attributeReq" class="px-2 py-0.5 rounded bg-blue-950/60 border border-blue-500/30 text-blue-300 font-bold uppercase">
+                                Teste: {{ choice.attributeReq }} + {{ choice.skillReq || 'Perícia' }} (Dif. {{ choice.difficulty }})
+                              </span>
+                              <span v-else class="px-2 py-0.5 rounded bg-white/5 text-gray-400 font-bold uppercase">
+                                Escolha Direta (Sem Teste)
+                              </span>
+                            </div>
+                          </div>
+
+                          <div class="flex gap-1.5">
+                            <button @click="openChoiceModal(choice, selectedNode.id)" class="px-2 py-1 rounded bg-white/5 border border-white/10 hover:border-white/30 text-[10px] text-gray-300">
+                              Editar
+                            </button>
+                            <button @click="confirmDeleteChoice(choice)" class="px-2 py-1 rounded bg-red-950/30 border border-red-500/30 hover:bg-red-900/50 text-[10px] text-red-300">
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- DESTINATION NODES -->
+                        <div class="text-[10px] text-gray-400 flex flex-wrap items-center gap-3 pt-2 border-t border-white/5">
+                          <div class="flex items-center gap-1">
+                            <span class="text-green-400">✓ Sucesso vai para:</span>
+                            <span class="text-parchment font-bold">{{ getNodeName(choice.successNodeId) }}</span>
+                          </div>
+                          <div v-if="choice.attributeReq" class="flex items-center gap-1">
+                            <span class="text-red-400">✕ Falha vai para:</span>
+                            <span class="text-parchment font-bold">{{ getNodeName(choice.failureNodeId) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+        </section>
 
-            <p class="text-xs text-gray-300">{{ act.description }}</p>
+        <!-- ========================================================================= -->
+        <!-- TAB 3: INCURSÕES & CAÇADAS (AFK) -->
+        <!-- ========================================================================= -->
+        <section v-if="activeTab === 'missions'" class="space-y-6 animate-fade-in">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-white/5">
+            <div>
+              <h1 class="font-serif text-2xl md:text-3xl text-parchment font-bold tracking-wide">Incursões &amp; Caçadas (Missões AFK)</h1>
+              <p class="text-xs text-gray-400 font-light mt-1">Despachos táticos no radar de Nocturna com tempo de espera e resolução automática de testes.</p>
+            </div>
+            <button @click="openMissionModal()" class="px-5 py-2.5 rounded-lg bg-blood-red text-white hover:bg-red-700 font-serif text-xs uppercase tracking-widest font-bold transition-all shadow-[0_0_15px_rgba(192,57,43,0.3)] flex items-center gap-2">
+              <span>+</span> Nova Missão AFK
+            </button>
+          </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
-              <div class="bg-green-950/30 border border-green-500/30 p-3 rounded">
-                <div class="text-[10px] font-serif uppercase tracking-widest text-green-400 font-bold mb-1">✓ Texto de Sucesso</div>
-                <div class="text-gray-300 italic">{{ act.successText }}</div>
+          <div v-if="missions.length === 0" class="border border-white/5 bg-black/40 p-12 rounded-2xl text-center space-y-4">
+            <div class="text-5xl">⏳</div>
+            <h3 class="font-serif text-lg text-parchment font-bold">Nenhuma missão AFK criada ainda</h3>
+            <p class="text-xs text-gray-400 max-w-md mx-auto">Crie operações táticas ou zonas de caçada de sangue para os personagens explorarem no radar.</p>
+            <button @click="openMissionModal()" class="px-5 py-2.5 rounded-lg bg-blood-red text-white font-serif text-xs uppercase tracking-widest font-bold">
+              Criar Primeira Missão
+            </button>
+          </div>
+
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div v-for="mission in missions" :key="mission.id" class="border border-white/10 bg-gradient-to-b from-zinc-950 to-black hover:border-blood-red/60 rounded-2xl p-6 flex flex-col justify-between transition-all group shadow-xl">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between text-[10px] font-serif uppercase tracking-widest">
+                  <span class="px-2 py-0.5 rounded font-bold" :class="mission.category === 'HUNT' ? 'bg-red-950 text-red-300 border border-red-500/40' : 'bg-blue-950 text-blue-300 border border-blue-500/40'">
+                    {{ mission.category === 'HUNT' ? '🩸 Caçada de Sangue' : '🎯 Operação Tática' }}
+                  </span>
+                  <span class="text-gray-400 font-mono">{{ mission.durationMinutes }} Minutos</span>
+                </div>
+
+                <h3 class="font-serif text-xl text-parchment font-bold group-hover:text-blood-red transition-colors">
+                  {{ mission.title }}
+                </h3>
+
+                <p class="text-xs text-gray-400 line-clamp-3 leading-relaxed font-light">
+                  {{ mission.description }}
+                </p>
+
+                <div class="text-[10px] text-gray-500 pt-2 border-t border-white/5 space-y-1">
+                  <div>Dificuldade Base: <span class="text-parchment font-bold">{{ mission.baseDifficulty }}</span></div>
+                  <div>Etapas Mecânicas: <span class="text-gold font-bold">{{ mission.Actions?.length || 0 }} ações</span></div>
+                </div>
               </div>
-              <div class="bg-red-950/30 border border-red-500/30 p-3 rounded">
-                <div class="text-[10px] font-serif uppercase tracking-widest text-red-400 font-bold mb-1">✕ Texto de Falha</div>
-                <div class="text-gray-300 italic">{{ act.failureText }}</div>
+
+              <div class="space-y-2 pt-4 border-t border-white/5 mt-4">
+                <button @click="openMissionDetail(mission.id)" class="w-full py-2.5 rounded-lg bg-blood-red/20 border border-blood-red/40 hover:bg-blood-red hover:text-white text-blood-red text-xs font-serif uppercase tracking-widest font-bold transition-all">
+                  Gerenciar Etapas ({{ mission.Actions?.length || 0 }}) →
+                </button>
+                
+                <div class="flex gap-2">
+                  <button @click="openMissionModal(mission)" class="flex-1 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-white/30 text-[10px] font-serif uppercase tracking-widest text-gray-300">
+                    Editar
+                  </button>
+                  <button @click="confirmDeleteMission(mission)" class="px-3 py-1.5 rounded-lg bg-red-950/30 border border-red-500/30 hover:bg-red-900/50 text-[10px] font-serif uppercase tracking-widest text-red-300">
+                    Excluir
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-    </main>
-
-    <!-- ========================================================================= -->
-    <!-- MODAL 1: ADICIONAR / EDITAR CRÔNICA (AVENTURA) -->
-    <!-- ========================================================================= -->
-    <div v-if="showAdventureModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-[#0c0c0c] border border-gold/40 rounded-xl max-w-xl w-full p-6 space-y-6 shadow-2xl">
-        <div class="flex justify-between items-center border-b border-white/10 pb-4">
-          <h3 class="font-serif text-xl text-gold font-bold">
-            {{ adventureForm.id ? 'Editar Crônica' : 'Nova Crônica Narrativa' }}
-          </h3>
-          <button @click="showAdventureModal = false" class="text-gray-400 hover:text-white">✕</button>
-        </div>
-
-        <form @submit.prevent="saveAdventure" class="space-y-4 text-xs font-serif">
-          <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Título da Crônica *</label>
-            <input type="text" v-model="adventureForm.title" required class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-gold outline-none" placeholder="Ex: A Vingança de Sangue">
+        <!-- ========================================================================= -->
+        <!-- TAB 4: MONITOR DE JOGADORES -->
+        <!-- ========================================================================= -->
+        <section v-if="activeTab === 'players'" class="space-y-6 animate-fade-in">
+          <div class="pb-6 border-b border-white/5">
+            <h1 class="font-serif text-2xl md:text-3xl text-parchment font-bold tracking-wide">Monitor de Jogadores &amp; Vampiros Ativos</h1>
+            <p class="text-xs text-gray-400 font-light mt-1">Acompanhe todos os personagens criados pelos jogadores que habitam a metrópole de Nocturna.</p>
           </div>
 
-          <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Sinopse / Descrição *</label>
-            <textarea v-model="adventureForm.description" required rows="4" class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-gold outline-none" placeholder="Uma breve introdução sobre a trama e os perigos da noite..."></textarea>
+          <div v-if="playersList.length === 0" class="text-center py-16 text-xs text-gray-500 font-serif border border-white/5 rounded-2xl bg-black/40">
+            Nenhum personagem de jogador cadastrado ainda.
           </div>
 
-          <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Limite de Conclusões por Personagem</label>
-            <input type="number" v-model.number="adventureForm.maxCompletions" class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-gold outline-none" placeholder="Deixe vazio para jogadas ilimitadas (ex: 1)">
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div v-for="player in playersList" :key="player.id" class="border border-white/10 bg-zinc-950/80 rounded-2xl p-5 space-y-4 hover:border-gold/40 transition-all">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full border border-gold/30 overflow-hidden bg-black shrink-0 flex items-center justify-center">
+                  <img v-if="player.avatarUrl" :src="player.avatarUrl" class="w-full h-full object-cover" />
+                  <span v-else class="text-lg">🧛</span>
+                </div>
+                <div>
+                  <h3 class="font-serif text-base font-bold text-parchment">{{ player.name }}</h3>
+                  <p class="text-[10px] text-gold font-serif uppercase tracking-wider">{{ player.clan?.name || 'Caitiff' }} • Geração {{ player.generation }}ª</p>
+                  <p class="text-[9px] text-gray-500 font-mono">Jogador: {{ player.user?.name || player.user?.email || 'N/A' }}</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 text-center text-[10px] pt-3 border-t border-white/5 font-serif">
+                <div class="p-2 rounded bg-black/60 border border-white/5">
+                  <span class="text-gray-500 block">Fome</span>
+                  <span class="text-blood-red font-bold text-sm">{{ player.hunger }}/5</span>
+                </div>
+                <div class="p-2 rounded bg-black/60 border border-white/5">
+                  <span class="text-gray-500 block">Humanidade</span>
+                  <span class="text-gold font-bold text-sm">{{ player.humanity }}/10</span>
+                </div>
+                <div class="p-2 rounded bg-black/60 border border-white/5">
+                  <span class="text-gray-500 block">Status</span>
+                  <span class="text-green-400 font-bold text-[10px]">{{ player.isAwake ? 'Ativo' : 'Torpor' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 5: COMPÊNDIO CANÔNICO (NPCS, LOCAIS, ARSENAL) -->
+        <!-- ========================================================================= -->
+        <section v-if="activeTab === 'compendium'" class="space-y-6 animate-fade-in">
+          <div class="pb-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 class="font-serif text-2xl md:text-3xl text-parchment font-bold tracking-wide">Compêndio Canônico de Nocturna</h1>
+              <p class="text-xs text-gray-400 font-light mt-1">Biblioteca central com os 25 NPCs oficiais, zonas urbanas e arsenal de itens cadastrados no banco.</p>
+            </div>
+            
+            <div class="flex gap-2">
+              <button @click="compendiumCategory = 'npcs'" :class="compendiumCategory === 'npcs' ? 'bg-gold text-black font-bold' : 'bg-white/5 text-gray-400'" class="px-3 py-1.5 rounded-lg text-xs font-serif uppercase tracking-wider">🎭 NPCs ({{ compendiumNpcs.length }})</button>
+              <button @click="compendiumCategory = 'locations'" :class="compendiumCategory === 'locations' ? 'bg-gold text-black font-bold' : 'bg-white/5 text-gray-400'" class="px-3 py-1.5 rounded-lg text-xs font-serif uppercase tracking-wider">🏙️ Locais ({{ compendiumLocations.length }})</button>
+              <button @click="compendiumCategory = 'equipments'" :class="compendiumCategory === 'equipments' ? 'bg-gold text-black font-bold' : 'bg-white/5 text-gray-400'" class="px-3 py-1.5 rounded-lg text-xs font-serif uppercase tracking-wider">🗡️ Itens ({{ compendiumEquipments.length }})</button>
+            </div>
           </div>
 
-          <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
-            <button type="button" @click="showAdventureModal = false" class="px-4 py-2 rounded border border-white/10 text-gray-400 hover:text-white uppercase tracking-widest">Cancelar</button>
-            <button type="submit" class="px-6 py-2 rounded bg-gold text-black font-bold uppercase tracking-widest hover:bg-white transition-colors">Salvar Crônica</button>
+          <!-- NPCS VIEW -->
+          <div v-if="compendiumCategory === 'npcs'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div v-for="npc in compendiumNpcs" :key="npc.id" class="border border-white/10 bg-zinc-950 rounded-2xl p-5 space-y-3 hover:border-gold/40 transition-all">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full border border-gold/40 overflow-hidden bg-black shrink-0 flex items-center justify-center">
+                  <img v-if="npc.avatarUrl" :src="npc.avatarUrl" class="w-full h-full object-cover" />
+                  <span v-else class="text-lg">👑</span>
+                </div>
+                <div>
+                  <h3 class="font-serif text-base font-bold text-parchment">{{ npc.name }}</h3>
+                  <span class="text-[10px] text-gold font-serif uppercase tracking-wider">{{ npc.clan?.name || 'Ancião' }} • Geração {{ npc.generation }}ª</span>
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 font-light line-clamp-3 leading-relaxed">{{ npc.history || npc.concept || 'Personagem canônico de Nocturna.' }}</p>
+            </div>
           </div>
-        </form>
-      </div>
+
+          <!-- LOCATIONS VIEW -->
+          <div v-if="compendiumCategory === 'locations'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div v-for="loc in compendiumLocations" :key="loc.id" class="border border-white/10 bg-zinc-950 rounded-2xl p-5 space-y-2 hover:border-blue-500/40 transition-all">
+              <div class="flex justify-between items-center">
+                <h3 class="font-serif text-base font-bold text-parchment">{{ loc.name }}</h3>
+                <span class="text-[9px] px-2 py-0.5 rounded bg-blue-950 border border-blue-500/30 text-blue-300 font-bold uppercase">
+                  {{ loc.level === 1 ? 'Metrópole' : loc.level === 2 ? 'Zona' : 'Bairro' }}
+                </span>
+              </div>
+              <p class="text-xs text-gray-400 font-light line-clamp-2">{{ loc.description || 'Zona urbana de Nocturna.' }}</p>
+            </div>
+          </div>
+
+          <!-- EQUIPMENTS VIEW -->
+          <div v-if="compendiumCategory === 'equipments'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div v-for="eq in compendiumEquipments" :key="eq.id" class="border border-white/10 bg-zinc-950 rounded-xl p-4 space-y-1 hover:border-emerald-500/40 transition-all">
+              <div class="flex justify-between items-center text-[9px] text-gray-500 uppercase font-mono">
+                <span>{{ eq.type }}</span>
+                <span v-if="eq.damage" class="text-blood-red font-bold">Dano: {{ eq.damage }}</span>
+              </div>
+              <h3 class="font-serif text-sm font-bold text-parchment truncate">{{ eq.name }}</h3>
+              <p class="text-[10px] text-gray-400 line-clamp-2 font-light">{{ eq.description }}</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
     </div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL 2: ADICIONAR / EDITAR CENA (NÓ) -->
+    <!-- MODAIS DE CRIAÇÃO / EDIÇÃO (ADVENTURE, NODE, CHOICE, MISSION, ACTION) -->
     <!-- ========================================================================= -->
-    <div v-if="showNodeModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div class="bg-[#0c0c0c] border border-gold/40 rounded-xl max-w-2xl w-full p-6 space-y-6 shadow-2xl my-8">
-        <div class="flex justify-between items-center border-b border-white/10 pb-4">
-          <h3 class="font-serif text-xl text-gold font-bold">
-            {{ nodeForm.id ? 'Editar Cena / Nó' : 'Nova Cena Narrativa' }}
-          </h3>
-          <button @click="showNodeModal = false" class="text-gray-400 hover:text-white">✕</button>
+    
+    <!-- MODAL CRÔNICA -->
+    <div v-if="showAdventureModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-zinc-950 border border-gold/40 w-full max-w-lg rounded-2xl p-6 space-y-6 shadow-2xl animate-fade-in">
+        <h3 class="font-serif text-xl text-gold font-bold">{{ adventureForm.id ? 'Editar Crônica' : 'Nova Crônica' }}</h3>
+        <div class="space-y-4 text-xs font-serif">
+          <div>
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">Título da Crônica</label>
+            <input v-model="adventureForm.title" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment focus:border-gold outline-none" placeholder="Ex: A Noite Inicial" />
+          </div>
+          <div>
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">Sinopse / Descrição</label>
+            <textarea v-model="adventureForm.description" rows="3" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment focus:border-gold outline-none" placeholder="Uma breve introdução à história..."></textarea>
+          </div>
         </div>
+        <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+          <button @click="showAdventureModal = false" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:text-white text-xs uppercase font-serif">Cancelar</button>
+          <button @click="saveAdventure" class="px-5 py-2 rounded-lg bg-gold text-black hover:bg-gold-dim text-xs uppercase font-serif font-bold">Salvar Crônica</button>
+        </div>
+      </div>
+    </div>
 
-        <form @submit.prevent="saveNode" class="space-y-4 text-xs font-serif">
+    <!-- MODAL CENA / NÓ -->
+    <div v-if="showNodeModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-zinc-950 border border-gold/40 w-full max-w-2xl rounded-2xl p-6 space-y-6 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
+        <h3 class="font-serif text-xl text-gold font-bold">{{ nodeForm.id ? 'Editar Cena' : 'Nova Cena' }}</h3>
+        <div class="space-y-4 text-xs font-serif">
           <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Quem está falando? (Orador / Speaker)</label>
-            <input type="text" v-model="nodeForm.speakerName" class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-gold outline-none" placeholder="Ex: André Maranhão, Voz nas Sombras, etc. (Deixe vazio para narrador neutro)">
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">Nome do Orador (Speaker)</label>
+            <input v-model="nodeForm.speakerName" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment focus:border-gold outline-none" placeholder="Ex: O Narrador, André Maranhão, Vítima Embriagada" />
           </div>
-
           <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Texto Narrativo da Cena *</label>
-            <textarea v-model="nodeForm.narrativeText" required rows="5" class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-gold outline-none font-sans text-sm" placeholder="Descreva a cena, os diálogos e o clima que o jogador irá presenciar..."></textarea>
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">Texto Narrativo da Cena</label>
+            <textarea v-model="nodeForm.narrativeText" rows="4" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment focus:border-gold outline-none leading-relaxed" placeholder="Descreva o ambiente, os diálogos e o suspense..."></textarea>
           </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block text-gray-400 uppercase tracking-wider mb-1">URL Imagem de Fundo</label>
-              <input type="text" v-model="nodeForm.backgroundImageUrl" class="w-full bg-black border border-white/20 px-3 py-1.5 rounded text-parchment focus:border-gold outline-none text-[11px]" placeholder="/story_assets/refugio.jpg">
+              <input v-model="nodeForm.backgroundImageUrl" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment text-[11px] focus:border-gold outline-none font-mono" placeholder="URL ou /story_assets/..." />
             </div>
             <div>
-              <label class="block text-gray-400 uppercase tracking-wider mb-1">Sprite Esquerda (URL)</label>
-              <input type="text" v-model="nodeForm.leftCharacterImageUrl" class="w-full bg-black border border-white/20 px-3 py-1.5 rounded text-parchment focus:border-gold outline-none text-[11px]" placeholder="/story_assets/membro1.png">
+              <label class="block text-gray-400 uppercase tracking-wider mb-1">URL Sprite Esquerdo</label>
+              <input v-model="nodeForm.leftCharacterImageUrl" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment text-[11px] focus:border-gold outline-none font-mono" placeholder="Sprite NPC..." />
             </div>
             <div>
-              <label class="block text-gray-400 uppercase tracking-wider mb-1">Sprite Direita (URL)</label>
-              <input type="text" v-model="nodeForm.rightCharacterImageUrl" class="w-full bg-black border border-white/20 px-3 py-1.5 rounded text-parchment focus:border-gold outline-none text-[11px]" placeholder="/story_assets/npc2.png">
+              <label class="block text-gray-400 uppercase tracking-wider mb-1">URL Sprite Direito</label>
+              <input v-model="nodeForm.rightCharacterImageUrl" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment text-[11px] focus:border-gold outline-none font-mono" placeholder="Sprite Jogador..." />
             </div>
           </div>
-
-          <div class="p-3 rounded border border-white/10 bg-black/40 flex items-center gap-3">
-            <input type="checkbox" id="isEndingCheck" v-model="nodeForm.isEnding" class="w-4 h-4 rounded text-blood-red focus:ring-0">
-            <label for="isEndingCheck" class="text-xs text-parchment uppercase tracking-wider cursor-pointer">
-              Esta é uma Cena de Desfecho / Fim da Crônica (Encerra a história ao chegar aqui)
-            </label>
+          <div class="flex items-center gap-2 pt-2">
+            <input type="checkbox" v-model="nodeForm.isEnding" id="isEndingCheck" class="rounded accent-blood-red" />
+            <label for="isEndingCheck" class="text-red-300 cursor-pointer">Marcar esta cena como Desfecho / Fim da História</label>
           </div>
-
-          <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
-            <button type="button" @click="showNodeModal = false" class="px-4 py-2 rounded border border-white/10 text-gray-400 hover:text-white uppercase tracking-widest">Cancelar</button>
-            <button type="submit" class="px-6 py-2 rounded bg-gold text-black font-bold uppercase tracking-widest hover:bg-white transition-colors">Salvar Cena</button>
-          </div>
-        </form>
+        </div>
+        <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+          <button @click="showNodeModal = false" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:text-white text-xs uppercase font-serif">Cancelar</button>
+          <button @click="saveNode" class="px-5 py-2 rounded-lg bg-gold text-black hover:bg-gold-dim text-xs uppercase font-serif font-bold">Salvar Cena</button>
+        </div>
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- MODAL 3: ADICIONAR / EDITAR ESCOLHA (CHOICE) -->
-    <!-- ========================================================================= -->
-    <div v-if="showChoiceModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div class="bg-[#0c0c0c] border border-gold/40 rounded-xl max-w-xl w-full p-6 space-y-6 shadow-2xl my-8">
-        <div class="flex justify-between items-center border-b border-white/10 pb-4">
-          <h3 class="font-serif text-xl text-gold font-bold">
-            {{ choiceForm.id ? 'Editar Escolha' : 'Nova Escolha na Cena' }}
-          </h3>
-          <button @click="showChoiceModal = false" class="text-gray-400 hover:text-white">✕</button>
-        </div>
-
-        <form @submit.prevent="saveChoice" class="space-y-4 text-xs font-serif">
+    <!-- MODAL ESCOLHA / TESTE V5 -->
+    <div v-if="showChoiceModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-zinc-950 border border-gold/40 w-full max-w-lg rounded-2xl p-6 space-y-6 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
+        <h3 class="font-serif text-xl text-gold font-bold">{{ choiceForm.id ? 'Editar Escolha' : 'Nova Escolha' }}</h3>
+        <div class="space-y-4 text-xs font-serif">
           <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Texto da Ação no Botão *</label>
-            <input type="text" v-model="choiceForm.choiceText" required class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-gold outline-none" placeholder="Ex: Tentar arrombar a porta dos fundos">
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">Texto do Botão de Escolha</label>
+            <input v-model="choiceForm.choiceText" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment focus:border-gold outline-none" placeholder="Ex: [PREDADOR] Atacar sorrateiramente" />
           </div>
 
-          <!-- CONFIGURAÇÃO DO TESTE DE DADOS -->
-          <div class="p-4 rounded-lg border border-white/10 bg-black/40 space-y-3">
-            <div class="text-[11px] uppercase tracking-wider text-gold-dim font-bold">Configuração de Teste de Dados (V5)</div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label class="block text-gray-400 uppercase tracking-wider mb-1 text-[10px]">Atributo</label>
-                <select v-model="choiceForm.attributeReq" class="w-full bg-black border border-white/20 px-2 py-1.5 rounded text-parchment focus:border-gold outline-none text-xs">
-                  <option :value="''">Nenhum</option>
-                  <option v-for="attr in ATTR_LIST" :key="attr" :value="attr">{{ attr }}</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-gray-400 uppercase tracking-wider mb-1 text-[10px]">Habilidade</label>
-                <select v-model="choiceForm.skillReq" class="w-full bg-black border border-white/20 px-2 py-1.5 rounded text-parchment focus:border-gold outline-none text-xs">
-                  <option :value="''">Nenhuma</option>
-                  <option v-for="skill in SKILL_LIST" :key="skill" :value="skill">{{ skill }}</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-gray-400 uppercase tracking-wider mb-1 text-[10px]">Dificuldade (Sucessos)</label>
-                <input type="number" min="1" max="10" v-model.number="choiceForm.difficulty" class="w-full bg-black border border-white/20 px-2 py-1.5 rounded text-parchment focus:border-gold outline-none text-xs" placeholder="1">
-              </div>
-            </div>
-          </div>
-
-          <!-- DESTINOS -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-green-400 uppercase tracking-wider mb-1">Cena Destino (Sucesso) *</label>
-              <select v-model="choiceForm.successNodeId" required class="w-full bg-black border border-green-500/40 px-3 py-2 rounded text-parchment focus:border-green-400 outline-none text-xs">
-                <option :value="''">Selecione a Cena de Sucesso...</option>
-                <option v-for="(node, idx) in activeAdventureDetail?.nodes" :key="node.id" :value="node.id">
-                  Cena #{{ Number(idx) + 1 }}: {{ node.narrativeText.substring(0, 35) }}...
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-red-400 uppercase tracking-wider mb-1">Cena Destino (Falha - Opcional)</label>
-              <select v-model="choiceForm.failureNodeId" class="w-full bg-black border border-red-500/40 px-3 py-2 rounded text-parchment focus:border-red-400 outline-none text-xs">
-                <option :value="''">Mesma cena de sucesso / Sem falha</option>
-                <option v-for="(node, idx) in activeAdventureDetail?.nodes" :key="node.id" :value="node.id">
-                  Cena #{{ Number(idx) + 1 }}: {{ node.narrativeText.substring(0, 35) }}...
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
-            <button type="button" @click="showChoiceModal = false" class="px-4 py-2 rounded border border-white/10 text-gray-400 hover:text-white uppercase tracking-widest">Cancelar</button>
-            <button type="submit" class="px-6 py-2 rounded bg-gold text-black font-bold uppercase tracking-widest hover:bg-white transition-colors">Salvar Escolha</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- MODAL 4: ADICIONAR / EDITAR MISSÃO AFK -->
-    <!-- ========================================================================= -->
-    <div v-if="showMissionModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div class="bg-[#0c0c0c] border border-blood-red/40 rounded-xl max-w-xl w-full p-6 space-y-6 shadow-2xl my-8">
-        <div class="flex justify-between items-center border-b border-white/10 pb-4">
-          <h3 class="font-serif text-xl text-blood-red font-bold">
-            {{ missionForm.id ? 'Editar Missão AFK' : 'Nova Missão AFK / Caçada' }}
-          </h3>
-          <button @click="showMissionModal = false" class="text-gray-400 hover:text-white">✕</button>
-        </div>
-
-        <form @submit.prevent="saveMission" class="space-y-4 text-xs font-serif">
-          <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Título da Missão *</label>
-            <input type="text" v-model="missionForm.title" required class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-blood-red outline-none" placeholder="Ex: Incursão ao Porto Velho">
-          </div>
-
-          <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Descrição Narrativa *</label>
-            <textarea v-model="missionForm.description" required rows="3" class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-blood-red outline-none" placeholder="Detalhes táticos da operação..."></textarea>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label class="block text-gray-400 uppercase tracking-wider mb-1">Categoria *</label>
-              <select v-model="missionForm.category" required class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-blood-red outline-none text-xs">
-                <option value="OPERATION">⚔️ Operação</option>
-                <option value="HUNT">🩸 Caçada</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-gray-400 uppercase tracking-wider mb-1">Duração (Minutos) *</label>
-              <input type="number" min="1" v-model.number="missionForm.durationMinutes" required class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-blood-red outline-none" placeholder="5">
-            </div>
-
-            <div>
-              <label class="block text-gray-400 uppercase tracking-wider mb-1">Dificuldade Base</label>
-              <input type="number" min="1" max="10" v-model.number="missionForm.baseDifficulty" class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-blood-red outline-none" placeholder="6">
-            </div>
-          </div>
-
-          <!-- RECOMPENSAS / PENALIDADES -->
-          <div class="p-3 rounded border border-white/10 bg-black/40 space-y-3">
-            <div class="text-[11px] uppercase tracking-wider text-green-400 font-bold">Recompensas na Conclusão</div>
+          <div class="p-3.5 rounded-xl border border-white/10 bg-black/40 space-y-3">
+            <div class="text-gold font-bold uppercase tracking-wider text-[11px]">Teste Mecânico de Vampiro V5 (Opcional)</div>
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-gray-400 uppercase tracking-wider mb-1 text-[10px]">Alteração de Fome</label>
-                <input type="number" v-model.number="missionForm.rewardHunger" class="w-full bg-black border border-white/20 px-2 py-1.5 rounded text-parchment focus:border-green-400 outline-none text-xs" placeholder="-1 (reduz) ou 0">
+                <label class="block text-gray-400 mb-1">Atributo</label>
+                <select v-model="choiceForm.attributeReq" class="w-full bg-zinc-900 border border-white/10 rounded-lg p-2 text-parchment outline-none">
+                  <option value="">Nenhum (Direto)</option>
+                  <option v-for="attr in attributesList" :key="attr" :value="attr">{{ attr }}</option>
+                </select>
               </div>
               <div>
-                <label class="block text-gray-400 uppercase tracking-wider mb-1 text-[10px]">Experiência (XP)</label>
-                <input type="number" min="0" v-model.number="missionForm.rewardExp" class="w-full bg-black border border-white/20 px-2 py-1.5 rounded text-parchment focus:border-green-400 outline-none text-xs" placeholder="Ex: 5">
+                <label class="block text-gray-400 mb-1">Perícia / Habilidade</label>
+                <select v-model="choiceForm.skillReq" class="w-full bg-zinc-900 border border-white/10 rounded-lg p-2 text-parchment outline-none">
+                  <option value="">Nenhuma</option>
+                  <option v-for="sk in skillsList" :key="sk" :value="sk">{{ sk }}</option>
+                </select>
               </div>
+            </div>
+
+            <div v-if="choiceForm.attributeReq">
+              <label class="block text-gray-400 mb-1">Dificuldade Alvo (Número de Sucessos)</label>
+              <input type="number" v-model.number="choiceForm.difficulty" min="1" max="10" class="w-full bg-zinc-900 border border-white/10 rounded-lg p-2 text-parchment outline-none" />
             </div>
           </div>
 
-          <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
-            <button type="button" @click="showMissionModal = false" class="px-4 py-2 rounded border border-white/10 text-gray-400 hover:text-white uppercase tracking-widest">Cancelar</button>
-            <button type="submit" class="px-6 py-2 rounded bg-blood-red text-white font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors">Salvar Missão</button>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-green-400 uppercase tracking-wider mb-1">Destino em Caso de Sucesso / Caminho Direto</label>
+              <select v-model="choiceForm.successNodeId" class="w-full bg-black border border-green-500/40 rounded-lg p-2.5 text-parchment outline-none">
+                <option value="">Selecione a Cena de Destino...</option>
+                <option v-for="node in activeAdventureDetail?.nodes" :key="node.id" :value="node.id">
+                  #{{ node.speakerName || 'Cena' }}: {{ node.narrativeText.substring(0, 45) }}...
+                </option>
+              </select>
+            </div>
+
+            <div v-if="choiceForm.attributeReq">
+              <label class="block text-red-400 uppercase tracking-wider mb-1">Destino em Caso de Falha no Teste</label>
+              <select v-model="choiceForm.failureNodeId" class="w-full bg-black border border-red-500/40 rounded-lg p-2.5 text-parchment outline-none">
+                <option value="">Selecione a Cena de Falha...</option>
+                <option v-for="node in activeAdventureDetail?.nodes" :key="node.id" :value="node.id">
+                  #{{ node.speakerName || 'Cena' }}: {{ node.narrativeText.substring(0, 45) }}...
+                </option>
+              </select>
+            </div>
           </div>
-        </form>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+          <button @click="showChoiceModal = false" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:text-white text-xs uppercase font-serif">Cancelar</button>
+          <button @click="saveChoice" class="px-5 py-2 rounded-lg bg-gold text-black hover:bg-gold-dim text-xs uppercase font-serif font-bold">Salvar Escolha</button>
+        </div>
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- MODAL 5: ADICIONAR / EDITAR ETAPA DA MISSÃO (ACTION) -->
-    <!-- ========================================================================= -->
-    <div v-if="showActionModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div class="bg-[#0c0c0c] border border-blood-red/40 rounded-xl max-w-xl w-full p-6 space-y-6 shadow-2xl my-8">
-        <div class="flex justify-between items-center border-b border-white/10 pb-4">
-          <h3 class="font-serif text-xl text-blood-red font-bold">
-            {{ actionForm.id ? 'Editar Etapa da Missão' : 'Nova Etapa da Missão' }}
-          </h3>
-          <button @click="showActionModal = false" class="text-gray-400 hover:text-white">✕</button>
+    <!-- MODAL MISSÃO AFK -->
+    <div v-if="showMissionModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-zinc-950 border border-blood-red/40 w-full max-w-lg rounded-2xl p-6 space-y-6 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
+        <h3 class="font-serif text-xl text-blood-red font-bold">{{ missionForm.id ? 'Editar Missão AFK' : 'Nova Missão AFK' }}</h3>
+        <div class="space-y-4 text-xs font-serif">
+          <div>
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">Título da Missão</label>
+            <input v-model="missionForm.title" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment focus:border-blood-red outline-none" placeholder="Ex: Caçada pelas Ruas da Sé" />
+          </div>
+          <div>
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">Categoria</label>
+            <select v-model="missionForm.category" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment outline-none">
+              <option value="HUNT">🩸 Caçada de Sangue (Alimentação)</option>
+              <option value="OPERATION">🎯 Operação Tática (Incursão)</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-gray-400 mb-1">Duração (Minutos)</label>
+              <input type="number" v-model.number="missionForm.durationMinutes" min="1" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment outline-none" />
+            </div>
+            <div>
+              <label class="block text-gray-400 mb-1">Dificuldade Base</label>
+              <input type="number" v-model.number="missionForm.baseDifficulty" min="1" max="10" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment outline-none" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">Descrição Imersiva</label>
+            <textarea v-model="missionForm.description" rows="3" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment outline-none"></textarea>
+          </div>
         </div>
-
-        <form @submit.prevent="saveAction" class="space-y-4 text-xs font-serif">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div class="sm:col-span-2">
-              <label class="block text-gray-400 uppercase tracking-wider mb-1">Nome da Etapa *</label>
-              <input type="text" v-model="actionForm.name" required class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-blood-red outline-none" placeholder="Ex: Infiltração Silenciosa">
-            </div>
-
-            <div>
-              <label class="block text-gray-400 uppercase tracking-wider mb-1">Ordem do Passo *</label>
-              <input type="number" min="1" v-model.number="actionForm.stepOrder" required class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-blood-red outline-none" placeholder="1">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Descrição do Desafio *</label>
-            <textarea v-model="actionForm.description" required rows="2" class="w-full bg-black border border-white/20 px-3 py-2 rounded text-parchment focus:border-blood-red outline-none" placeholder="O que o personagem enfrenta neste momento?"></textarea>
-          </div>
-
-          <!-- TESTE DE DADOS -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label class="block text-gray-400 uppercase tracking-wider mb-1">Atributo</label>
-              <select v-model="actionForm.attributeReq" class="w-full bg-black border border-white/20 px-2 py-1.5 rounded text-parchment focus:border-blood-red outline-none text-xs">
-                <option :value="''">Nenhum</option>
-                <option v-for="attr in ATTR_LIST" :key="attr" :value="attr">{{ attr }}</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-gray-400 uppercase tracking-wider mb-1">Habilidade</label>
-              <select v-model="actionForm.skillReq" class="w-full bg-black border border-white/20 px-2 py-1.5 rounded text-parchment focus:border-blood-red outline-none text-xs">
-                <option :value="''">Nenhuma</option>
-                <option v-for="skill in SKILL_LIST" :key="skill" :value="skill">{{ skill }}</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-gray-400 uppercase tracking-wider mb-1">Dificuldade Alvo</label>
-              <input type="number" min="1" max="10" v-model.number="actionForm.difficulty" class="w-full bg-black border border-white/20 px-2 py-1.5 rounded text-parchment focus:border-blood-red outline-none text-xs" placeholder="6">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-green-400 uppercase tracking-wider mb-1">Narrativa de Sucesso *</label>
-            <textarea v-model="actionForm.successText" required rows="2" class="w-full bg-black border border-green-500/40 px-3 py-2 rounded text-parchment focus:border-green-400 outline-none text-xs" placeholder="Ex: Você desliza pelas sombras sem ser notado..."></textarea>
-          </div>
-
-          <div>
-            <label class="block text-red-400 uppercase tracking-wider mb-1">Narrativa de Falha *</label>
-            <textarea v-model="actionForm.failureText" required rows="2" class="w-full bg-black border border-red-500/40 px-3 py-2 rounded text-parchment focus:border-red-400 outline-none text-xs" placeholder="Ex: Um guarda nota o ruído e soa o alarme..."></textarea>
-          </div>
-
-          <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
-            <button type="button" @click="showActionModal = false" class="px-4 py-2 rounded border border-white/10 text-gray-400 hover:text-white uppercase tracking-widest">Cancelar</button>
-            <button type="submit" class="px-6 py-2 rounded bg-blood-red text-white font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-colors">Salvar Etapa</button>
-          </div>
-        </form>
+        <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+          <button @click="showMissionModal = false" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:text-white text-xs uppercase font-serif">Cancelar</button>
+          <button @click="saveMission" class="px-5 py-2 rounded-lg bg-blood-red text-white hover:bg-red-700 text-xs uppercase font-serif font-bold">Salvar Missão</button>
+        </div>
       </div>
     </div>
 
@@ -752,488 +862,387 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import api from '../services/api'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import api from '../services/api';
 
-const router = useRouter()
-const activeTab = ref<'stories' | 'missions'>('stories')
-const loading = ref(false)
-const successMsg = ref('')
-const errorMsg = ref('')
+const router = useRouter();
 
-const masterInfo = ref<any>(null)
+// ==================== STATE ====================
+const activeTab = ref<'overview' | 'stories' | 'missions' | 'players' | 'compendium'>('overview');
+const compendiumCategory = ref<'npcs' | 'locations' | 'equipments'>('npcs');
+const loading = ref(false);
+const successMsg = ref('');
+const errorMsg = ref('');
 
-// ==================== LISTAS CONSTANTES V5 ====================
-const ATTR_LIST = [
+const masterInfo = ref<any>(null);
+const isLeadMaster = ref(false);
+const overviewStats = ref<any>(null);
+const recentLogs = ref<any[]>([]);
+const playersList = ref<any[]>([]);
+
+// Compendium Data
+const compendiumNpcs = ref<any[]>([]);
+const compendiumLocations = ref<any[]>([]);
+const compendiumEquipments = ref<any[]>([]);
+
+// Stories & Adventures
+const adventures = ref<any[]>([]);
+const activeAdventureDetail = ref<any>(null);
+const selectedNode = ref<any>(null);
+
+// Missions AFK
+const missions = ref<any[]>([]);
+
+// Constants for V5 Rolls
+const attributesList = [
   'Força', 'Destreza', 'Vigor',
   'Carisma', 'Manipulação', 'Autocontrole',
   'Inteligência', 'Raciocínio', 'Percepção'
-]
+];
 
-const SKILL_LIST = [
-  'Prontidão', 'Briga', 'Esquiva', 'Empatia', 'Intimidação', 'Liderança', 'Lábia', 'Manha', 'Atletismo', 'Furtividade',
-  'Ofícios', 'Condução', 'Armas de Fogo', 'Armas Brancas', 'Ladinagem', 'Sobrevivência', 'Segurança',
-  'Acadêmicos', 'Computador', 'Finanças', 'Investigação', 'Medicina', 'Ocultismo', 'Política', 'Ciências'
-]
+const skillsList = [
+  'Briga', 'Armas Brancas', 'Armas de Fogo', 'Furtividade', 'Atletismo', 'Ladroagem', 'Condução',
+  'Persuasão', 'Lábia', 'Intimidação', 'Liderança', 'Etiqueta', 'Performance', 'Subterfúgio', 'Manha',
+  'Investigação', 'Ocultismo', 'Medicina', 'Ciência', 'Tecnologia', 'Finanças', 'Política', 'Erudição', 'Sobrevivência'
+];
 
-// ==================== ESTADO: CRÔNICAS / AVENTURAS ====================
-const adventures = ref<any[]>([])
-const activeAdventureDetail = ref<any>(null)
-const selectedFirstNodeId = ref<string | undefined>(undefined)
+// Forms
+const showAdventureModal = ref(false);
+const adventureForm = ref<any>({ id: '', title: '', description: '', maxCompletions: null });
 
-const showAdventureModal = ref(false)
-const adventureForm = ref<any>({
-  id: null,
-  title: '',
-  description: '',
-  maxCompletions: null
-})
+const showNodeModal = ref(false);
+const nodeForm = ref<any>({ id: '', adventureId: '', narrativeText: '', isEnding: false, speakerName: '', backgroundImageUrl: '', leftCharacterImageUrl: '', rightCharacterImageUrl: '' });
 
-const showNodeModal = ref(false)
-const nodeForm = ref<any>({
-  id: null,
-  adventureId: '',
-  narrativeText: '',
-  speakerName: '',
-  backgroundImageUrl: '',
-  leftCharacterImageUrl: '',
-  rightCharacterImageUrl: '',
-  isEnding: false
-})
+const showChoiceModal = ref(false);
+const choiceForm = ref<any>({ id: '', nodeId: '', choiceText: '', attributeReq: '', skillReq: '', difficulty: 1, successNodeId: '', failureNodeId: '', customStyle: null });
 
-const showChoiceModal = ref(false)
-const choiceForm = ref<any>({
-  id: null,
-  nodeId: '',
-  choiceText: '',
-  attributeReq: '',
-  skillReq: '',
-  difficulty: 1,
-  successNodeId: '',
-  failureNodeId: ''
-})
+const showMissionModal = ref(false);
+const missionForm = ref<any>({ id: '', title: '', description: '', durationMinutes: 2, baseDifficulty: 5, category: 'OPERATION' });
 
-// ==================== ESTADO: MISSÕES AFK ====================
-const missions = ref<any[]>([])
-const activeMissionDetail = ref<any>(null)
-
-const showMissionModal = ref(false)
-const missionForm = ref<any>({
-  id: null,
-  title: '',
-  description: '',
-  category: 'OPERATION',
-  durationMinutes: 5,
-  baseDifficulty: 6,
-  rewardHunger: 0,
-  rewardExp: 5
-})
-
-const showActionModal = ref(false)
-const actionForm = ref<any>({
-  id: null,
-  missionId: '',
-  stepOrder: 1,
-  name: '',
-  description: '',
-  attributeReq: '',
-  skillReq: '',
-  difficulty: 6,
-  successText: '',
-  failureText: ''
-})
-
-// ==================== CARREGAMENTO INICIAL ====================
+// ==================== LIFECYCLE ====================
 onMounted(async () => {
-  const localUserStr = sessionStorage.getItem('lira_user') || localStorage.getItem('lira_user')
-  if (localUserStr) {
-    try {
-      masterInfo.value = JSON.parse(localUserStr)
-    } catch (e) {
-      console.error(e)
+  await checkStatus();
+  await loadOverview();
+  await loadAdventures();
+  await loadMissions();
+});
+
+const setTab = (tab: any) => {
+  activeTab.value = tab;
+  if (tab === 'overview') loadOverview();
+  if (tab === 'stories' && !activeAdventureDetail.value) loadAdventures();
+  if (tab === 'missions') loadMissions();
+  if (tab === 'players') loadPlayers();
+  if (tab === 'compendium') loadCompendium();
+};
+
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+};
+
+// ==================== API ACTIONS ====================
+const checkStatus = async () => {
+  try {
+    const res = await api.get('/gm/status');
+    masterInfo.value = res.data.master;
+    isLeadMaster.value = masterInfo.value?.id === '37339df8-b042-458d-8d9c-d15cf18adbd8' || masterInfo.value?.role === 'ADMIN';
+  } catch (err: any) {
+    if (err.response?.status === 403 || err.response?.status === 401) {
+      router.push('/login');
     }
   }
+};
 
-  await loadAdventures()
-  await loadMissions()
-})
-
-// ==================== MÉTODOS: CRÔNICAS ====================
-const loadAdventures = async () => {
-  loading.value = true
+const loadOverview = async () => {
   try {
-    const res = await api.get('/api/gm/story/adventures')
-    adventures.value = res.data || []
-  } catch (err: any) {
-    errorMsg.value = 'Erro ao carregar aventuras: ' + (err.response?.data?.error || err.message)
-  } finally {
-    loading.value = false
+    const res = await api.get('/gm/dashboard/overview');
+    overviewStats.value = res.data.stats;
+    recentLogs.value = res.data.recentLogs || [];
+    isLeadMaster.value = res.data.isLeadMaster || isLeadMaster.value;
+  } catch (err) {
+    console.error('Erro ao carregar dashboard:', err);
   }
-}
+};
 
+const loadPlayers = async () => {
+  try {
+    const res = await api.get('/gm/players');
+    playersList.value = res.data;
+  } catch (err) {
+    console.error('Erro ao carregar jogadores:', err);
+  }
+};
+
+const loadCompendium = async () => {
+  try {
+    const [npcsRes, locsRes, eqsRes] = await Promise.all([
+      api.get('/gm/compendium/npcs'),
+      api.get('/gm/compendium/locations'),
+      api.get('/gm/compendium/equipments')
+    ]);
+    compendiumNpcs.value = npcsRes.data;
+    compendiumLocations.value = locsRes.data;
+    compendiumEquipments.value = eqsRes.data;
+  } catch (err) {
+    console.error('Erro ao carregar compêndio:', err);
+  }
+};
+
+const loadAdventures = async () => {
+  loading.value = true;
+  try {
+    const res = await api.get('/gm/story/adventures');
+    adventures.value = res.data;
+  } catch (err: any) {
+    errorMsg.value = err.response?.data?.error || 'Erro ao carregar crônicas';
+  } finally {
+    loading.value = false;
+  }
+};
+
+const openAdventureDetail = async (adventureId: string) => {
+  loading.value = true;
+  try {
+    const res = await api.get(`/gm/story/adventures/${adventureId}`);
+    activeAdventureDetail.value = res.data;
+    if (res.data.nodes && res.data.nodes.length > 0) {
+      // Se tiver nó inicial, seleciona ele, senão seleciona o primeiro
+      const initialNode = res.data.nodes.find((n: any) => n.id === res.data.firstNodeId) || res.data.nodes[0];
+      selectedNode.value = initialNode;
+    } else {
+      selectedNode.value = null;
+    }
+  } catch (err: any) {
+    errorMsg.value = err.response?.data?.error || 'Erro ao abrir crônica';
+  } finally {
+    loading.value = false;
+  }
+};
+
+const closeAdventureDetail = () => {
+  activeAdventureDetail.value = null;
+  selectedNode.value = null;
+  loadAdventures();
+};
+
+const selectNode = (node: any) => {
+  selectedNode.value = node;
+};
+
+const getNodeName = (nodeId: string) => {
+  if (!nodeId) return 'Nenhum (Finaliza)';
+  const node = activeAdventureDetail.value?.nodes?.find((n: any) => n.id === nodeId);
+  if (!node) return 'Cena #' + nodeId.substring(0, 6);
+  return `#${node.speakerName || 'Cena'}: ${node.narrativeText.substring(0, 20)}...`;
+};
+
+// ==================== CRÔNICA CRUD ====================
 const openAdventureModal = (adv?: any) => {
   if (adv) {
-    adventureForm.value = {
-      id: adv.id,
-      title: adv.title,
-      description: adv.description,
-      maxCompletions: adv.maxCompletions
-    }
+    adventureForm.value = { id: adv.id, title: adv.title, description: adv.description, maxCompletions: adv.maxCompletions };
   } else {
-    adventureForm.value = {
-      id: null,
-      title: '',
-      description: '',
-      maxCompletions: null
-    }
+    adventureForm.value = { id: '', title: '', description: '', maxCompletions: null };
   }
-  showAdventureModal.value = true
-}
+  showAdventureModal.value = true;
+};
 
 const saveAdventure = async () => {
   try {
     if (adventureForm.value.id) {
-      await api.put(`/api/gm/story/adventures/${adventureForm.value.id}`, adventureForm.value)
-      successMsg.value = 'Crônica atualizada com sucesso!'
+      await api.put(`/gm/story/adventures/${adventureForm.value.id}`, adventureForm.value);
+      successMsg.value = 'Crônica atualizada com sucesso!';
     } else {
-      await api.post('/api/gm/story/adventures', adventureForm.value)
-      successMsg.value = 'Crônica criada com sucesso!'
+      await api.post('/gm/story/adventures', adventureForm.value);
+      successMsg.value = 'Nova crônica criada com sucesso!';
     }
-    showAdventureModal.value = false
-    await loadAdventures()
+    showAdventureModal.value = false;
+    await loadAdventures();
   } catch (err: any) {
-    errorMsg.value = err.response?.data?.error || 'Erro ao salvar crônica'
+    errorMsg.value = err.response?.data?.error || 'Erro ao salvar crônica';
   }
-}
+};
 
 const confirmDeleteAdventure = async (adv: any) => {
-  if (confirm(`Tem certeza que deseja excluir a crônica "${adv.title}" e todas as suas cenas?`)) {
-    try {
-      await api.delete(`/api/gm/story/adventures/${adv.id}`)
-      successMsg.value = 'Crônica excluída com sucesso!'
-      await loadAdventures()
-    } catch (err: any) {
-      errorMsg.value = err.response?.data?.error || 'Erro ao excluir crônica'
-    }
-  }
-}
-
-const openAdventureDetail = async (adventureId: string) => {
-  loading.value = true
+  if (!confirm(`Deseja realmente excluir a crônica "${adv.title}" e todas as suas cenas?`)) return;
   try {
-    const res = await api.get(`/api/gm/story/adventures/${adventureId}`)
-    activeAdventureDetail.value = res.data
-    selectedFirstNodeId.value = res.data.firstNodeId
+    await api.delete(`/gm/story/adventures/${adv.id}`);
+    successMsg.value = 'Crônica excluída com sucesso!';
+    await loadAdventures();
   } catch (err: any) {
-    errorMsg.value = err.response?.data?.error || 'Erro ao carregar detalhes da crônica'
-  } finally {
-    loading.value = false
+    errorMsg.value = err.response?.data?.error || 'Erro ao excluir crônica';
   }
-}
+};
 
-const closeAdventureDetail = async () => {
-  activeAdventureDetail.value = null
-  await loadAdventures()
-}
-
-const saveFirstNodeId = async () => {
-  if (!activeAdventureDetail.value) return
-  try {
-    await api.put(`/api/gm/story/adventures/${activeAdventureDetail.value.id}`, {
-      firstNodeId: selectedFirstNodeId.value || null
-    })
-    activeAdventureDetail.value.firstNodeId = selectedFirstNodeId.value
-    successMsg.value = 'Cena inicial atualizada!'
-  } catch (err: any) {
-    errorMsg.value = 'Erro ao definir nó inicial: ' + (err.response?.data?.error || err.message)
-  }
-}
-
-const getNodeSnippet = (nodeId?: string) => {
-  if (!nodeId || !activeAdventureDetail.value?.nodes) return ''
-  const n = activeAdventureDetail.value.nodes.find((item: any) => item.id === nodeId)
-  if (!n) return ''
-  return `${n.speakerName ? `[${n.speakerName}] ` : ''}${n.narrativeText.substring(0, 45)}...`
-}
-
-// ==================== MÉTODOS: NÓS / CENAS ====================
+// ==================== NODE CRUD ====================
 const openNodeModal = (node?: any) => {
   if (node) {
-    nodeForm.value = {
-      id: node.id,
-      adventureId: activeAdventureDetail.value.id,
-      narrativeText: node.narrativeText,
-      speakerName: node.speakerName || '',
-      backgroundImageUrl: node.backgroundImageUrl || '',
-      leftCharacterImageUrl: node.leftCharacterImageUrl || '',
-      rightCharacterImageUrl: node.rightCharacterImageUrl || '',
-      isEnding: !!node.isEnding
-    }
+    nodeForm.value = { ...node };
   } else {
     nodeForm.value = {
-      id: null,
-      adventureId: activeAdventureDetail.value.id,
+      id: '',
+      adventureId: activeAdventureDetail.value?.id,
       narrativeText: '',
+      isEnding: false,
       speakerName: '',
       backgroundImageUrl: '',
       leftCharacterImageUrl: '',
-      rightCharacterImageUrl: '',
-      isEnding: false
-    }
+      rightCharacterImageUrl: ''
+    };
   }
-  showNodeModal.value = true
-}
+  showNodeModal.value = true;
+};
 
 const saveNode = async () => {
   try {
     if (nodeForm.value.id) {
-      await api.put(`/api/gm/story/nodes/${nodeForm.value.id}`, nodeForm.value)
-      successMsg.value = 'Cena atualizada com sucesso!'
+      await api.put(`/gm/story/nodes/${nodeForm.value.id}`, nodeForm.value);
+      successMsg.value = 'Cena atualizada com sucesso!';
     } else {
-      await api.post('/api/gm/story/nodes', nodeForm.value)
-      successMsg.value = 'Cena criada com sucesso!'
+      await api.post('/gm/story/nodes', nodeForm.value);
+      successMsg.value = 'Nova cena adicionada!';
     }
-    showNodeModal.value = false
-    await openAdventureDetail(activeAdventureDetail.value.id)
+    showNodeModal.value = false;
+    await openAdventureDetail(activeAdventureDetail.value.id);
   } catch (err: any) {
-    errorMsg.value = err.response?.data?.error || 'Erro ao salvar cena'
+    errorMsg.value = err.response?.data?.error || 'Erro ao salvar cena';
   }
-}
+};
 
-const confirmDeleteNode = async (nodeId: string) => {
-  if (confirm('Deseja excluir esta cena e todas as suas escolhas?')) {
-    try {
-      await api.delete(`/api/gm/story/nodes/${nodeId}`)
-      successMsg.value = 'Cena excluída com sucesso!'
-      await openAdventureDetail(activeAdventureDetail.value.id)
-    } catch (err: any) {
-      errorMsg.value = err.response?.data?.error || 'Erro ao excluir cena'
-    }
+const setAsStartingNode = async (nodeId: string) => {
+  try {
+    await api.put(`/gm/story/adventures/${activeAdventureDetail.value.id}`, { firstNodeId: nodeId });
+    activeAdventureDetail.value.firstNodeId = nodeId;
+    successMsg.value = 'Nó inicial da crônica definido com sucesso!';
+  } catch (err: any) {
+    errorMsg.value = err.response?.data?.error || 'Erro ao definir nó inicial';
   }
-}
+};
 
-// ==================== MÉTODOS: ESCOLHAS ====================
-const openChoiceModal = (nodeId: string, choice?: any) => {
+const confirmDeleteNode = async (node: any) => {
+  if (!confirm('Deseja realmente excluir esta cena e suas escolhas?')) return;
+  try {
+    await api.delete(`/gm/story/nodes/${node.id}`);
+    successMsg.value = 'Cena excluída com sucesso!';
+    await openAdventureDetail(activeAdventureDetail.value.id);
+  } catch (err: any) {
+    errorMsg.value = err.response?.data?.error || 'Erro ao excluir cena';
+  }
+};
+
+// ==================== CHOICE CRUD ====================
+const openChoiceModal = (choice?: any, nodeId?: string) => {
   if (choice) {
-    choiceForm.value = {
-      id: choice.id,
-      nodeId,
-      choiceText: choice.choiceText,
-      attributeReq: choice.attributeReq || '',
-      skillReq: choice.skillReq || '',
-      difficulty: choice.difficulty || 1,
-      successNodeId: choice.successNodeId || '',
-      failureNodeId: choice.failureNodeId || ''
-    }
+    choiceForm.value = { ...choice };
   } else {
     choiceForm.value = {
-      id: null,
-      nodeId,
+      id: '',
+      nodeId: nodeId || selectedNode.value?.id,
       choiceText: '',
       attributeReq: '',
       skillReq: '',
       difficulty: 1,
       successNodeId: '',
-      failureNodeId: ''
-    }
+      failureNodeId: '',
+      customStyle: null
+    };
   }
-  showChoiceModal.value = true
-}
+  showChoiceModal.value = true;
+};
 
 const saveChoice = async () => {
   try {
     if (choiceForm.value.id) {
-      await api.put(`/api/gm/story/choices/${choiceForm.value.id}`, choiceForm.value)
-      successMsg.value = 'Escolha atualizada com sucesso!'
+      await api.put(`/gm/story/choices/${choiceForm.value.id}`, choiceForm.value);
+      successMsg.value = 'Escolha atualizada!';
     } else {
-      await api.post('/api/gm/story/choices', choiceForm.value)
-      successMsg.value = 'Escolha adicionada com sucesso!'
+      await api.post('/gm/story/choices', choiceForm.value);
+      successMsg.value = 'Nova escolha vinculada!';
     }
-    showChoiceModal.value = false
-    await openAdventureDetail(activeAdventureDetail.value.id)
+    showChoiceModal.value = false;
+    await openAdventureDetail(activeAdventureDetail.value.id);
   } catch (err: any) {
-    errorMsg.value = err.response?.data?.error || 'Erro ao salvar escolha'
+    errorMsg.value = err.response?.data?.error || 'Erro ao salvar escolha';
   }
-}
+};
 
-const confirmDeleteChoice = async (choiceId: string) => {
-  if (confirm('Excluir esta escolha?')) {
-    try {
-      await api.delete(`/api/gm/story/choices/${choiceId}`)
-      successMsg.value = 'Escolha excluída!'
-      await openAdventureDetail(activeAdventureDetail.value.id)
-    } catch (err: any) {
-      errorMsg.value = err.response?.data?.error || 'Erro ao excluir escolha'
-    }
+const confirmDeleteChoice = async (choice: any) => {
+  if (!confirm('Deseja excluir esta opção de escolha?')) return;
+  try {
+    await api.delete(`/gm/story/choices/${choice.id}`);
+    successMsg.value = 'Escolha excluída!';
+    await openAdventureDetail(activeAdventureDetail.value.id);
+  } catch (err: any) {
+    errorMsg.value = err.response?.data?.error || 'Erro ao excluir escolha';
   }
-}
+};
 
-// ==================== MÉTODOS: MISSÕES AFK ====================
+// ==================== MISSIONS CRUD ====================
 const loadMissions = async () => {
   try {
-    const res = await api.get('/api/gm/missions-idle')
-    missions.value = res.data || []
+    const res = await api.get('/gm/missions-idle');
+    missions.value = res.data;
   } catch (err: any) {
-    console.error('Erro ao carregar missões:', err)
+    console.error('Erro ao carregar missões:', err);
   }
-}
+};
 
-const formatJson = (val: any) => {
-  if (!val || typeof val !== 'object') return 'Nenhum'
-  return Object.entries(val).map(([k, v]) => `${k}: ${v}`).join(', ') || 'Nenhum'
-}
-
-const openMissionModal = (m?: any) => {
-  if (m) {
-    missionForm.value = {
-      id: m.id,
-      title: m.title,
-      description: m.description,
-      category: m.category,
-      durationMinutes: m.durationMinutes,
-      baseDifficulty: m.baseDifficulty,
-      rewardHunger: m.rewardsJson?.hunger || 0,
-      rewardExp: m.rewardsJson?.exp || 0
-    }
+const openMissionModal = (mission?: any) => {
+  if (mission) {
+    missionForm.value = { ...mission };
   } else {
-    missionForm.value = {
-      id: null,
-      title: '',
-      description: '',
-      category: 'OPERATION',
-      durationMinutes: 5,
-      baseDifficulty: 6,
-      rewardHunger: 0,
-      rewardExp: 5
-    }
+    missionForm.value = { id: '', title: '', description: '', durationMinutes: 2, baseDifficulty: 5, category: 'OPERATION' };
   }
-  showMissionModal.value = true
-}
+  showMissionModal.value = true;
+};
 
 const saveMission = async () => {
-  const payload = {
-    title: missionForm.value.title,
-    description: missionForm.value.description,
-    category: missionForm.value.category,
-    durationMinutes: missionForm.value.durationMinutes,
-    baseDifficulty: missionForm.value.baseDifficulty,
-    rewardsJson: {
-      hunger: missionForm.value.rewardHunger || 0,
-      exp: missionForm.value.rewardExp || 0
-    }
-  }
-
   try {
     if (missionForm.value.id) {
-      await api.put(`/api/gm/missions-idle/${missionForm.value.id}`, payload)
-      successMsg.value = 'Missão atualizada!'
+      await api.put(`/gm/missions-idle/${missionForm.value.id}`, missionForm.value);
+      successMsg.value = 'Missão AFK atualizada!';
     } else {
-      await api.post('/api/gm/missions-idle', payload)
-      successMsg.value = 'Missão criada com sucesso!'
+      await api.post('/gm/missions-idle', missionForm.value);
+      successMsg.value = 'Nova missão AFK criada!';
     }
-    showMissionModal.value = false
-    await loadMissions()
+    showMissionModal.value = false;
+    await loadMissions();
   } catch (err: any) {
-    errorMsg.value = err.response?.data?.error || 'Erro ao salvar missão'
+    errorMsg.value = err.response?.data?.error || 'Erro ao salvar missão';
   }
-}
+};
 
-const confirmDeleteMission = async (m: any) => {
-  if (confirm(`Excluir a missão "${m.title}" e todas as suas etapas?`)) {
-    try {
-      await api.delete(`/api/gm/missions-idle/${m.id}`)
-      successMsg.value = 'Missão excluída!'
-      await loadMissions()
-    } catch (err: any) {
-      errorMsg.value = err.response?.data?.error || 'Erro ao excluir missão'
-    }
-  }
-}
+const openMissionDetail = (missionId: string) => {
+  alert('Editor de etapas da missão: ' + missionId);
+};
 
-const openMissionDetail = async (missionId: string) => {
-  loading.value = true
+const confirmDeleteMission = async (mission: any) => {
+  if (!confirm(`Deseja excluir a missão "${mission.title}"?`)) return;
   try {
-    const res = await api.get(`/api/gm/missions-idle/${missionId}`)
-    activeMissionDetail.value = res.data
+    await api.delete(`/gm/missions-idle/${mission.id}`);
+    successMsg.value = 'Missão excluída com sucesso!';
+    await loadMissions();
   } catch (err: any) {
-    errorMsg.value = err.response?.data?.error || 'Erro ao carregar detalhes da missão'
-  } finally {
-    loading.value = false
+    errorMsg.value = err.response?.data?.error || 'Erro ao excluir missão';
   }
-}
+};
 
-const closeMissionDetail = async () => {
-  activeMissionDetail.value = null
-  await loadMissions()
-}
-
-// ==================== MÉTODOS: ETAPAS DA MISSÃO ====================
-const openActionModal = (act?: any) => {
-  if (act) {
-    actionForm.value = {
-      id: act.id,
-      missionId: activeMissionDetail.value.id,
-      stepOrder: act.stepOrder,
-      name: act.name,
-      description: act.description,
-      attributeReq: act.attributeReq || '',
-      skillReq: act.skillReq || '',
-      difficulty: act.difficulty || 6,
-      successText: act.successText,
-      failureText: act.failureText
-    }
-  } else {
-    actionForm.value = {
-      id: null,
-      missionId: activeMissionDetail.value.id,
-      stepOrder: (activeMissionDetail.value.Actions?.length || 0) + 1,
-      name: '',
-      description: '',
-      attributeReq: '',
-      skillReq: '',
-      difficulty: 6,
-      successText: '',
-      failureText: ''
-    }
-  }
-  showActionModal.value = true
-}
-
-const saveAction = async () => {
-  try {
-    if (actionForm.value.id) {
-      await api.put(`/api/gm/missions-idle/actions/${actionForm.value.id}`, actionForm.value)
-      successMsg.value = 'Etapa atualizada com sucesso!'
-    } else {
-      await api.post(`/api/gm/missions-idle/${activeMissionDetail.value.id}/actions`, actionForm.value)
-      successMsg.value = 'Etapa adicionada à missão!'
-    }
-    showActionModal.value = false
-    await openMissionDetail(activeMissionDetail.value.id)
-  } catch (err: any) {
-    errorMsg.value = err.response?.data?.error || 'Erro ao salvar etapa'
-  }
-}
-
-const confirmDeleteAction = async (actionId: string) => {
-  if (confirm('Excluir esta etapa da missão?')) {
-    try {
-      await api.delete(`/api/gm/missions-idle/actions/${actionId}`)
-      successMsg.value = 'Etapa excluída!'
-      await openMissionDetail(activeMissionDetail.value.id)
-    } catch (err: any) {
-      errorMsg.value = err.response?.data?.error || 'Erro ao excluir etapa'
-    }
-  }
-}
-
+// ==================== AUTH ====================
 const handleLogout = () => {
-  sessionStorage.removeItem('lira_token')
-  sessionStorage.removeItem('lira_user')
-  localStorage.removeItem('token')
-  localStorage.removeItem('lira_token')
-  localStorage.removeItem('lira_user')
-  router.push('/login')
-}
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  router.push('/login');
+};
 </script>
+
+<style scoped>
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+</style>

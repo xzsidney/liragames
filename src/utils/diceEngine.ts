@@ -28,7 +28,6 @@ export interface ActiveDie {
   faceNormals: FaceData[]
   settled: boolean
   finalValue?: number
-  floatingBadge?: THREE.Sprite
 }
 
 export class Dice3DEngine {
@@ -59,7 +58,7 @@ export class Dice3DEngine {
     // Configuração de Three.js Scene
     this.scene = new THREE.Scene()
 
-    // Câmera com perspectiva de cima
+    // Câmera com ângulo imersivo
     const width = this.canvas.clientWidth || window.innerWidth
     const height = this.canvas.clientHeight || window.innerHeight
     this.camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100)
@@ -89,8 +88,9 @@ export class Dice3DEngine {
 
     this.setupBoundaries()
 
-    // Ordem das 10 faces (5 superiores, 5 inferiores)
-    const faceValues = [10, 2, 8, 4, 6, 1, 9, 3, 7, 5]
+    // Ordem das 10 faces (5 superiores: 10, 2, 8, 4, 6 | 5 inferiores opostas: 7, 5, 1, 9, 3)
+    // Cada par oposto soma 11 (10 <-> 1, 2 <-> 9, 8 <-> 3, 4 <-> 7, 6 <-> 5)
+    const faceValues = [10, 2, 8, 4, 6, 7, 5, 1, 9, 3]
 
     // Construção da Geometria Monolítica do D10 com Projeção Conforme
     const { geometry, shape, normals, textPositions } = this.buildD10GeometryAndPhysics(faceValues)
@@ -215,7 +215,7 @@ export class Dice3DEngine {
   }
 
   /**
-   * Constrói a geometria 3D do D10 com Projeção Conforme (Zero Distorção UV)
+   * Constrói a geometria 3D do D10 com Projeção Conforme
    */
   private buildD10GeometryAndPhysics(faceValues: number[]) {
     const scale = 1.35
@@ -263,7 +263,7 @@ export class Dice3DEngine {
 
     let faceIndex = 0
 
-    // Processador com Projeção Conforme Planar Exata
+    // Processador com Projeção Conforme Planar
     const addKiteFace = (
       val: number,
       pApex: THREE.Vector3,
@@ -324,7 +324,6 @@ export class Dice3DEngine {
       const uvC = toUV(ptCenter)
       const uvR = toUV(ptRight)
 
-      // Salvar posição do centróide no canvas 512x512 para desenhar o texto exatamente no centro
       const canvasPt = (uv: number[]) => [uv[0] * 512, (1 - uv[1]) * 512]
       textPositions.push({
         x: 256,
@@ -389,7 +388,7 @@ export class Dice3DEngine {
   }
 
   /**
-   * Gera a textura de uma face desenhando o polígono e o texto perfeitamente centralizados
+   * Gera a textura de uma face com número centralizado, limpo e legível
    */
   private createFaceMaterial(
     value: number,
@@ -406,18 +405,18 @@ export class Dice3DEngine {
     // 1. Fundo da Face
     const grad = ctx.createRadialGradient(256, 256, 30, 256, 256, 250)
     if (type === 'regular') {
-      grad.addColorStop(0, '#26252e')
-      grad.addColorStop(0.65, '#14131a')
-      grad.addColorStop(1, '#09080d')
+      grad.addColorStop(0, '#282730')
+      grad.addColorStop(0.65, '#15141b')
+      grad.addColorStop(1, '#0a090e')
     } else {
-      grad.addColorStop(0, '#a81313')
-      grad.addColorStop(0.65, '#6e0000')
-      grad.addColorStop(1, '#3b0000')
+      grad.addColorStop(0, '#b31515')
+      grad.addColorStop(0.65, '#750000')
+      grad.addColorStop(1, '#3d0000')
     }
     ctx.fillStyle = grad
     ctx.fillRect(0, 0, 512, 512)
 
-    // 2. Traçado do Losango Conforme Exato
+    // 2. Traçado do Losango
     if (meta.kitePoly && meta.kitePoly.length === 4) {
       ctx.beginPath()
       ctx.moveTo(meta.kitePoly[0][0], meta.kitePoly[0][1])
@@ -430,7 +429,6 @@ export class Dice3DEngine {
       ctx.lineWidth = 14
       ctx.stroke()
 
-      // Borda Interna Fina
       ctx.strokeStyle = type === 'regular' ? 'rgba(212, 175, 55, 0.45)' : 'rgba(255, 120, 120, 0.45)'
       ctx.lineWidth = 4
       ctx.stroke()
@@ -446,34 +444,37 @@ export class Dice3DEngine {
     const tx = meta.x
     const ty = meta.y
 
+    // Formatar números para fácil leitura (ex: ponto no 6. e 9.)
+    const displayText = value === 6 ? '6.' : value === 9 ? '9.' : value.toString()
+
     if (type === 'regular') {
       ctx.fillStyle = '#ffdf66'
-      ctx.font = 'bold 150px "Cinzel", "Georgia", serif'
+      ctx.font = 'bold 140px "Cinzel", "Arial", sans-serif'
 
       if (value === 10) {
-        ctx.font = 'bold 125px "Cinzel", "Georgia", serif'
+        ctx.font = 'bold 115px "Cinzel", "Arial", sans-serif'
         ctx.fillText('10☥', tx, ty)
       } else {
-        ctx.fillText(value.toString(), tx, ty)
+        ctx.fillText(displayText, tx, ty)
       }
     } else {
       // Hunger Dice
       if (value === 10) {
         ctx.fillStyle = '#ff6b6b'
-        ctx.font = 'bold 125px "Cinzel", "Georgia", serif'
+        ctx.font = 'bold 115px "Cinzel", "Arial", sans-serif'
         ctx.fillText('10☥', tx, ty)
       } else if (value === 1) {
         ctx.fillStyle = '#ff2222'
-        ctx.font = 'bold 150px serif'
+        ctx.font = 'bold 140px serif'
         ctx.fillText('1☠', tx, ty)
       } else if (value >= 6) {
         ctx.fillStyle = '#ffffff'
-        ctx.font = 'bold 150px "Cinzel", "Georgia", serif'
-        ctx.fillText(value.toString(), tx, ty)
+        ctx.font = 'bold 140px "Cinzel", "Arial", sans-serif'
+        ctx.fillText(displayText, tx, ty)
       } else {
         ctx.fillStyle = 'rgba(255, 210, 210, 0.75)'
-        ctx.font = 'bold 150px "Cinzel", "Georgia", serif'
-        ctx.fillText(value.toString(), tx, ty)
+        ctx.font = 'bold 140px "Cinzel", "Arial", sans-serif'
+        ctx.fillText(displayText, tx, ty)
       }
     }
 
@@ -490,67 +491,6 @@ export class Dice3DEngine {
       roughness: type === 'regular' ? 0.22 : 0.28,
       metalness: type === 'regular' ? 0.35 : 0.15
     })
-  }
-
-  /**
-   * Cria um Badge Flutuante em 3D sobre o dado quando ele para
-   */
-  private createFloatingBadge(value: number, type: 'regular' | 'hunger'): THREE.Sprite {
-    const canvas = document.createElement('canvas')
-    canvas.width = 256
-    canvas.height = 256
-    const ctx = canvas.getContext('2d')!
-
-    ctx.clearRect(0, 0, 256, 256)
-
-    // Círculo com brilho
-    const grad = ctx.createRadialGradient(128, 128, 20, 128, 128, 120)
-    if (type === 'regular') {
-      grad.addColorStop(0, value >= 6 ? 'rgba(30, 28, 38, 0.95)' : 'rgba(18, 18, 22, 0.9)')
-      grad.addColorStop(1, 'rgba(10, 10, 14, 0.85)')
-    } else {
-      grad.addColorStop(0, value === 1 ? 'rgba(120, 10, 10, 0.95)' : 'rgba(90, 8, 8, 0.95)')
-      grad.addColorStop(1, 'rgba(45, 4, 4, 0.85)')
-    }
-
-    ctx.fillStyle = grad
-    ctx.beginPath()
-    ctx.arc(128, 128, 110, 0, Math.PI * 2)
-    ctx.fill()
-
-    // Borda
-    ctx.strokeStyle = type === 'regular' 
-      ? (value === 10 ? '#ffd700' : value >= 6 ? '#d4af37' : '#666677')
-      : (value === 10 ? '#ff4d4d' : value === 1 ? '#ff1111' : '#ff6666')
-    ctx.lineWidth = 10
-    ctx.stroke()
-
-    // Texto
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.font = 'bold 110px "Cinzel", serif'
-    ctx.fillStyle = type === 'regular' 
-      ? (value >= 6 ? '#ffd700' : '#888899')
-      : (value === 1 ? '#ff3333' : '#ffffff')
-
-    if (value === 10) {
-      ctx.fillText('10☥', 128, 132)
-    } else if (value === 1 && type === 'hunger') {
-      ctx.font = 'bold 115px serif'
-      ctx.fillText('1☠', 128, 132)
-    } else {
-      ctx.fillText(value.toString(), 128, 132)
-    }
-
-    const texture = new THREE.CanvasTexture(canvas)
-    const spriteMat = new THREE.SpriteMaterial({
-      map: texture,
-      transparent: true,
-      depthTest: false
-    })
-    const sprite = new THREE.Sprite(spriteMat)
-    sprite.scale.set(2.2, 2.2, 2.2)
-    return sprite
   }
 
   public rollDice(regularCount: number, hungerCount: number) {
@@ -650,10 +590,6 @@ export class Dice3DEngine {
 
   public clearDice() {
     for (const die of this.dice) {
-      if (die.floatingBadge) {
-        this.scene.remove(die.floatingBadge)
-        die.floatingBadge.material.dispose()
-      }
       this.scene.remove(die.mesh)
       this.world.removeBody(die.body)
     }
@@ -679,16 +615,6 @@ export class Dice3DEngine {
         if (!die.settled) {
           die.settled = true
           die.finalValue = this.getUpwardFace(die)
-
-          // Criar badge flutuante acima do dado
-          const badge = this.createFloatingBadge(die.finalValue, die.type)
-          badge.position.set(
-            die.mesh.position.x,
-            die.mesh.position.y + 2.4,
-            die.mesh.position.z
-          )
-          this.scene.add(badge)
-          die.floatingBadge = badge
         }
       } else {
         allSettled = false
