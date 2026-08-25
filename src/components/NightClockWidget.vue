@@ -182,6 +182,9 @@ const displayLocation = computed(() => {
 })
 
 const liveTimeFormatted = computed(() => {
+  if (isDaytime.value) {
+    return '06:00:00'
+  }
   const totalSec = Math.floor(liveSeconds.value % 86400)
   const h = Math.floor(totalSec / 3600) % 24
   const m = Math.floor((totalSec % 3600) / 60)
@@ -191,7 +194,7 @@ const liveTimeFormatted = computed(() => {
 
 const isDaytime = computed(() => {
   const currentMinutes = nightStatus.value?.nightMinutesSpent || 0
-  return currentMinutes >= 600 || (liveSeconds.value >= 108000 && liveSeconds.value < 158400)
+  return currentMinutes >= 600 || liveSeconds.value >= 108000
 })
 
 const isSunHazardActive = computed(() => {
@@ -213,13 +216,15 @@ const progressPercent = computed(() => {
 const startLiveClock = () => {
   if (clockInterval) clearInterval(clockInterval)
   clockInterval = setInterval(() => {
-    liveSeconds.value += 1
+    if (liveSeconds.value < 108000) { // 108000s = 06:00:00
+      liveSeconds.value += 1
+    }
   }, 1000)
 }
 
 const syncClockFromStatus = (data: any) => {
   if (!data) return
-  const mins = data.nightMinutesSpent || 0
+  const mins = Math.min(600, Math.max(0, data.nightMinutesSpent || 0))
   // 20:00 (72000s) + minutos gastos * 60
   liveSeconds.value = 72000 + (mins * 60)
 

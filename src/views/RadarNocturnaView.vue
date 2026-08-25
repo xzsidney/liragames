@@ -214,12 +214,12 @@
 
           <button 
             @click="startReconMission" 
-            :disabled="!!activeMission || exploring"
+            :disabled="!!activeMission || exploring || currentNightStatus?.isDaytime"
             class="w-full py-3.5 rounded-lg border border-cyan-400 bg-cyan-950/70 hover:bg-cyan-500 hover:text-black text-cyan-300 font-serif font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_20px_rgba(0,255,255,0.25)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <span v-if="exploring" class="animate-spin">⏳</span>
             <span v-else>🔍</span>
-            <span>{{ activeMission ? 'Vampiro Ocupado em Missão' : (exploring ? 'Iniciando Expedição...' : 'Iniciar Missão de Reconhecimento') }}</span>
+            <span>{{ activeMission ? 'Vampiro Ocupado em Missão' : (currentNightStatus?.isDaytime ? '☀️ Operação Bloqueada (Dia)' : (exploring ? 'Iniciando Expedição...' : 'Iniciar Missão de Reconhecimento')) }}</span>
           </button>
         </div>
 
@@ -270,10 +270,10 @@
                 </div>
                 <button 
                   @click="dispatchMission(m)"
-                  :disabled="!!activeMission || dispatching" 
+                  :disabled="!!activeMission || dispatching || currentNightStatus?.isDaytime" 
                   class="w-full mt-2 py-2 rounded border border-vamp-c2 bg-vamp-c2/10 hover:bg-vamp-c2 hover:text-white text-vamp-c2 text-xs font-serif font-bold uppercase tracking-wider transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {{ activeMission ? 'Vampiro Ocupado em Missão' : 'Despachar Personagem' }}
+                  {{ activeMission ? 'Vampiro Ocupado em Missão' : (currentNightStatus?.isDaytime ? '☀️ Operação Bloqueada (Dia)' : 'Despachar Personagem') }}
                 </button>
               </div>
             </div>
