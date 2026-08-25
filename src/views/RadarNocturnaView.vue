@@ -7,17 +7,28 @@
         <span class="text-cyan-400 text-2xl drop-shadow-[0_0_10px_rgba(0,255,255,0.8)]">⚜</span>
         <div>
           <h1 class="text-cyan-400 font-serif text-xl tracking-widest uppercase">Radar Tático</h1>
-          <span class="text-[rgba(0,150,255,0.8)] text-xs tracking-widest uppercase">Nocturna</span>
+          <span class="text-[rgba(0,150,255,0.8)] text-xs tracking-widest uppercase">Nocturna • Reconhecimento Urbano</span>
         </div>
       </div>
-      <button @click="router.push(`/personagem/hub?id=${characterId}`)" class="text-cyan-500 hover:text-cyan-300 transition text-xs uppercase tracking-widest font-serif border border-cyan-500/30 px-4 py-2 rounded hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] hover:bg-cyan-900/20">
-        ← Retornar ao Refúgio
-      </button>
+
+      <div class="flex items-center gap-4">
+        <!-- Status de Missão Ativa no Header -->
+        <div v-if="activeMission" class="flex items-center gap-3 px-3 py-1.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+          <span class="text-cyan-300 uppercase tracking-wider text-[11px]">Operação: {{ activeMission.currentReport?.title || 'Em Curso' }}</span>
+          <span class="text-gold font-bold">{{ activeMission.readyToResolve ? 'Pronto para Coleta' : timeRemainingDisplay }}</span>
+          <button v-if="activeMission.readyToResolve" @click="resolveActiveMission" class="ml-2 px-2 py-0.5 rounded bg-green-600 text-black font-bold uppercase text-[10px]">Coletar</button>
+        </div>
+
+        <button @click="router.push(`/personagem/hub?id=${characterId}`)" class="text-cyan-500 hover:text-cyan-300 transition text-xs uppercase tracking-widest font-serif border border-cyan-500/30 px-4 py-2 rounded hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] hover:bg-cyan-900/20">
+          ← Retornar ao Refúgio
+        </button>
+      </div>
     </header>
 
     <div v-if="loading" class="relative z-10 max-w-7xl mx-auto px-6 py-20 text-center text-cyan-500 font-serif">
       <div class="animate-spin w-8 h-8 border-2 border-cyan-900 border-t-transparent rounded-full mx-auto mb-4"></div>
-      Calibrando frequências...
+      Calibrando frequências de sonar e névoa urbana...
     </div>
 
     <!-- MAPA E DOSSIÊ -->
@@ -47,13 +58,14 @@
           <div 
             v-for="(node, index) in mapNodes" 
             :key="index"
-            class="absolute w-1.5 h-1.5 rounded-full cursor-pointer transition-all duration-200 ease-out hover:scale-[2] hover:z-30 hover:opacity-100"
-            :class="[node.facClass, node.blinking ? 'animate-[blipBlink_2s_infinite]' : 'opacity-80']"
-            :style="{ left: `${node.x}%`, top: `${node.y}%`, animationDelay: `${node.delay}s`, backgroundColor: node.color, boxShadow: `0 0 8px ${node.color}` }"
+            class="absolute w-2 h-2 rounded-full cursor-pointer transition-all duration-200 ease-out hover:scale-[2.5] hover:z-30 hover:opacity-100 flex items-center justify-center text-[8px]"
+            :class="[node.blinking ? 'animate-[blipBlink_2s_infinite]' : 'opacity-80', node.knownStatus === 'RUMOR' ? 'border border-dashed border-gray-400' : '']"
+            :style="{ left: `${node.x}%`, top: `${node.y}%`, animationDelay: `${node.delay}s`, backgroundColor: node.color, boxShadow: `0 0 10px ${node.color}` }"
             @mouseenter="(e) => showTooltip(e, node)"
             @mouseleave="hideTooltip"
             @click.stop="openSidebar(node)"
           >
+            <span v-if="node.knownStatus === 'RUMOR'" class="text-[7px] text-black font-bold">?</span>
             <!-- Hover Ring -->
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border border-current opacity-0 transition-all duration-200 hover:opacity-100 hover:scale-150"></div>
           </div>
@@ -73,63 +85,102 @@
 
       <!-- Sidebar Dossiê -->
       <aside 
-        class="absolute top-0 bottom-0 w-full md:w-[400px] bg-[rgba(5,5,12,0.95)] backdrop-blur-md border-l border-[rgba(0,150,255,0.3)] shadow-[-10px_0_30px_rgba(0,0,0,0.8)] z-30 p-8 overflow-y-auto transition-all duration-300 ease-out"
-        :class="sidebarNode ? 'right-0' : '-right-[100%] md:-right-[420px]'"
+        class="absolute top-0 bottom-0 w-full md:w-[420px] bg-[rgba(5,5,12,0.96)] backdrop-blur-md border-l border-[rgba(0,150,255,0.3)] shadow-[-10px_0_30px_rgba(0,0,0,0.8)] z-30 p-6 md:p-8 overflow-y-auto transition-all duration-300 ease-out space-y-6"
+        :class="sidebarNode ? 'right-0' : '-right-[100%] md:-right-[450px]'"
       >
         <button @click="closeSidebar" class="absolute top-5 right-5 text-[rgba(0,150,255,0.7)] text-2xl hover:text-cyan-400 hover:drop-shadow-[0_0_10px_#00ffff] transition-all">×</button>
         
-        <div v-if="sidebarNode" class="mb-6 pb-4 border-b border-[rgba(0,150,255,0.3)]">
+        <div v-if="sidebarNode" class="pb-4 border-b border-[rgba(0,150,255,0.3)]">
           <div class="font-mono text-[10px] tracking-widest uppercase text-[rgba(0,200,255,0.8)]">{{ sidebarNode.zona }}</div>
-          <h2 class="font-serif text-[1.8rem] text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] leading-tight mb-2">{{ sidebarNode.nome }}</h2>
+          <h2 class="font-serif text-2xl text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] leading-tight mb-2">{{ sidebarNode.nome }}</h2>
           
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-mono text-[11px] tracking-widest uppercase mt-2" :style="{ color: sidebarNode.color, borderColor: `${sidebarNode.color}55`, backgroundColor: `${sidebarNode.color}22` }">
-            {{ sidebarNode.icon }} {{ sidebarNode.faccao }}
-          </span>
-        </div>
-
-        <div v-if="sidebarNode" class="grid grid-cols-2 gap-3 mb-6">
-          <div class="border border-[rgba(0,150,255,0.2)] rounded p-2.5 text-center">
-            <span class="block font-mono text-[9px] tracking-widest uppercase text-white/50 mb-1">Riqueza</span>
-            <span class="font-serif text-xs tracking-widest text-white uppercase">{{ sidebarNode.attributes.riqueza }}</span>
-          </div>
-          <div class="border border-[rgba(0,150,255,0.2)] rounded p-2.5 text-center">
-            <span class="block font-mono text-[9px] tracking-widest uppercase text-white/50 mb-1">Criminalidade</span>
-            <span class="font-serif text-xs tracking-widest text-white uppercase">{{ sidebarNode.attributes.criminalidade }}</span>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border font-mono text-[11px] tracking-widest uppercase" :style="{ color: sidebarNode.color, borderColor: `${sidebarNode.color}55`, backgroundColor: `${sidebarNode.color}22` }">
+              {{ sidebarNode.icon }} {{ sidebarNode.faccao }}
+            </span>
+            <span v-if="sidebarNode.knownStatus === 'RUMOR'" class="px-2 py-0.5 rounded bg-yellow-950/80 border border-yellow-500/50 text-yellow-400 font-mono text-[9px] uppercase tracking-wider">
+              Névoa: Boato
+            </span>
+            <span v-else class="px-2 py-0.5 rounded bg-green-950/80 border border-green-500/50 text-green-400 font-mono text-[9px] uppercase tracking-wider">
+              Explorado
+            </span>
           </div>
         </div>
 
-        <div v-if="sidebarNode" class="bg-[rgba(0,150,255,0.05)] border border-[rgba(0,150,255,0.2)] rounded p-4 mb-4">
-          <div class="font-mono text-[10px] tracking-widest uppercase text-[rgba(0,200,255,0.8)] mb-1.5">Segurança Pública</div>
-          <div class="font-sans text-[0.95rem] text-[#dcd1b3] leading-relaxed">{{ sidebarNode.attributes.seguranca_publica }}</div>
+        <!-- ESTADO RUMOR (NÉVOA DE GUERRA) -->
+        <div v-if="sidebarNode && sidebarNode.knownStatus === 'RUMOR'" class="space-y-4">
+          <div class="p-4 rounded-xl border border-yellow-500/30 bg-yellow-950/20 text-xs font-serif leading-relaxed text-yellow-200/90 space-y-2">
+            <div class="font-bold uppercase tracking-wider text-yellow-400 flex items-center gap-2">
+              <span>⚠️</span> Território Não Mapeado
+            </div>
+            <p>Seus contatos e lacaios ouviram rumores sobre este local, mas você ainda não o explorou pessoalmente. Dados estratégicos e rotas de caça permanecem ocultos nas sombras.</p>
+          </div>
+
+          <button 
+            @click="exploreCurrentLocation" 
+            :disabled="exploring"
+            class="w-full py-3 rounded-lg border border-cyan-400 bg-cyan-950/60 hover:bg-cyan-500 hover:text-black text-cyan-300 font-serif font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_15px_rgba(0,255,255,0.2)] disabled:opacity-50"
+          >
+            {{ exploring ? 'Mapeando Bairro...' : '🔍 Reconhecer e Mapear Território' }}
+          </button>
         </div>
 
-        <div v-if="sidebarNode" class="bg-[rgba(0,150,255,0.05)] border border-[rgba(0,150,255,0.2)] rounded p-4 mb-4">
-          <div class="font-mono text-[10px] tracking-widest uppercase text-[rgba(0,200,255,0.8)] mb-1.5">Visibilidade Midiática</div>
-          <div class="font-sans text-[0.95rem] text-[#dcd1b3] leading-relaxed">{{ sidebarNode.attributes.visibilidade_midiatica }}</div>
-        </div>
+        <!-- ESTADO DISCOVERED (TOTALMENTE EXPLORADO) -->
+        <div v-else-if="sidebarNode" class="space-y-6">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="border border-[rgba(0,150,255,0.2)] rounded p-2.5 text-center bg-black/40">
+              <span class="block font-mono text-[9px] tracking-widest uppercase text-white/50 mb-1">Riqueza</span>
+              <span class="font-serif text-xs tracking-widest text-white uppercase">{{ sidebarNode.attributes.riqueza }}</span>
+            </div>
+            <div class="border border-[rgba(0,150,255,0.2)] rounded p-2.5 text-center bg-black/40">
+              <span class="block font-mono text-[9px] tracking-widest uppercase text-white/50 mb-1">Criminalidade</span>
+              <span class="font-serif text-xs tracking-widest text-white uppercase">{{ sidebarNode.attributes.criminalidade }}</span>
+            </div>
+          </div>
 
-        <div v-if="sidebarNode" class="rounded p-4 mb-4" :style="{ backgroundColor: `${sidebarNode.color}15`, borderColor: `${sidebarNode.color}55`, borderWidth: '1px' }">
-          <div class="font-mono text-[10px] tracking-widest uppercase mb-1.5" :style="{ color: sidebarNode.color }">Dificuldades (Rolagens)</div>
-          <div class="flex flex-col gap-1.5 mt-2">
-            <div class="flex items-center justify-between px-2.5 py-1.5 rounded" :style="{ backgroundColor: `${sidebarNode.color}22` }">
-              <span class="font-mono text-[10px] tracking-widest uppercase text-white/70">Riqueza</span>
-              <span class="font-serif text-[1.1rem]" :style="{ color: sidebarNode.color, textShadow: `0 0 5px ${sidebarNode.color}55` }">{{ sidebarNode.attributes.dificuldades?.teste_riqueza }}</span>
+          <div v-if="sidebarNode.attributes.seguranca_publica" class="bg-[rgba(0,150,255,0.05)] border border-[rgba(0,150,255,0.2)] rounded p-3.5">
+            <div class="font-mono text-[10px] tracking-widest uppercase text-[rgba(0,200,255,0.8)] mb-1">Segurança Pública</div>
+            <div class="font-sans text-xs text-[#dcd1b3] leading-relaxed">{{ sidebarNode.attributes.seguranca_publica }}</div>
+          </div>
+
+          <div v-if="sidebarNode.attributes.visibilidade_midiatica" class="bg-[rgba(0,150,255,0.05)] border border-[rgba(0,150,255,0.2)] rounded p-3.5">
+            <div class="font-mono text-[10px] tracking-widest uppercase text-[rgba(0,200,255,0.8)] mb-1">Visibilidade Midiática</div>
+            <div class="font-sans text-xs text-[#dcd1b3] leading-relaxed">{{ sidebarNode.attributes.visibilidade_midiatica }}</div>
+          </div>
+
+          <!-- SEÇÃO DE MISSÕES E CAÇADAS NESTE LOCAL -->
+          <div class="border-t border-[rgba(0,150,255,0.2)] pt-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-serif text-xs text-gold uppercase tracking-widest font-bold flex items-center gap-1.5">
+                <span>🩸</span> Incursões & Caçadas no Bairro
+              </h3>
+              <span class="text-[10px] text-gray-400 font-mono">{{ sidebarNode.missions?.length || 0 }} ativas</span>
             </div>
-            <div class="flex items-center justify-between px-2.5 py-1.5 rounded" :style="{ backgroundColor: `${sidebarNode.color}22` }">
-              <span class="font-mono text-[10px] tracking-widest uppercase text-white/70">Criminalidade</span>
-              <span class="font-serif text-[1.1rem]" :style="{ color: sidebarNode.color, textShadow: `0 0 5px ${sidebarNode.color}55` }">{{ sidebarNode.attributes.dificuldades?.teste_criminalidade }}</span>
+
+            <div v-if="sidebarNode.missions && sidebarNode.missions.length > 0" class="space-y-3">
+              <div v-for="m in sidebarNode.missions" :key="m.id" class="p-3.5 rounded-lg border border-white/10 bg-black/60 hover:border-gold/40 transition-all space-y-2">
+                <div class="flex justify-between items-start">
+                  <h4 class="font-serif text-sm text-parchment font-bold">{{ m.title }}</h4>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded uppercase font-mono" :class="m.category === 'HUNT' ? 'bg-red-950 text-red-400 border border-red-800/40' : 'bg-blue-950 text-cyan-400 border border-cyan-800/40'">
+                    {{ m.category === 'HUNT' ? 'Caçada' : 'Operação' }}
+                  </span>
+                </div>
+                <p class="text-xs text-gray-400 font-light line-clamp-2 leading-relaxed">{{ m.description }}</p>
+                <div class="flex justify-between items-center text-[10px] font-mono text-gray-500 pt-1">
+                  <span>⏱ {{ m.durationMinutes }} min</span>
+                  <span>Dif. {{ m.baseDifficulty }}</span>
+                </div>
+                <button 
+                  @click="dispatchMission(m)"
+                  :disabled="!!activeMission || dispatching" 
+                  class="w-full mt-2 py-2 rounded border border-vamp-c2 bg-vamp-c2/10 hover:bg-vamp-c2 hover:text-white text-vamp-c2 text-xs font-serif font-bold uppercase tracking-wider transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {{ activeMission ? 'Vampiro Ocupado em Missão' : 'Despachar Personagem' }}
+                </button>
+              </div>
             </div>
-            <div class="flex items-center justify-between px-2.5 py-1.5 rounded" :style="{ backgroundColor: `${sidebarNode.color}22` }">
-              <span class="font-mono text-[10px] tracking-widest uppercase text-white/70">Segurança</span>
-              <span class="font-serif text-[1.1rem]" :style="{ color: sidebarNode.color, textShadow: `0 0 5px ${sidebarNode.color}55` }">{{ sidebarNode.attributes.dificuldades?.teste_seguranca }}</span>
-            </div>
-            <div class="flex items-center justify-between px-2.5 py-1.5 rounded" :style="{ backgroundColor: `${sidebarNode.color}22` }">
-              <span class="font-mono text-[10px] tracking-widest uppercase text-white/70">Domínio</span>
-              <span class="font-serif text-[1.1rem]" :style="{ color: sidebarNode.color, textShadow: `0 0 5px ${sidebarNode.color}55` }">{{ sidebarNode.attributes.dificuldades?.teste_dominio }}</span>
-            </div>
-            <div class="flex items-center justify-between px-2.5 py-1.5 rounded" :style="{ backgroundColor: `${sidebarNode.color}22` }">
-              <span class="font-mono text-[10px] tracking-widest uppercase text-white/70">Visibilidade</span>
-              <span class="font-serif text-[1.1rem]" :style="{ color: sidebarNode.color, textShadow: `0 0 5px ${sidebarNode.color}55` }">{{ sidebarNode.attributes.dificuldades?.teste_visibilidade }}</span>
+            <div v-else class="text-center py-4 text-xs text-gray-500 font-serif italic border border-white/5 rounded-lg bg-black/20">
+              Nenhuma operação ativa registrada neste domínio no momento.
             </div>
           </div>
         </div>
@@ -141,7 +192,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '../services/api'
 
@@ -149,9 +200,12 @@ const router = useRouter()
 const route = useRoute()
 const characterId = ref<string>('')
 const loading = ref(true)
+const exploring = ref(false)
+const dispatching = ref(false)
 
 const mapNodes = ref<any[]>([])
 const sidebarNode = ref<any>(null)
+const activeMission = ref<any>(null)
 
 const tooltip = ref({
   visible: false,
@@ -171,7 +225,8 @@ const ZONAS_MAP: Record<string, any> = {
   'zona_oeste':   { minR: 0.35, maxR: 0.9, minA: 0.75 * Math.PI, maxA: 1.25 * Math.PI }
 }
 
-const getFactionColor = (dom: string = '') => {
+const getFactionColor = (dom: string = '', status: string = 'DISCOVERED') => {
+  if (status === 'RUMOR') return '#9ca3af' // Cinza para boato/rumor
   const d = dom.toLowerCase()
   if (d.includes('vampiro')) return '#ff3333'
   if (d.includes('lobisomem')) return '#33ff33'
@@ -180,13 +235,14 @@ const getFactionColor = (dom: string = '') => {
   return '#00ffff'
 }
 
-const getFactionIcon = (dom: string = '') => {
+const getFactionIcon = (dom: string = '', status: string = 'DISCOVERED') => {
+  if (status === 'RUMOR') return '❔'
   const d = dom.toLowerCase()
   if (d.includes('vampiro')) return '🩸'
   if (d.includes('lobisomem')) return '🐺'
   if (d.includes('mago')) return '🔮'
   if (d.includes('caçador') || d.includes('cacador')) return '🔫'
-  return '❓'
+  return '🏙️'
 }
 
 let seed = 42
@@ -198,7 +254,7 @@ const seededRandom = () => {
 const fetchLocations = async () => {
   try {
     characterId.value = (route.query.id as string) || localStorage.getItem('lira_active_character_id') || ''
-    const res = await api.get('/api/radar/locations')
+    const res = await api.get(`/api/radar?characterId=${characterId.value}`)
     const zones = res.data
 
     const nodes: any[] = []
@@ -224,7 +280,8 @@ const fetchLocations = async () => {
           const x = 50 + (r * Math.cos(a) * 50)
           const y = 50 + (r * Math.sin(a) * 50)
 
-          const faccao = bairroAttrs.dominio_faccao || 'Desconhecido'
+          const status = bairro.knownStatus || 'DISCOVERED'
+          const faccao = status === 'RUMOR' ? 'Boato Não Confirmado' : (bairroAttrs.dominio_faccao || 'Desconhecido')
 
           nodes.push({
             id: bairro.id,
@@ -234,10 +291,12 @@ const fetchLocations = async () => {
             y,
             delay: seededRandom() * 2,
             blinking: true,
-            color: getFactionColor(faccao),
+            knownStatus: status,
+            color: getFactionColor(faccao, status),
             faccao: faccao,
-            icon: getFactionIcon(faccao),
-            attributes: bairroAttrs
+            icon: getFactionIcon(faccao, status),
+            attributes: bairroAttrs,
+            missions: bairro.missions || []
           })
         })
       }
@@ -250,6 +309,77 @@ const fetchLocations = async () => {
     loading.value = false
   }
 }
+
+const fetchActiveMission = async () => {
+  if (!characterId.value) return
+  try {
+    const res = await api.get(`/api/missions-idle/active/${characterId.value}`)
+    activeMission.value = res.data
+  } catch (e) {
+    console.error('Erro ao buscar missão ativa:', e)
+  }
+}
+
+const exploreCurrentLocation = async () => {
+  if (!sidebarNode.value || !characterId.value) return
+  try {
+    exploring.value = true
+    await api.post(`/api/radar/locations/${sidebarNode.value.id}/explore`, {
+      characterId: characterId.value
+    })
+    alert(`Distrito '${sidebarNode.value.nome}' mapeado com sucesso!`)
+    await fetchLocations()
+    sidebarNode.value = mapNodes.value.find(n => n.id === sidebarNode.value.id) || null
+  } catch (e) {
+    console.error('Erro ao explorar local:', e)
+    alert('Erro ao explorar local')
+  } finally {
+    exploring.value = false
+  }
+}
+
+const dispatchMission = async (mission: any) => {
+  if (!characterId.value) return
+  try {
+    dispatching.value = true
+    await api.post('/api/missions-idle/start', {
+      characterId: characterId.value,
+      definitionMissionIdleId: mission.id
+    })
+    alert(`Operação '${mission.title}' iniciada com sucesso!`)
+    await fetchActiveMission()
+  } catch (e: any) {
+    console.error(e)
+    alert(e.response?.data?.error || 'Erro ao despachar missão')
+  } finally {
+    dispatching.value = false
+  }
+}
+
+const resolveActiveMission = async () => {
+  if (!activeMission.value) return
+  try {
+    const res = await api.post('/api/missions-idle/resolve', {
+      activeMissionId: activeMission.value.id
+    })
+    const report = res.data.report
+    alert(`Missão Finalizada!\nResultado: ${report.isSuccess ? 'SUCESSO' : 'FALHA'}\n${report.finalChanges?.join('\n') || ''}`)
+    activeMission.value = null
+    await fetchActiveMission()
+  } catch (e: any) {
+    console.error(e)
+    alert(e.response?.data?.error || 'Erro ao resolver missão')
+  }
+}
+
+const timeRemainingDisplay = computed(() => {
+  if (!activeMission.value || !activeMission.value.expiresAt) return ''
+  const diff = new Date(activeMission.value.expiresAt).getTime() - new Date().getTime()
+  if (diff <= 0) return 'Pronto'
+  const mins = Math.floor(diff / 60000)
+  const secs = Math.floor((diff % 60000) / 1000)
+  return `${mins}m ${secs}s`
+})
 
 const showTooltip = (e: MouseEvent, node: any) => {
   const target = e.target as HTMLElement
@@ -285,8 +415,9 @@ const closeSidebarIfClickOutside = (e: MouseEvent) => {
   }
 }
 
-onMounted(() => {
-  fetchLocations()
+onMounted(async () => {
+  await fetchLocations()
+  await fetchActiveMission()
 })
 </script>
 
@@ -301,8 +432,8 @@ onMounted(() => {
 }
 
 @keyframes blipBlink {
-  0% { opacity: 0.2; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.2); }
-  100% { opacity: 0.2; transform: scale(1); }
+  0% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 0.3; transform: scale(1); }
 }
 </style>

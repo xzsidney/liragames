@@ -145,6 +145,52 @@
 
           </div>
 
+          <!-- CARD DE OPERAÇÃO ATIVA / MISSÃO EM ANDAMENTO -->
+          <div v-if="activeMission" class="p-4 mx-5 my-3 rounded-lg border border-vamp-c2 bg-black/80 shadow-[0_0_20px_rgba(192,57,43,0.3)] space-y-3 animate-fade-in">
+            <div class="flex justify-between items-center text-[10px] font-mono uppercase tracking-widest text-vamp-c2">
+              <span class="flex items-center gap-1.5 font-bold">
+                <span class="w-2 h-2 rounded-full bg-vamp-c2 animate-ping"></span>
+                Operação em Andamento
+              </span>
+              <span>Etapa {{ activeMission.currentStage || 1 }}/{{ activeMission.totalStages || 1 }}</span>
+            </div>
+
+            <div>
+              <h4 class="font-serif text-sm font-bold text-parchment">{{ activeMission.currentReport?.title || activeMission.DefinitionMissionIdle?.title || 'Caçada Urbana' }}</h4>
+              <p class="text-[11px] text-gray-400 font-light mt-0.5">Vampiro despachado em território de Nocturna.</p>
+            </div>
+
+            <div class="space-y-1">
+              <div class="flex justify-between text-[10px] font-mono text-gray-400">
+                <span>Progresso</span>
+                <span class="text-gold font-bold">{{ isMissionExpired(activeMission.expiresAt) ? 'Concluído' : formatTimeRemaining(activeMission.expiresAt) }}</span>
+              </div>
+              <div class="w-full bg-zinc-900 h-2 rounded overflow-hidden border border-white/10">
+                <div 
+                  class="bg-vamp-c2 h-full transition-all duration-1000 shadow-[0_0_8px_rgba(192,57,43,0.8)]"
+                  :style="{ width: isMissionExpired(activeMission.expiresAt) ? '100%' : `${((activeMission.currentStage || 1) / (activeMission.totalStages || 1)) * 100}%` }"
+                ></div>
+              </div>
+            </div>
+
+            <div class="pt-1 flex gap-2">
+              <button 
+                v-if="isMissionExpired(activeMission.expiresAt) || activeMission.readyToResolve"
+                @click="resolveActiveMission"
+                class="flex-1 py-2 rounded bg-gold hover:bg-gold-light text-black text-xs font-serif font-bold uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)] animate-bounce"
+              >
+                🏆 Coletar Recompensas & Sangue
+              </button>
+              <button 
+                v-else
+                @click="router.push('/personagem/aventuras?id=' + characterId)"
+                class="flex-1 py-2 rounded border border-white/20 bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-serif uppercase tracking-wider transition-all"
+              >
+                Inspecionar Relatório Tático
+              </button>
+            </div>
+          </div>
+
           <!-- Botões de Ação -->
           <div class="p-5 border-t border-vamp-border bg-black/60 mt-auto rounded-b-lg">
             <div class="text-[10px] uppercase tracking-widest text-parchment-dim mb-4 font-serif text-center">Ações Operacionais</div>
@@ -296,11 +342,21 @@ const fetchCharacter = async () => {
 
     const res = await api.get(`/api/character-vampires/${id}`)
     character.value = res.data
-
+    await fetchActiveMission()
   } catch (error) {
     console.error('Erro ao buscar personagem:', error)
   } finally {
     loading.value = false
+  }
+}
+
+const fetchActiveMission = async () => {
+  if (!characterId.value) return
+  try {
+    const res = await api.get(`/api/missions-idle/active/${characterId.value}`)
+    activeMission.value = res.data
+  } catch (e) {
+    console.error('Erro ao buscar missão ativa:', e)
   }
 }
 
@@ -323,8 +379,19 @@ const isMissionExpired = (expiresAtStr: string) => {
 }
 
 const resolveActiveMission = async () => {
-  // To be implemented in future
-  alert('Resolvendo missão...');
+  if (!activeMission.value) return
+  try {
+    const res = await api.post('/api/missions-idle/resolve', {
+      activeMissionId: activeMission.value.id
+    })
+    const report = res.data.report
+    alert(`🎉 Operação Finalizada!\nResultado: ${report.isSuccess ? 'SUCESSO' : 'FALHA'}\n${report.finalChanges?.join('\n') || ''}`)
+    activeMission.value = null
+    await fetchCharacter()
+  } catch (e: any) {
+    console.error(e)
+    alert(e.response?.data?.error || 'Erro ao resolver missão')
+  }
 }
 
 onMounted(() => {

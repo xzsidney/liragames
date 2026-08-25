@@ -843,6 +843,15 @@
               <option value="OPERATION">🎯 Operação Tática (Incursão)</option>
             </select>
           </div>
+          <div>
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">Distrito / Local de Nocturna (Opcional)</label>
+            <select v-model="missionForm.locationId" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment outline-none">
+              <option :value="null">🏙️ Cidade Inteira (Global)</option>
+              <option v-for="loc in compendiumLocations" :key="loc.id" :value="loc.id">
+                {{ loc.name }} ({{ loc.attributes?.dominio_faccao || 'Zona' }})
+              </option>
+            </select>
+          </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-gray-400 mb-1">Duração (Minutos)</label>
@@ -1205,11 +1214,17 @@ const loadMissions = async () => {
   }
 };
 
-const openMissionModal = (mission?: any) => {
+const openMissionModal = async (mission?: any) => {
+  if (compendiumLocations.value.length === 0) {
+    try {
+      const locRes = await api.get('/api/gm/compendium/locations');
+      compendiumLocations.value = locRes.data;
+    } catch (e) {}
+  }
   if (mission) {
-    missionForm.value = { ...mission };
+    missionForm.value = { ...mission, locationId: mission.locationId || null };
   } else {
-    missionForm.value = { id: '', title: '', description: '', durationMinutes: 2, baseDifficulty: 5, category: 'OPERATION' };
+    missionForm.value = { id: '', title: '', description: '', locationId: null, durationMinutes: 2, baseDifficulty: 5, category: 'OPERATION' };
   }
   showMissionModal.value = true;
 };
