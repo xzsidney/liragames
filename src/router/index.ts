@@ -16,6 +16,8 @@ import CharacterVisualNovelView from '../views/CharacterVisualNovelView.vue'
 import GmDashboardView from '../views/GmDashboardView.vue'
 import DiceTestView from '../views/DiceTestView.vue'
 import CharacterActiveMissionView from '../views/CharacterActiveMissionView.vue'
+import CharacterHotelShelterView from '../views/CharacterHotelShelterView.vue'
+import CharacterSewerShelterView from '../views/CharacterSewerShelterView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -80,6 +82,18 @@ const routes: Array<RouteRecordRaw> = [
     path: '/personagem/missao-ativa',
     name: 'character-active-mission',
     component: CharacterActiveMissionView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/personagem/abrigo-hotel',
+    name: 'character-hotel-shelter',
+    component: CharacterHotelShelterView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/personagem/abrigo-esgoto',
+    name: 'character-sewer-shelter',
+    component: CharacterSewerShelterView,
     meta: { requiresAuth: true }
   },
   {

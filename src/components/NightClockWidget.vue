@@ -287,10 +287,17 @@ const takeShelter = async (type: string) => {
       return
     }
 
-    const res = await api.post(`/api/night-cycle/${props.characterId}/shelter`, { shelterType: type })
-    notifySuccess('Abrigo Conquistado', res.data.message)
-    showEmergencyModal.value = false
-    await fetchStatus()
+    if (type === 'BUY_MOTEL') {
+      showEmergencyModal.value = false
+      router.push(`/personagem/abrigo-hotel?id=${props.characterId}`)
+      return
+    }
+
+    if (type === 'BREACH_SEWER') {
+      showEmergencyModal.value = false
+      router.push(`/personagem/abrigo-esgoto?id=${props.characterId}`)
+      return
+    }
   } catch (e: any) {
     console.error(e)
     notifyError('Falha no Abrigo', e.response?.data?.error || 'Não foi possível encontrar abrigo.')

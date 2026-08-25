@@ -668,18 +668,34 @@ const triggerEmergencyShelter = () => {
 
 const takeShelter = async (type: string) => {
   try {
+    if (activeMission.value?.id) {
+      try {
+        await api.post('/api/missions-idle/cancel', {
+          activeMissionId: activeMission.value.id
+        })
+        activeMission.value = null
+      } catch (e) {}
+    }
+
     if (type === 'GO_HOME') {
       await api.post(`/api/night-cycle/${characterId.value}/return-haven`)
-      notifySuccess('Retorno Seguro', 'Você retornou com segurança ao seu refúgio antes que a luz do sol o destruísse!')
+      notifySuccess('Retorno Seguro', 'Você correu com urgência ao seu refúgio antes que a luz do sol o destruísse!')
       showEmergencyModal.value = false
       router.push(`/personagem/hub?id=${characterId.value}`)
       return
     }
 
-    const res = await api.post(`/api/night-cycle/${characterId.value}/shelter`, { shelterType: type })
-    notifySuccess('Abrigo Conquistado', res.data.message)
-    showEmergencyModal.value = false
-    await fetchNightStatus()
+    if (type === 'BUY_MOTEL') {
+      showEmergencyModal.value = false
+      router.push(`/personagem/abrigo-hotel?id=${characterId.value}`)
+      return
+    }
+
+    if (type === 'BREACH_SEWER') {
+      showEmergencyModal.value = false
+      router.push(`/personagem/abrigo-esgoto?id=${characterId.value}`)
+      return
+    }
   } catch (e: any) {
     notifyError('Falha no Abrigo', e.response?.data?.error || 'Não foi possível encontrar abrigo.')
   }
