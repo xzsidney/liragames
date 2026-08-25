@@ -160,6 +160,18 @@
       </div>
     </div>
 
+    <!-- FALLBACK SCREEN (When active adventure has no nodes or node deleted) -->
+    <div v-else-if="activeAdventure && !currentNode" class="flex-1 flex flex-col items-center justify-center bg-black p-6 text-center space-y-4 z-30">
+      <div class="text-4xl animate-bounce">📜</div>
+      <h3 class="font-serif text-2xl text-gold font-bold uppercase tracking-widest">Cena em Construção</h3>
+      <p class="text-xs text-gray-400 max-w-md leading-relaxed font-light">
+        Esta crônica ainda não possui cenas ativas ou o nó inicial está sendo configurado pelo Mestre no GM Studio.
+      </p>
+      <button @click="handleBack" class="px-6 py-2.5 rounded-lg border border-gold/40 bg-gold/10 hover:bg-gold hover:text-black text-gold text-xs font-serif uppercase tracking-widest font-bold transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+        ← Voltar às Crônicas
+      </button>
+    </div>
+
     <!-- DICE ROLL RESULT OVERLAY (Cinematic) -->
     <div v-if="showResultModal && lastResult" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/90 backdrop-blur-md"></div>
@@ -265,13 +277,18 @@ const startAdventure = async (advId: string) => {
   try {
     loading.value = true
     const res = await api.get(`/api/story/adventures/${advId}/progress/${characterId.value}`)
+    if (!res.data.currentNode) {
+      alert('Esta crônica ainda não possui cenas configuradas pelo Mestre.')
+      return
+    }
     triggerSceneTransition()
     activeAdventure.value = advId
     progressData.value = res.data.progress
     currentNode.value = res.data.currentNode
-  } catch (e) {
+  } catch (e: any) {
     console.error(e)
-    alert('Erro ao carregar crônica')
+    const msg = e.response?.data?.error || 'Erro ao carregar crônica.'
+    alert(msg)
   } finally {
     loading.value = false
   }
