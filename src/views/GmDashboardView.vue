@@ -998,6 +998,22 @@
                 <input type="number" v-model.number="missionForm.penaltiesJson.stains" min="0" max="5" class="w-full bg-black border border-red-800/40 rounded-lg p-2 text-xs text-parchment outline-none" />
               </div>
             </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-red-800/20">
+              <div>
+                <label class="block text-[10px] text-red-300 mb-1">💸 Perda de Recursos / Prejuízo (R$)</label>
+                <input type="number" v-model.number="missionForm.penaltiesJson.money" min="0" max="50000" placeholder="Ex: 200" class="w-full bg-black border border-red-800/40 rounded-lg p-2 text-xs text-parchment outline-none" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-red-300 mb-1">⚠️ Apreensão / Perda de Item de Arsenal (Opcional)</label>
+                <select v-model="missionForm.penaltiesJson.lostEquipmentId" class="w-full bg-black border border-red-800/40 rounded-lg p-2 text-xs text-parchment outline-none">
+                  <option value="">Nenhum item perdido</option>
+                  <option v-for="eq in compendiumEquipments" :key="eq.id" :value="eq.id">
+                    {{ eq.name }} ({{ eq.type }})
+                  </option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1291,6 +1307,8 @@ const defaultMissionForm = () => ({
   },
   penaltiesJson: {
     hunger: 1,
+    money: 0,
+    lostEquipmentId: '',
     healthDamageSuperficial: 1,
     healthDamageAggravated: 0,
     willpowerDamageSuperficial: 1,
@@ -1662,6 +1680,8 @@ const openMissionModal = async (mission?: any) => {
       },
       penaltiesJson: {
         hunger: rawPenalties.hunger ?? 1,
+        money: rawPenalties.money ?? 0,
+        lostEquipmentId: rawPenalties.lostEquipmentId || '',
         healthDamageSuperficial: rawPenalties.healthDamageSuperficial ?? 1,
         healthDamageAggravated: rawPenalties.healthDamageAggravated ?? 0,
         willpowerDamageSuperficial: rawPenalties.willpowerDamageSuperficial ?? 1,
