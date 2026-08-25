@@ -165,10 +165,10 @@
               <span class="text-[10px] text-stone-400 font-mono uppercase">Status Tático</span>
               <span 
                 class="px-3 py-1 rounded text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5"
-                :class="isReady ? 'bg-green-950 text-green-400 border border-green-700/60 shadow-[0_0_12px_rgba(34,197,94,0.3)]' : 'bg-red-950 text-red-400 border border-red-800/60 shadow-[0_0_12px_rgba(239,68,68,0.3)] animate-pulse'"
+                :class="isReady ? 'bg-green-950 text-green-400 border border-green-700/60 shadow-[0_0_12px_rgba(34,197,94,0.3)]' : (isSunHazardActive ? 'bg-amber-950 text-amber-300 border border-amber-500/80 shadow-[0_0_15px_rgba(245,158,11,0.5)] animate-pulse' : 'bg-red-950 text-red-400 border border-red-800/60 shadow-[0_0_12px_rgba(239,68,68,0.3)] animate-pulse')"
               >
-                <span>{{ isReady ? '✔' : '⏳' }}</span>
-                <span>{{ isReady ? 'Pronto para Coleta' : 'Em Execução' }}</span>
+                <span>{{ isReady ? '✔' : (isSunHazardActive ? '⏸️' : '⏳') }}</span>
+                <span>{{ isReady ? 'Pronto para Coleta' : (isSunHazardActive ? 'Pausada (Ameaça Solar)' : 'Em Execução') }}</span>
               </span>
             </div>
           </div>
@@ -181,12 +181,12 @@
               <div class="text-[10px] text-stone-400 font-mono uppercase tracking-widest">Tempo Restante</div>
               <div 
                 class="text-3xl sm:text-4xl font-mono font-bold tracking-widest"
-                :class="isReady ? 'text-green-400 drop-shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'text-gold drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]'"
+                :class="isReady ? 'text-green-400 drop-shadow-[0_0_10px_rgba(34,197,94,0.6)]' : (isSunHazardActive ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]' : 'text-gold drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]')"
               >
-                {{ isReady ? '00:00' : formattedTimeRemaining }}
+                {{ isReady ? '00:00' : (isSunHazardActive ? 'PAUSADO' : formattedTimeRemaining) }}
               </div>
-              <div class="text-[10px] text-stone-500 font-mono">
-                {{ isReady ? 'Operação Finalizada' : 'Atualização ao vivo' }}
+              <div class="text-[10px] font-mono" :class="isSunHazardActive ? 'text-amber-400 font-bold' : 'text-stone-500'">
+                {{ isReady ? 'Operação Finalizada' : (isSunHazardActive ? '⚠️ Paralisado pelo Sol' : 'Atualização ao vivo') }}
               </div>
             </div>
 

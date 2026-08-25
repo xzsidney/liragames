@@ -10,11 +10,11 @@
       <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <button 
-            v-if="hasBookedRoom"
-            @click="router.push('/personagem/hub?id=' + characterId)" 
+            @click="awakenForNextNight" 
             class="text-stone-400 hover:text-amber-300 transition-colors flex items-center gap-1.5 font-serif text-xs uppercase tracking-widest"
+            title="Ao retornar ao Hub, o personagem dorme durante o dia e desperta às 20:00 com o Rouse Check."
           >
-            <span>&larr;</span> Hub
+            <span>&larr;</span> Hub (Despertar 20:00)
           </button>
           <div class="font-serif font-bold text-xs sm:text-sm tracking-widest flex items-center gap-2 text-amber-400">
             <span>🏨</span>
