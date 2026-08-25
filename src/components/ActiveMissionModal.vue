@@ -19,7 +19,7 @@
           <div class="text-right">
             <span class="text-[10px] text-gray-400 font-mono uppercase block">Tempo Restante</span>
             <span class="text-base font-mono font-bold text-gold">
-              {{ activeMission.readyToResolve ? 'Tempo Esgotado' : formattedTimeRemaining }}
+              {{ isReady ? 'Tempo Esgotado' : formattedTimeRemaining }}
             </span>
           </div>
         </div>
@@ -31,15 +31,15 @@
           <span class="text-gray-300">
             Progresso: <strong class="text-gold">{{ activeMission.currentStage || 0 }} / {{ activeMission.totalStages || 1 }} Etapas</strong>
           </span>
-          <span :class="activeMission.readyToResolve ? 'text-green-400 font-bold' : 'text-vamp-c2 animate-pulse'">
-            {{ activeMission.readyToResolve ? 'Pronto para Coleta' : 'Em Execução...' }}
+          <span :class="isReady ? 'text-green-400 font-bold' : 'text-vamp-c2 animate-pulse'">
+            {{ isReady ? 'Pronto para Coleta' : 'Em Execução...' }}
           </span>
         </div>
 
         <div class="w-full bg-zinc-900 h-2.5 rounded-full overflow-hidden border border-white/5">
           <div 
             class="bg-gradient-to-r from-red-900 via-vamp-c2 to-gold h-full transition-all duration-1000 shadow-[0_0_12px_rgba(192,57,43,0.8)]"
-            :style="{ width: activeMission.readyToResolve ? '100%' : `${((activeMission.currentStage || 0) / (activeMission.totalStages || 1)) * 100}%` }"
+            :style="{ width: isReady ? '100%' : `${((activeMission.currentStage || 0) / (activeMission.totalStages || 1)) * 100}%` }"
           ></div>
         </div>
       </div>
@@ -109,7 +109,7 @@
       <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/10">
         <!-- BOTÃO COLETAR (QUANDO PRONTO) -->
         <button 
-          v-if="activeMission.readyToResolve"
+          v-if="isReady"
           @click="resolve"
           :disabled="isResolving"
           class="flex-1 py-3 px-6 rounded bg-gold hover:bg-gold-light text-black text-xs font-serif font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(212,175,55,0.4)] animate-bounce disabled:opacity-50"
@@ -140,7 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { confirmAction, notifySuccess, notifyError } from '../utils/gothicAlerts'
 import api from '../services/api'
 
@@ -154,12 +154,28 @@ const emit = defineEmits(['close', 'resolved', 'cancelled'])
 
 const isResolving = ref(false)
 const isCancelling = ref(false)
+const now = ref(Date.now())
+let tickerInterval: any = null
+
+onMounted(() => {
+  tickerInterval = setInterval(() => {
+    now.value = Date.now()
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (tickerInterval) clearInterval(tickerInterval)
+})
+
+const isReady = computed(() => {
+  if (!props.activeMission?.expiresAt) return false
+  return now.value >= new Date(props.activeMission.expiresAt).getTime()
+})
 
 const formattedTimeRemaining = computed(() => {
-  if (props.timeRemaining) return props.timeRemaining
   if (!props.activeMission?.expiresAt) return '00:00'
-  const diff = new Date(props.activeMission.expiresAt).getTime() - new Date().getTime()
-  if (diff <= 0) return '00:00'
+  const diff = new Date(props.activeMission.expiresAt).getTime() - now.value
+  if (diff <= 0) return 'Pronto para Coleta'
   const mins = Math.floor(diff / 60000)
   const secs = Math.floor((diff % 60000) / 1000)
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`

@@ -351,7 +351,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '../services/api'
 import NightClockWidget from '../components/NightClockWidget.vue'
@@ -366,6 +366,9 @@ const exploring = ref(false)
 const dispatching = ref(false)
 const nightClockRef = ref<any>(null)
 const currentNightStatus = ref<any>(null)
+
+const now = ref(Date.now())
+let tickerInterval: any = null
 
 const onNightStatusUpdated = (status: any) => {
   currentNightStatus.value = status
@@ -390,14 +393,7 @@ const onMissionCancelled = async () => {
   await nightClockRef.value?.fetchStatus()
 }
 
-const returnToHaven = async () => {
-  if (characterId.value) {
-    try {
-      await api.post(`/api/night-cycle/${characterId.value}/return-haven`)
-    } catch (e) {
-      console.error('Erro ao retornar ao refúgio:', e)
-    }
-  }
+const returnToHaven = () => {
   router.push(`/personagem/hub?id=${characterId.value}`)
 }
 
@@ -599,11 +595,11 @@ const resolveActiveMission = async () => {
 
 const timeRemainingDisplay = computed(() => {
   if (!activeMission.value || !activeMission.value.expiresAt) return ''
-  const diff = new Date(activeMission.value.expiresAt).getTime() - new Date().getTime()
-  if (diff <= 0) return 'Pronto'
+  const diff = new Date(activeMission.value.expiresAt).getTime() - now.value
+  if (diff <= 0) return 'Pronto para Coleta'
   const mins = Math.floor(diff / 60000)
   const secs = Math.floor((diff % 60000) / 1000)
-  return `${mins}m ${secs}s`
+  return `${mins}m ${secs.toString().padStart(2, '0')}s`
 })
 
 const showTooltip = (e: MouseEvent, node: any) => {
@@ -644,6 +640,13 @@ const closeSidebarIfClickOutside = (e: MouseEvent) => {
 onMounted(async () => {
   await fetchLocations()
   await fetchActiveMission()
+  tickerInterval = setInterval(() => {
+    now.value = Date.now()
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (tickerInterval) clearInterval(tickerInterval)
 })
 </script>
 
