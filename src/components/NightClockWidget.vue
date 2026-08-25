@@ -15,8 +15,8 @@
 
           <div class="flex items-center gap-1.5 text-stone-300 text-[11px]">
             <span class="text-stone-500 uppercase text-[10px]">Posição:</span>
-            <span class="text-gold font-bold uppercase truncate max-w-[160px] sm:max-w-[220px]" :title="nightStatus?.currentLocation?.name || 'Refúgio'">
-              📍 {{ nightStatus?.currentLocation?.name || 'Refúgio' }}
+            <span class="text-gold font-bold uppercase truncate max-w-[170px] sm:max-w-[240px]" :title="displayLocation">
+              {{ displayLocation }}
             </span>
           </div>
         </div>
@@ -157,6 +157,7 @@ import { confirmAction, notifySuccess, notifyError } from '../utils/gothicAlerts
 
 const props = defineProps<{
   characterId: string
+  isHub?: boolean
 }>()
 
 const emit = defineEmits(['status-updated'])
@@ -164,6 +165,14 @@ const emit = defineEmits(['status-updated'])
 const nightStatus = ref<any>(null)
 const isProcessing = ref(false)
 const showEmergencyModal = ref(false)
+
+const displayLocation = computed(() => {
+  if (props.isHub || nightStatus.value?.isRestingInHaven) {
+    const havenName = nightStatus.value?.havenLocation?.name || nightStatus.value?.currentLocation?.name || 'Refúgio'
+    return `🏠 Refúgio (${havenName})`
+  }
+  return `📍 ${nightStatus.value?.currentLocation?.name || 'Nocturna'}`
+})
 
 const progressPercent = computed(() => {
   if (!nightStatus.value) return 0

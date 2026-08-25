@@ -361,6 +361,7 @@
     <NightClockWidget 
       v-if="characterId" 
       :characterId="characterId" 
+      :isHub="true"
       ref="nightClockRef" 
       @status-updated="onNightStatusUpdated" 
     />

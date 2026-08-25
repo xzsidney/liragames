@@ -36,8 +36,9 @@
           </button>
         </div>
 
-        <button @click="router.push(`/personagem/hub?id=${characterId}`)" class="text-cyan-500 hover:text-cyan-300 transition text-xs uppercase tracking-widest font-serif border border-cyan-500/30 px-4 py-2 rounded hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] hover:bg-cyan-900/20">
-          ← Retornar ao Refúgio
+        <button @click="returnToHaven" class="text-cyan-500 hover:text-cyan-300 transition text-xs uppercase tracking-widest font-serif border border-cyan-500/30 px-4 py-2 rounded hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] hover:bg-cyan-900/20 flex items-center gap-1.5">
+          <span>🏠</span>
+          <span>Retornar ao Refúgio</span>
         </button>
       </div>
     </header>
@@ -134,10 +135,10 @@
 
           <button 
             @click="exploreCurrentLocation" 
-            :disabled="exploring"
-            class="w-full py-3 rounded-lg border border-cyan-400 bg-cyan-950/60 hover:bg-cyan-500 hover:text-black text-cyan-300 font-serif font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_15px_rgba(0,255,255,0.2)] disabled:opacity-50"
+            :disabled="!!activeMission || exploring"
+            class="w-full py-3 rounded-lg border border-cyan-400 bg-cyan-950/60 hover:bg-cyan-500 hover:text-black text-cyan-300 font-serif font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_15px_rgba(0,255,255,0.2)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {{ exploring ? 'Mapeando Bairro...' : '🔍 Reconhecer e Mapear Território' }}
+            {{ activeMission ? 'Vampiro Ocupado em Missão' : (exploring ? 'Mapeando Bairro...' : '🔍 Reconhecer e Mapear Território') }}
           </button>
         </div>
 
@@ -306,6 +307,17 @@ const onMissionCancelled = async () => {
   showActiveMissionModal.value = false
   await fetchActiveMission()
   await nightClockRef.value?.fetchStatus()
+}
+
+const returnToHaven = async () => {
+  if (characterId.value) {
+    try {
+      await api.post(`/api/night-cycle/${characterId.value}/return-haven`)
+    } catch (e) {
+      console.error('Erro ao retornar ao refúgio:', e)
+    }
+  }
+  router.push(`/personagem/hub?id=${characterId.value}`)
 }
 
 const tooltip = ref({
