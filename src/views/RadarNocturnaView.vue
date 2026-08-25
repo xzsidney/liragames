@@ -51,24 +51,69 @@
     <!-- MAPA E DOSSIÊ -->
     <main v-else class="mapa-container relative w-full h-[calc(100vh-85px)] overflow-hidden flex items-center justify-center bg-[#02050a]" @click="closeSidebarIfClickOutside">
       
-      <div class="radar relative w-[85vh] h-[85vh] max-w-[800px] max-h-[800px] rounded-full border-2 border-[rgba(0,150,255,0.4)] bg-[radial-gradient(circle_at_center,rgba(0,50,100,0.1)_0%,rgba(0,10,20,0.8)_100%)] shadow-[0_0_40px_rgba(0,150,255,0.1),inset_0_0_60px_rgba(0,150,255,0.15)] overflow-hidden">
+      <div class="radar relative w-[85vh] h-[85vh] max-w-[800px] max-h-[800px] rounded-full border-2 border-[rgba(0,150,255,0.4)] bg-[radial-gradient(circle_at_center,rgba(0,50,100,0.15)_0%,rgba(0,10,20,0.9)_100%)] shadow-[0_0_50px_rgba(0,150,255,0.15),inset_0_0_80px_rgba(0,150,255,0.2)] overflow-hidden font-mono select-none">
         
         <!-- Crosshairs & Grid -->
-        <div class="absolute inset-y-0 left-1/2 w-px bg-[rgba(0,150,255,0.3)] -translate-x-1/2"></div>
-        <div class="absolute inset-x-0 top-1/2 h-px bg-[rgba(0,150,255,0.3)] -translate-y-1/2"></div>
+        <div class="absolute inset-y-0 left-1/2 w-px bg-[rgba(0,150,255,0.3)] -translate-x-1/2 pointer-events-none"></div>
+        <div class="absolute inset-x-0 top-1/2 h-px bg-[rgba(0,150,255,0.3)] -translate-y-1/2 pointer-events-none"></div>
         
-        <div class="absolute inset-0 border-t border-[rgba(0,150,255,0.15)] top-1/2 rotate-45"></div>
-        <div class="absolute inset-0 border-t border-[rgba(0,150,255,0.15)] top-1/2 -rotate-45"></div>
+        <div class="absolute inset-0 border-t border-[rgba(0,150,255,0.12)] top-1/2 rotate-45 pointer-events-none"></div>
+        <div class="absolute inset-0 border-t border-[rgba(0,150,255,0.12)] top-1/2 -rotate-45 pointer-events-none"></div>
 
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-[rgba(0,150,255,0.25)] rounded-full pointer-events-none w-1/4 h-1/4"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-[rgba(0,150,255,0.25)] rounded-full pointer-events-none w-2/4 h-2/4"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-[rgba(0,150,255,0.25)] rounded-full pointer-events-none w-3/4 h-3/4"></div>
+        <!-- 4 Anéis Concêntricos (A, B, C, D) -->
+        <!-- Anel A (Centro - Raio 20%) -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-cyan-500/20 rounded-full pointer-events-none w-[20%] h-[20%]"></div>
+        <!-- Anel B (Próximo - Raio 45%) -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-cyan-500/25 rounded-full pointer-events-none w-[45%] h-[45%]"></div>
+        <!-- Anel C (Médio - Raio 70%) -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-cyan-500/25 rounded-full pointer-events-none w-[70%] h-[70%]"></div>
+        <!-- Anel D (Fronteira - Raio 92%) -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-cyan-500/20 rounded-full pointer-events-none w-[92%] h-[92%]"></div>
+
+        <!-- LABELS DE QUADRANTES TÁTICOS (01 NORTE, 02 LESTE, 03 SUL, 04 OESTE) -->
+        <div class="absolute top-4 left-6 text-2xl sm:text-3xl font-mono font-bold text-yellow-400/40 pointer-events-none tracking-widest">
+          01 <span class="text-[10px] text-cyan-400/40 uppercase block font-sans -mt-1 font-normal">ZN • Norte</span>
+        </div>
+        <div class="absolute top-4 right-6 text-2xl sm:text-3xl font-mono font-bold text-yellow-400/40 pointer-events-none tracking-widest text-right">
+          02 <span class="text-[10px] text-cyan-400/40 uppercase block font-sans -mt-1 font-normal">ZL • Leste</span>
+        </div>
+        <div class="absolute bottom-4 right-6 text-2xl sm:text-3xl font-mono font-bold text-yellow-400/40 pointer-events-none tracking-widest text-right">
+          03 <span class="text-[10px] text-cyan-400/40 uppercase block font-sans -mt-1 font-normal">ZS • Sul</span>
+        </div>
+        <div class="absolute bottom-4 left-6 text-2xl sm:text-3xl font-mono font-bold text-yellow-400/40 pointer-events-none tracking-widest">
+          04 <span class="text-[10px] text-cyan-400/40 uppercase block font-sans -mt-1 font-normal">ZO • Oeste</span>
+        </div>
+
+        <!-- LABELS TÁTICOS DOS SETORES (1A, 1B, 1C, 1D, 2A...) -->
+        <!-- Quadrante 01 (Norte) -->
+        <div class="absolute top-[43%] left-[44%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">1A</div>
+        <div class="absolute top-[32%] left-[41%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">1B</div>
+        <div class="absolute top-[20%] left-[34%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">1C</div>
+        <div class="absolute top-[10%] left-[27%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">1D</div>
+
+        <!-- Quadrante 02 (Leste) -->
+        <div class="absolute top-[43%] right-[44%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">2A</div>
+        <div class="absolute top-[38%] right-[32%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">2B</div>
+        <div class="absolute top-[28%] right-[22%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">2C</div>
+        <div class="absolute top-[18%] right-[12%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">2D</div>
+
+        <!-- Quadrante 03 (Sul) -->
+        <div class="absolute bottom-[43%] right-[44%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">3A</div>
+        <div class="absolute bottom-[35%] right-[38%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">3B</div>
+        <div class="absolute bottom-[22%] right-[34%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">3C</div>
+        <div class="absolute bottom-[10%] right-[30%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">3D</div>
+
+        <!-- Quadrante 04 (Oeste) -->
+        <div class="absolute bottom-[43%] left-[44%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">4A</div>
+        <div class="absolute bottom-[38%] left-[32%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">4B</div>
+        <div class="absolute bottom-[28%] left-[22%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">4C</div>
+        <div class="absolute bottom-[18%] left-[12%] text-[9px] font-mono text-yellow-400/30 pointer-events-none font-bold">4D</div>
 
         <!-- Radar Sweep -->
         <div class="absolute inset-0 origin-center rounded-full pointer-events-none z-10 animate-sweep" style="background: conic-gradient(from 0deg, transparent 70%, rgba(0, 200, 255, 0.1) 90%, rgba(0, 255, 255, 0.6) 100%);"></div>
         
         <!-- Radar Center -->
-        <div class="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400 shadow-[0_0_15px_#00ffff] z-20"></div>
+        <div class="absolute top-1/2 left-1/2 w-2.5 h-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400 shadow-[0_0_15px_#00ffff] z-20"></div>
 
         <!-- Blips Content -->
         <div class="absolute inset-0 z-20">
@@ -91,13 +136,16 @@
 
       <!-- Tooltip -->
       <div 
-        class="fixed pointer-events-none opacity-0 bg-[rgba(2,5,10,0.95)] border border-[rgba(0,150,255,0.5)] px-3 py-2 rounded z-[100] font-mono text-[11px] tracking-widest text-cyan-400 uppercase -translate-x-1/2 -translate-y-[120%] transition-opacity duration-200 shadow-[0_4px_12px_rgba(0,0,0,0.8)] drop-shadow-[0_0_5px_rgba(0,255,255,0.5)] whitespace-nowrap"
+        class="fixed pointer-events-none opacity-0 bg-[rgba(2,5,10,0.95)] border border-cyan-500/60 px-3.5 py-2 rounded-lg z-[100] font-mono text-[11px] tracking-widest text-cyan-300 uppercase -translate-x-1/2 -translate-y-[120%] transition-opacity duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.9)] drop-shadow-[0_0_10px_rgba(0,255,255,0.5)] whitespace-nowrap"
         :class="{ 'opacity-100': tooltip.visible }"
         :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
       >
-        <span class="block text-[8px] text-white/50 mb-1">{{ tooltip.zona }}</span>
-        <span class="block">{{ tooltip.nome }}</span>
-        <span class="block text-[9px] mt-1" :style="{ color: tooltip.facColor }">{{ tooltip.faccao }}</span>
+        <div class="flex items-center justify-between gap-3 text-[9px] text-white/50 mb-0.5">
+          <span>{{ tooltip.zona }}</span>
+          <span class="text-yellow-400 font-bold">[{{ tooltip.sectorCode }}]</span>
+        </div>
+        <span class="block text-white font-serif font-bold tracking-wider">{{ tooltip.nome }}</span>
+        <span class="block text-[10px] mt-1 font-mono" :style="{ color: tooltip.facColor }">{{ tooltip.faccao }}</span>
       </div>
 
       <!-- Sidebar Dossiê -->
@@ -108,7 +156,10 @@
         <button @click="closeSidebar" class="absolute top-5 right-5 text-[rgba(0,150,255,0.7)] text-2xl hover:text-cyan-400 hover:drop-shadow-[0_0_10px_#00ffff] transition-all">×</button>
         
         <div v-if="sidebarNode" class="pb-4 border-b border-[rgba(0,150,255,0.3)]">
-          <div class="font-mono text-[10px] tracking-widest uppercase text-[rgba(0,200,255,0.8)]">{{ sidebarNode.zona }}</div>
+          <div class="flex justify-between items-center text-[10px] font-mono tracking-widest uppercase mb-1">
+            <span class="text-cyan-400">{{ sidebarNode.zona }}</span>
+            <span class="px-2 py-0.5 rounded bg-yellow-950/80 border border-yellow-500/40 text-yellow-300 font-bold">SETOR: {{ sidebarNode.sectorCode }}</span>
+          </div>
           <h2 class="font-serif text-2xl text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] leading-tight mb-2">{{ sidebarNode.nome }}</h2>
           
           <div class="flex items-center gap-2 mt-2">
@@ -355,18 +406,11 @@ const tooltip = ref({
   x: 0,
   y: 0,
   zona: '',
+  sectorCode: '',
   nome: '',
   faccao: '',
   facColor: ''
 })
-
-const ZONAS_MAP: Record<string, any> = {
-  'zona_central': { minR: 0.05, maxR: 0.25, minA: 0, maxA: 2 * Math.PI },
-  'zona_norte':   { minR: 0.35, maxR: 0.9, minA: 1.25 * Math.PI, maxA: 1.75 * Math.PI },
-  'zona_leste':   { minR: 0.35, maxR: 0.9, minA: 1.75 * Math.PI, maxA: 2.25 * Math.PI },
-  'zona_sul':     { minR: 0.35, maxR: 0.9, minA: 0.25 * Math.PI, maxA: 0.75 * Math.PI },
-  'zona_oeste':   { minR: 0.35, maxR: 0.9, minA: 0.75 * Math.PI, maxA: 1.25 * Math.PI }
-}
 
 const getFactionColor = (dom: string = '', status: string = 'DISCOVERED') => {
   if (status === 'RUMOR') return '#9ca3af' // Cinza para boato/rumor
@@ -388,11 +432,20 @@ const getFactionIcon = (dom: string = '', status: string = 'DISCOVERED') => {
   return '🏙️'
 }
 
-let seed = 42
-const seededRandom = () => {
-  const x = Math.sin(seed++) * 10000
-  return x - Math.floor(x)
+// Configuração Tática dos 4 Quadrantes e Anéis Concêntricos
+const QUADRANTS_CONFIG: Record<string, { quadrantNum: string; name: string; minA: number; maxA: number }> = {
+  'zona_norte':   { quadrantNum: '01', name: 'Zona Norte',   minA: 1.25 * Math.PI, maxA: 1.75 * Math.PI },
+  'zona_leste':   { quadrantNum: '02', name: 'Zona Leste',   minA: 1.75 * Math.PI, maxA: 2.25 * Math.PI },
+  'zona_sul':     { quadrantNum: '03', name: 'Zona Sul',     minA: 0.25 * Math.PI, maxA: 0.75 * Math.PI },
+  'zona_oeste':   { quadrantNum: '04', name: 'Zona Oeste',   minA: 0.75 * Math.PI, maxA: 1.25 * Math.PI },
+  'zona_central': { quadrantNum: '00', name: 'Zona Central', minA: 0,              maxA: 2 * Math.PI }
 }
+
+const RINGS = [
+  { letter: 'B', r: 0.38 }, // Anel B (Próximo)
+  { letter: 'C', r: 0.62 }, // Anel C (Intermediário)
+  { letter: 'D', r: 0.84 }  // Anel D (Fronteira/Periferia)
+]
 
 const fetchLocations = async () => {
   try {
@@ -408,18 +461,38 @@ const fetchLocations = async () => {
         try { zoneAttrs = JSON.parse(zoneAttrs) } catch (e) {}
       }
       const zoneKey = zoneAttrs.key || 'zona_central'
-      const sector = ZONAS_MAP[zoneKey] || ZONAS_MAP['zona_central']
+      const quad = QUADRANTS_CONFIG[zoneKey] || QUADRANTS_CONFIG['zona_central']
 
       if (zone.children && Array.isArray(zone.children)) {
-        zone.children.forEach((bairro: any) => {
+        // Ordenação alfabética estrita para garantir posições 100% fixas e imutáveis
+        const sortedBairros = [...zone.children].sort((a, b) => a.name.localeCompare(b.name))
+        const totalBairros = sortedBairros.length || 1
+
+        sortedBairros.forEach((bairro: any, index: number) => {
           let bairroAttrs = bairro.attributes || {}
           if (typeof bairroAttrs === 'string') {
             try { bairroAttrs = JSON.parse(bairroAttrs) } catch (e) {}
           }
 
-          const r = sector.minR + seededRandom() * (sector.maxR - sector.minR)
-          const a = sector.minA + seededRandom() * (sector.maxA - sector.minA)
-          
+          let r: number
+          let a: number
+          let sectorCode: string
+
+          if (zoneKey === 'zona_central') {
+            // Centro fica no Anel A (Raio 0.16)
+            r = 0.16
+            a = (index / totalBairros) * 2 * Math.PI
+            sectorCode = `00-A`
+          } else {
+            // Anéis B, C, D alternados deterministicamente
+            const ring = RINGS[index % 3]
+            r = ring.r
+            sectorCode = `${quad.quadrantNum}${ring.letter}`
+            
+            // Ângulo distribuído uniformemente na fatia angular do quadrante
+            a = quad.minA + ((index + 0.5) / totalBairros) * (quad.maxA - quad.minA)
+          }
+
           const x = 50 + (r * Math.cos(a) * 50)
           const y = 50 + (r * Math.sin(a) * 50)
 
@@ -429,10 +502,11 @@ const fetchLocations = async () => {
           nodes.push({
             id: bairro.id,
             nome: bairro.name,
-            zona: zone.name || (zone.name === 'undefined' ? 'Zona Desconhecida' : zone.name),
+            zona: zone.name || quad.name,
+            sectorCode,
             x,
             y,
-            delay: seededRandom() * 2,
+            delay: (index * 0.3) % 2,
             blinking: true,
             knownStatus: status,
             color: getFactionColor(faccao, status),
@@ -541,6 +615,7 @@ const showTooltip = (e: MouseEvent, node: any) => {
     x: rect.left + (rect.width / 2),
     y: rect.top - 10,
     zona: node.zona,
+    sectorCode: node.sectorCode || '00-A',
     nome: node.nome,
     faccao: node.faccao,
     facColor: node.color
