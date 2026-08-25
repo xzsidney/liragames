@@ -605,8 +605,8 @@
                 </div>
                 <div>
                   <h3 class="font-serif text-base font-bold text-parchment">{{ player.name }}</h3>
-                  <p class="text-[10px] text-gold font-serif uppercase tracking-wider">{{ player.clan?.name || 'Caitiff' }} • Geração {{ player.generation }}ª</p>
-                  <p class="text-[9px] text-gray-500 font-mono">Jogador: {{ player.user?.name || player.user?.email || 'N/A' }}</p>
+                  <p class="text-[10px] text-gold font-serif uppercase tracking-wider">{{ player.DefinitionClan?.name || player.clan?.name || 'Caitiff' }} • Geração {{ player.generation }}ª</p>
+                  <p class="text-[9px] text-gray-500 font-mono">Jogador: {{ player.User?.name || player.user?.name || player.User?.email || player.user?.email || 'N/A' }}</p>
                 </div>
               </div>
 
@@ -655,7 +655,7 @@
                 </div>
                 <div>
                   <h3 class="font-serif text-base font-bold text-parchment">{{ npc.name }}</h3>
-                  <span class="text-[10px] text-gold font-serif uppercase tracking-wider">{{ npc.clan?.name || 'Ancião' }} • Geração {{ npc.generation }}ª</span>
+                  <span class="text-[10px] text-gold font-serif uppercase tracking-wider">{{ npc.DefinitionClan?.name || npc.clan?.name || 'Ancião' }} • Geração {{ npc.generation }}ª</span>
                 </div>
               </div>
               <p class="text-xs text-gray-400 font-light line-clamp-3 leading-relaxed">{{ npc.history || npc.concept || 'Personagem canônico de Nocturna.' }}</p>
