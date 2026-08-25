@@ -761,8 +761,15 @@
         <h3 class="font-serif text-xl text-gold font-bold">{{ choiceForm.id ? 'Editar Escolha' : 'Nova Escolha' }}</h3>
         <div class="space-y-4 text-xs font-serif">
           <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Texto do Botão de Escolha</label>
-            <input v-model="choiceForm.choiceText" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment focus:border-gold outline-none" placeholder="Ex: [PREDADOR] Atacar sorrateiramente" />
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">
+              Texto do Botão de Escolha <span class="text-red-400 font-bold">* (Obrigatório)</span>
+            </label>
+            <input 
+              v-model="choiceForm.choiceText" 
+              class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment focus:border-gold outline-none" 
+              placeholder="Digite a ação do jogador (Ex: Investigar a sala, Atacar, Fugir...)" 
+              required
+            />
           </div>
 
           <div class="p-3.5 rounded-xl border border-white/10 bg-black/40 space-y-3">
@@ -1153,6 +1160,15 @@ const openChoiceModal = (choice?: any, nodeId?: string) => {
 };
 
 const saveChoice = async () => {
+  if (!choiceForm.value.choiceText || !choiceForm.value.choiceText.trim()) {
+    alert('Por favor, digite o Texto do Botão de Escolha (ex: Investigar a sala, Atacar, Fugir).');
+    return;
+  }
+
+  if (!choiceForm.value.nodeId) {
+    choiceForm.value.nodeId = selectedNode.value?.id;
+  }
+
   try {
     if (choiceForm.value.id) {
       await api.put(`/api/gm/story/choices/${choiceForm.value.id}`, choiceForm.value);
