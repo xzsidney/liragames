@@ -107,6 +107,16 @@
                   <div v-for="i in 10" :key="i" class="h-2 flex-1 rounded-sm border border-white/10 bg-black/50" :class="i <= character.humanity ? 'bg-parchment-dim border-parchment/50' : ''"></div>
                 </div>
               </div>
+
+              <!-- CARTEIRA / SALDO DE RECURSOS -->
+              <div class="bg-black/50 border border-white/10 p-3 rounded-lg flex items-center justify-between">
+                <span class="text-[10px] uppercase font-serif tracking-widest text-parchment-dim flex items-center gap-1.5">
+                  <span>💵</span> Carteira / Dinheiro
+                </span>
+                <span class="text-xs font-mono font-bold text-green-400">
+                  R$ {{ Number(character.money || 0).toLocaleString('pt-BR') }}
+                </span>
+              </div>
             </div>
           </div>
         </div>

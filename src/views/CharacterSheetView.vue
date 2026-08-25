@@ -111,7 +111,7 @@
             </div>
           </div>
 
-          <!-- XP -->
+          <!-- XP & Economia -->
           <div class="mt-6 space-y-2">
             <div class="flex items-end text-sm">
               <span class="font-serif text-gold-dim w-32 shrink-0">Experiência Total</span>
@@ -122,6 +122,11 @@
               <span class="font-serif text-gold-dim w-32 shrink-0">Experiência Gasta</span>
               <div class="flex-1 border-b border-dashed border-white/20 mx-2 mb-1"></div>
               <span class="font-mono text-gray-300 w-8 text-right">{{ character?.experienceSpent || 0 }}</span>
+            </div>
+            <div class="flex items-end text-sm">
+              <span class="font-serif text-green-400 w-32 shrink-0">Recursos / Dinheiro</span>
+              <div class="flex-1 border-b border-dashed border-white/20 mx-2 mb-1"></div>
+              <span class="font-mono text-green-300 text-right">R$ {{ Number(character?.money || 0).toLocaleString('pt-BR') }}</span>
             </div>
           </div>
         </div>
