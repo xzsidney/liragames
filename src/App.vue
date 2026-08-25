@@ -5,7 +5,14 @@ import MainFooter from './components/layout/MainFooter.vue'
 
 const route = useRoute()
 const showFooter = computed(() => {
-  return !route.path.includes('/cronicas') && !route.path.includes('/visual-novel')
+  const isGameRoute = route.path.startsWith('/personagem') || 
+                      route.path.startsWith('/jogador') || 
+                      route.path.startsWith('/gm') || 
+                      route.path.includes('/radar') || 
+                      route.path.includes('/cronicas') || 
+                      route.path.includes('/visual-novel') ||
+                      route.path.includes('/aventuras')
+  return !isGameRoute
 })
 </script>
 
