@@ -624,6 +624,20 @@
                   <span class="text-green-400 font-bold text-[10px]">{{ player.isAwake ? 'Ativo' : 'Torpor' }}</span>
                 </div>
               </div>
+
+              <!-- MAPEAMENTO URBANO / NÉVOA DE GUERRA DO JOGADOR -->
+              <div class="pt-3 border-t border-white/5 space-y-2">
+                <div class="flex justify-between items-center text-[10px] font-mono">
+                  <span class="text-cyan-400 font-bold">🗺️ Mapa de Nocturna:</span>
+                  <span class="text-gray-300">
+                    <span class="text-green-400 font-bold">{{ getPlayerDiscoveredCount(player) }} Expl.</span> • 
+                    <span class="text-yellow-400 font-bold">{{ getPlayerRumorCount(player) }} Boatos</span>
+                  </span>
+                </div>
+                <button @click="openPlayerLocationsModal(player)" class="w-full py-2 rounded-lg bg-cyan-950/70 border border-cyan-500/40 hover:bg-cyan-500 hover:text-black text-cyan-300 text-[10px] uppercase font-serif font-bold tracking-wider transition-all shadow-[0_0_10px_rgba(0,255,255,0.15)]">
+                  🧭 Ver Locais Conhecidos / Conceder Pista
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -874,6 +888,75 @@
       </div>
     </div>
 
+    <!-- ==================== MODAL DE LOCAIS DO JOGADOR (NÉVOA DE GUERRA) ==================== -->
+    <div v-if="showPlayerLocationsModal && selectedPlayerForLocations" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+      <div class="border border-cyan-500/40 bg-zinc-950 max-w-2xl w-full rounded-2xl p-6 md:p-8 space-y-6 shadow-[0_0_40px_rgba(0,150,255,0.2)] max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-start border-b border-white/10 pb-4">
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-widest text-cyan-400">Névoa de Guerra & Territórios</span>
+            <h2 class="text-xl md:text-2xl font-serif text-parchment font-bold">Mapa de {{ selectedPlayerForLocations.name }}</h2>
+            <p class="text-xs text-gray-400">Inspecione quais distritos o vampiro conhece e conceda novas pistas de reconhecimento.</p>
+          </div>
+          <button @click="showPlayerLocationsModal = false" class="text-gray-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <!-- FORMULÁRIO DE CONCEDER LOCAL -->
+        <div class="p-4 rounded-xl border border-cyan-500/30 bg-cyan-950/20 space-y-3">
+          <h3 class="text-xs font-serif uppercase tracking-widest text-cyan-300 font-bold">🧭 Conceder Pista / Revelar Novo Distrito</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] text-gray-400 mb-1">Distrito de Nocturna</label>
+              <select v-model="grantLocationForm.locationId" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-xs text-parchment outline-none">
+                <option value="">Selecione um distrito...</option>
+                <option v-for="loc in compendiumLocations" :key="loc.id" :value="loc.id">
+                  {{ loc.name }} ({{ loc.attributes?.dominio_faccao || 'Zona' }})
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-400 mb-1">Nível de Conhecimento</label>
+              <select v-model="grantLocationForm.status" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-xs text-parchment outline-none">
+                <option value="DISCOVERED">🟢 Explorado (Visão Total + Caçadas)</option>
+                <option value="RUMOR">❔ Boato (Nome apenas, dados com ???)</option>
+              </select>
+            </div>
+          </div>
+          <button 
+            @click="submitGrantLocation" 
+            :disabled="!grantLocationForm.locationId || grantingLocation"
+            class="w-full py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-serif font-bold uppercase text-xs tracking-wider transition-all disabled:opacity-40"
+          >
+            {{ grantingLocation ? 'Registrando no Mapa...' : 'Liberar Local no Radar do Jogador' }}
+          </button>
+        </div>
+
+        <!-- LISTA DE LOCAIS CONHECIDOS -->
+        <div class="space-y-3">
+          <h3 class="text-xs font-serif uppercase tracking-widest text-parchment font-bold">Distritos no Radar do Jogador ({{ selectedPlayerForLocations.CharacterKnownLocations?.length || 0 }})</h3>
+          
+          <div v-if="!selectedPlayerForLocations.CharacterKnownLocations || selectedPlayerForLocations.CharacterKnownLocations.length === 0" class="text-center py-6 text-xs text-gray-500 font-serif italic border border-white/5 rounded-lg bg-black/40">
+            Este personagem ainda não possui registros de locais (o radar dele gerará os locais iniciais no primeiro acesso ao jogo).
+          </div>
+          
+          <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1">
+            <div v-for="kl in selectedPlayerForLocations.CharacterKnownLocations" :key="kl.id" class="p-3 rounded-lg border border-white/10 bg-black/60 flex items-center justify-between">
+              <div>
+                <h4 class="text-xs font-serif font-bold text-parchment">{{ kl.DefinitionLocation?.name || 'Distrito' }}</h4>
+                <span class="text-[9px] text-gray-500">{{ kl.DefinitionLocation?.attributes?.dominio_faccao || 'Domínio' }}</span>
+              </div>
+              <span class="text-[9px] px-2 py-0.5 rounded font-mono uppercase" :class="kl.status === 'DISCOVERED' ? 'bg-green-950 text-green-400 border border-green-800/40' : 'bg-yellow-950 text-yellow-400 border border-yellow-800/40'">
+                {{ kl.status === 'DISCOVERED' ? 'Explorado' : 'Boato' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-4 border-t border-white/10">
+          <button @click="showPlayerLocationsModal = false" class="px-5 py-2 rounded-lg bg-white/10 text-gray-300 hover:text-white text-xs uppercase font-serif">Fechar</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -936,6 +1019,11 @@ const choiceForm = ref<any>({ id: '', nodeId: '', choiceText: '', attributeReq: 
 const showMissionModal = ref(false);
 const missionForm = ref<any>({ id: '', title: '', description: '', durationMinutes: 2, baseDifficulty: 5, category: 'OPERATION' });
 
+const showPlayerLocationsModal = ref(false);
+const selectedPlayerForLocations = ref<any>(null);
+const grantLocationForm = ref<any>({ locationId: '', status: 'DISCOVERED' });
+const grantingLocation = ref(false);
+
 // ==================== LIFECYCLE ====================
 onMounted(async () => {
   await checkStatus();
@@ -989,6 +1077,39 @@ const loadPlayers = async () => {
     playersList.value = res.data;
   } catch (err) {
     console.error('Erro ao carregar jogadores:', err);
+  }
+};
+
+const getPlayerDiscoveredCount = (player: any) => {
+  return (player.CharacterKnownLocations || []).filter((k: any) => k.status === 'DISCOVERED').length;
+};
+
+const getPlayerRumorCount = (player: any) => {
+  return (player.CharacterKnownLocations || []).filter((k: any) => k.status === 'RUMOR').length;
+};
+
+const openPlayerLocationsModal = async (player: any) => {
+  if (compendiumLocations.value.length === 0) {
+    await loadCompendium();
+  }
+  selectedPlayerForLocations.value = player;
+  grantLocationForm.value = { locationId: '', status: 'DISCOVERED' };
+  showPlayerLocationsModal.value = true;
+};
+
+const submitGrantLocation = async () => {
+  if (!selectedPlayerForLocations.value || !grantLocationForm.value.locationId) return;
+  try {
+    grantingLocation.value = true;
+    const res = await api.post(`/api/gm/players/${selectedPlayerForLocations.value.id}/locations`, grantLocationForm.value);
+    successMsg.value = res.data.message || 'Local registrado no mapa do jogador!';
+    await loadPlayers();
+    selectedPlayerForLocations.value = playersList.value.find(p => p.id === selectedPlayerForLocations.value.id) || selectedPlayerForLocations.value;
+    grantLocationForm.value.locationId = '';
+  } catch (err: any) {
+    errorMsg.value = err.response?.data?.error || 'Erro ao conceder local';
+  } finally {
+    grantingLocation.value = false;
   }
 };
 
