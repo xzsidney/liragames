@@ -14,8 +14,14 @@ import CharacterNewsView from '../views/CharacterNewsView.vue'
 import CharacterAdventuresView from '../views/CharacterAdventuresView.vue'
 import CharacterVisualNovelView from '../views/CharacterVisualNovelView.vue'
 import GmDashboardView from '../views/GmDashboardView.vue'
+import DiceTestView from '../views/DiceTestView.vue'
 
 const routes: Array<RouteRecordRaw> = [
+  {
+    path: '/teste-dados',
+    name: 'dice-test',
+    component: DiceTestView
+  },
   {
     path: '/',
     name: 'home',

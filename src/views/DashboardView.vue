@@ -50,6 +50,21 @@
             Acessar Sangue &amp; Escuridão →
           </div>
         </div>
+
+        <div 
+          @click="router.push('/teste-dados')"
+          class="group border border-red-900/40 hover:border-red-600 rounded-xl p-6 bg-black/40 hover:bg-black/60 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-[0_0_20px_rgba(220,38,38,0.25)]"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-serif uppercase tracking-widest text-red-500">Motor 3D &amp; Física</span>
+            <span class="text-red-400 font-serif">Three.js</span>
+          </div>
+          <h2 class="font-serif text-2xl text-parchment group-hover:text-red-400 transition-colors mb-2">🎲 Dados 3D (Dice So Nice)</h2>
+          <p class="text-gray-400 text-sm italic mb-6">Teste de rolagens 3D em tempo real com dados de Fome, colisões e sons.</p>
+          <div class="flex items-center text-xs font-serif text-red-400 group-hover:translate-x-1 transition-transform">
+            Abrir Mesa de Dados 3D →
+          </div>
+        </div>
       </div>
     </main>
   </div>
