@@ -126,19 +126,49 @@
 
         <!-- ESTADO RUMOR (NÉVOA DE GUERRA) -->
         <div v-if="sidebarNode && sidebarNode.knownStatus === 'RUMOR'" class="space-y-4">
-          <div class="p-4 rounded-xl border border-yellow-500/30 bg-yellow-950/20 text-xs font-serif leading-relaxed text-yellow-200/90 space-y-2">
+          <div class="p-4 rounded-xl border border-yellow-500/30 bg-yellow-950/20 text-xs font-serif leading-relaxed text-yellow-200/90 space-y-2.5">
             <div class="font-bold uppercase tracking-wider text-yellow-400 flex items-center gap-2">
               <span>⚠️</span> Território Não Mapeado
             </div>
             <p>Seus contatos e lacaios ouviram rumores sobre este local, mas você ainda não o explorou pessoalmente. Dados estratégicos e rotas de caça permanecem ocultos nas sombras.</p>
+            
+            <!-- PARÂMETROS DA OPERAÇÃO DE RECONHECIMENTO -->
+            <div class="pt-2.5 border-t border-yellow-500/20 space-y-1.5 font-mono text-[11px] text-yellow-300/80">
+              <div class="flex justify-between">
+                <span>⏱ Duração Real:</span>
+                <strong class="text-white">5 minutos</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>🌙 Custo Noturno:</span>
+                <strong class="text-cyan-400">5 horas de noite</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>🎲 Dificuldade Base:</span>
+                <strong class="text-red-400">Dificuldade 8</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>🎯 Testes V5:</span>
+                <strong class="text-stone-300">Sobrevivência, Investigação, Furtividade</strong>
+              </div>
+              <div class="flex justify-between text-green-400">
+                <span>🏆 Sucesso:</span>
+                <span>Mapeamento Total & +5 XP</span>
+              </div>
+              <div class="flex justify-between text-red-400">
+                <span>💀 Falha:</span>
+                <span>Permanece Oculto & +1 Fome</span>
+              </div>
+            </div>
           </div>
 
           <button 
-            @click="exploreCurrentLocation" 
+            @click="startReconMission" 
             :disabled="!!activeMission || exploring"
-            class="w-full py-3 rounded-lg border border-cyan-400 bg-cyan-950/60 hover:bg-cyan-500 hover:text-black text-cyan-300 font-serif font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_15px_rgba(0,255,255,0.2)] disabled:opacity-40 disabled:cursor-not-allowed"
+            class="w-full py-3.5 rounded-lg border border-cyan-400 bg-cyan-950/70 hover:bg-cyan-500 hover:text-black text-cyan-300 font-serif font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_20px_rgba(0,255,255,0.25)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {{ activeMission ? 'Vampiro Ocupado em Missão' : (exploring ? 'Mapeando Bairro...' : '🔍 Reconhecer e Mapear Território') }}
+            <span v-if="exploring" class="animate-spin">⏳</span>
+            <span v-else>🔍</span>
+            <span>{{ activeMission ? 'Vampiro Ocupado em Missão' : (exploring ? 'Iniciando Expedição...' : 'Iniciar Missão de Reconhecimento') }}</span>
           </button>
         </div>
 
@@ -433,19 +463,20 @@ const fetchActiveMission = async () => {
   }
 }
 
-const exploreCurrentLocation = async () => {
+const startReconMission = async () => {
   if (!sidebarNode.value || !characterId.value) return
   try {
     exploring.value = true
-    await api.post(`/api/radar/locations/${sidebarNode.value.id}/explore`, {
+    await api.post(`/api/radar/locations/${sidebarNode.value.id}/start-recon`, {
       characterId: characterId.value
     })
-    notifySuccess('Território Mapeado', `Distrito '${sidebarNode.value.nome}' agora está totalmente explorado!`)
-    await fetchLocations()
-    sidebarNode.value = mapNodes.value.find(n => n.id === sidebarNode.value.id) || null
+    notifySuccess('Expedição Iniciada', `Missão de Reconhecimento iniciada para ${sidebarNode.value.nome}!`)
+    await fetchActiveMission()
+    await nightClockRef.value?.fetchStatus()
+    showActiveMissionModal.value = true
   } catch (e: any) {
-    console.error('Erro ao explorar local:', e)
-    notifyError('Erro ao Mapear', 'Não foi possível enviar a expedição de reconhecimento.')
+    console.error('Erro ao iniciar reconhecimento:', e)
+    notifyError('Falha no Reconhecimento', e.response?.data?.error || 'Não foi possível iniciar a expedição.')
   } finally {
     exploring.value = false
   }
@@ -481,6 +512,10 @@ const resolveActiveMission = async () => {
     showActiveMissionModal.value = false
     activeMission.value = null
     await fetchActiveMission()
+    await fetchLocations()
+    if (sidebarNode.value) {
+      sidebarNode.value = mapNodes.value.find(n => n.id === sidebarNode.value.id) || null
+    }
     await nightClockRef.value?.fetchStatus()
   } catch (e: any) {
     console.error(e)
