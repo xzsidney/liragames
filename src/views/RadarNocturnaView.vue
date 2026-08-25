@@ -11,15 +11,7 @@
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-4">
-        <!-- Widget do Ciclo Noturno -->
-        <NightClockWidget 
-          v-if="characterId" 
-          :characterId="characterId" 
-          ref="nightClockRef" 
-          @status-updated="onNightStatusUpdated" 
-        />
-
+      <div class="flex items-center gap-4">
         <!-- Status de Missão Ativa no Header -->
         <div v-if="activeMission" class="flex items-center gap-3 px-3 py-1.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-xs font-mono">
           <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
@@ -195,6 +187,14 @@
 
       </aside>
     </main>
+
+    <!-- BARRA INFERIOR / DOCK DO CICLO NOTURNO -->
+    <NightClockWidget 
+      v-if="characterId" 
+      :characterId="characterId" 
+      ref="nightClockRef" 
+      @status-updated="onNightStatusUpdated" 
+    />
 
   </div>
 </template>

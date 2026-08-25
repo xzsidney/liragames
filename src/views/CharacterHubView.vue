@@ -124,14 +124,6 @@
 
       <!-- CENTRO: Terminal de Operações e Feed -->
       <section class="xl:col-span-6 flex flex-col gap-6">
-        <!-- WIDGET DE CICLO NOTURNO E TRÂNSITO -->
-        <NightClockWidget 
-          v-if="characterId" 
-          :characterId="characterId" 
-          ref="nightClockRef" 
-          @status-updated="onNightStatusUpdated" 
-        />
-
         <div class="demiplane-box rounded-lg overflow-hidden flex flex-col flex-1">
           <div class="bg-black/80 border-b border-vamp-border p-3 flex justify-between items-center text-[10px] uppercase tracking-widest text-parchment-dim font-serif">
             <span>Terminal de Operações e Vigilância</span>
@@ -308,6 +300,15 @@
       </section>
 
     </main>
+    
+    <!-- BARRA INFERIOR / DOCK DO CICLO NOTURNO -->
+    <NightClockWidget 
+      v-if="characterId" 
+      :characterId="characterId" 
+      ref="nightClockRef" 
+      @status-updated="onNightStatusUpdated" 
+    />
+
   </div>
 </template>
 \n<script setup lang="ts">
