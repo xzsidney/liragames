@@ -358,7 +358,7 @@
                     <div class="flex justify-between items-center">
                       <div class="flex items-center gap-2">
                         <span class="text-[10px] font-serif font-bold px-1.5 py-0.5 rounded" :class="selectedNode?.id === node.id ? 'bg-gold text-black' : 'bg-white/10 text-gray-400'">
-                          #{{ Number(index) + 1 }}
+                          #{{ (Number(index) || 0) + 1 }}
                         </span>
                         <span class="text-xs font-serif font-bold truncate text-parchment">
                           {{ node.speakerName || 'Narrativa' }}
