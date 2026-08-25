@@ -1,38 +1,86 @@
 <template>
-  <div class="min-h-screen bg-[#03060c] text-parchment font-sans relative overflow-x-hidden selection:bg-blood-red selection:text-white pb-24 select-none">
+  <div 
+    class="min-h-screen text-parchment font-sans relative overflow-x-hidden selection:bg-blood-red selection:text-white pb-24 select-none transition-colors duration-1000"
+    :class="ambientThemeClass"
+  >
     
-    <!-- NOISE / TEXTURE -->
+    <!-- ATMOSPHERIC WEATHER & LIGHTING LAYERS -->
+    <!-- 1. Deep Midnight Rain / Mist Effect (20:00 - 02:00) -->
+    <div 
+      v-if="weatherPhase === 'DEEP_NIGHT'" 
+      class="fixed inset-0 pointer-events-none z-0 opacity-40 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-950/20 via-transparent to-black"
+    >
+      <div class="absolute inset-0 bg-repeat opacity-15 animate-rain" style="background-image: url('data:image/svg+xml,%3Csvg width=%2220%22 height=%2220%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cline x1=%220%22 y1=%220%22 x2=%2210%22 y2=%2220%22 stroke=%22%2360a5fa%22 stroke-width=%221%22/%3E%3C/svg%3E');"></div>
+    </div>
+
+    <!-- 2. Late Night Blood Mist Effect (02:00 - 05:00) -->
+    <div 
+      v-else-if="weatherPhase === 'LATE_NIGHT'" 
+      class="fixed inset-0 pointer-events-none z-0 opacity-45 bg-[radial-gradient(circle_at_bottom,_var(--tw-gradient-stops))] from-red-950/25 via-purple-950/15 to-black"
+    >
+      <div class="absolute inset-0 bg-repeat opacity-10 animate-pulse" style="background-image: url('data:image/svg+xml,%3Csvg width=%2240%22 height=%2240%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2215%22 fill=%22%23991b1b%22 opacity=%220.1%22/%3E%3C/svg%3E');"></div>
+    </div>
+
+    <!-- 3. Pre-Dawn Amber Horizon Glow (05:00 - 06:00) -->
+    <div 
+      v-else-if="weatherPhase === 'PRE_DAWN'" 
+      class="fixed inset-0 pointer-events-none z-0 opacity-60 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-amber-900/30 via-red-950/20 to-black"
+    >
+      <div class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-amber-600/15 via-red-600/5 to-transparent animate-pulse"></div>
+    </div>
+
+    <!-- 4. Solar Daylight Hazard (06:00+) -->
+    <div 
+      v-else 
+      class="fixed inset-0 pointer-events-none z-0 opacity-75 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-orange-600/30 via-red-950/40 to-[#120303]"
+    >
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-yellow-500/10 via-red-500/15 to-transparent animate-ping" style="animation-duration: 4s;"></div>
+    </div>
+
+    <!-- NOISE / TEXTURE OVERLAY -->
     <div class="fixed inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay z-0" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
 
-    <!-- NAVBAR OPERACIONAL -->
-    <header class="relative z-20 border-b border-cyan-500/30 bg-[#02050a]/90 backdrop-blur-md sticky top-0 shadow-xl">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+    <!-- NAVBAR OPERACIONAL BLINDADA (SEM SAÍDA INDESEJADA DURANTE MISSÃO) -->
+    <header class="relative z-20 border-b border-cyan-500/30 bg-[#02050a]/95 backdrop-blur-md sticky top-0 shadow-2xl">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+        
         <div class="flex items-center gap-3">
+          <!-- Se NÃO houver missão ativa ou se já estiver concluída, permite voltar ao Hub -->
           <button 
-            @click="handleBackNavigation" 
+            v-if="!activeMission || isReady" 
+            @click="router.push('/personagem/hub?id=' + characterId)" 
             class="text-stone-400 hover:text-cyan-300 transition-colors flex items-center gap-1.5 font-serif text-xs uppercase tracking-widest"
           >
-            <span>&larr;</span> {{ activeMission ? 'Hub' : 'Voltar' }}
+            <span>&larr;</span> Retornar ao Hub
           </button>
+          
+          <!-- Se a missão estiver EM ANDAMENTO, a navegação fica bloqueada -->
+          <div 
+            v-else 
+            class="flex items-center gap-2 px-2.5 py-1 rounded bg-black/60 border border-red-900/60 text-[11px] font-mono text-red-400"
+            title="A navegação externa está bloqueada durante a operação. Aguarde o desfecho ou aborte a missão."
+          >
+            <span>🔒</span>
+            <span class="uppercase tracking-wider">Missão em Campo (Bloqueada)</span>
+          </div>
+
           <div class="h-4 w-px bg-cyan-900/60 mx-1"></div>
+          
           <div class="font-serif font-bold text-xs sm:text-sm tracking-widest flex items-center gap-2 text-cyan-400">
-            <span class="w-2 h-2 rounded-full" :class="activeMission ? 'bg-red-500 animate-ping' : 'bg-cyan-400'"></span>
+            <span class="w-2 h-2 rounded-full" :class="activeMission ? (isReady ? 'bg-green-400 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 animate-ping shadow-[0_0_8px_#ef4444]') : 'bg-cyan-400'"></span>
             CENTRO DE OPERAÇÕES • NOCTURNA
           </div>
         </div>
 
-        <div class="flex items-center gap-4 text-xs font-mono">
-          <div v-if="character" class="hidden sm:flex items-center gap-3 text-[11px] text-stone-400">
-            <span>Vampiro: <strong class="text-parchment font-serif">{{ character.name }}</strong></span>
-            <span class="text-red-400 font-bold">🩸 Fome {{ character.hunger }}/5</span>
+        <div class="flex items-center gap-3 text-xs font-mono">
+          <div v-if="character" class="flex items-center gap-3 text-[11px]">
+            <span class="text-stone-400 hidden sm:inline">Vampiro: <strong class="text-parchment font-serif">{{ character.name }}</strong></span>
+            <span class="text-red-400 font-bold bg-black/60 px-2.5 py-1 rounded border border-red-900/50 shadow-inner">
+              🩸 Fome {{ character.hunger }}/5
+            </span>
           </div>
-          <button 
-            @click="router.push('/personagem/ficha?id=' + characterId)" 
-            class="border border-cyan-500/30 px-3 py-1 text-[10px] text-cyan-300 hover:bg-cyan-950/40 transition-colors rounded uppercase tracking-wider"
-          >
-            Ficha
-          </button>
         </div>
+
       </div>
     </header>
 
@@ -40,7 +88,7 @@
     <div v-if="loading" class="flex flex-col items-center justify-center min-h-[70vh] relative z-10 space-y-4">
       <div class="animate-spin w-12 h-12 border-2 border-cyan-900 border-t-cyan-400 rounded-full shadow-[0_0_20px_rgba(0,255,255,0.3)]"></div>
       <p class="text-cyan-500/80 font-serif text-xs tracking-widest uppercase animate-pulse">
-        Sincronizando frequências táticas de campo...
+        Sincronizando frequências táticas e atmosfera urbana...
       </p>
     </div>
 
@@ -48,7 +96,7 @@
     <main v-else class="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-12 relative z-10 space-y-6">
 
       <!-- CASO NÃO HAJA MISSÃO ATIVA -->
-      <div v-if="!activeMission" class="border border-cyan-500/20 bg-black/60 rounded-xl p-8 text-center space-y-6 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-sm">
+      <div v-if="!activeMission" class="border border-cyan-500/20 bg-black/75 rounded-xl p-8 sm:p-10 text-center space-y-6 shadow-[0_0_40px_rgba(0,0,0,0.9)] backdrop-blur-md">
         <div class="w-16 h-16 rounded-full bg-cyan-950/60 border border-cyan-500/40 mx-auto flex items-center justify-center text-2xl text-cyan-400 shadow-[0_0_20px_rgba(0,255,255,0.2)]">
           🦇
         </div>
@@ -78,11 +126,11 @@
       <div v-else class="space-y-6">
 
         <!-- ALERTA SOLAR / EMERGÊNCIA DE DIA -->
-        <div v-if="isSunHazardActive" class="border-2 border-red-600 bg-red-950/40 rounded-xl p-4 sm:p-5 shadow-[0_0_30px_rgba(255,0,0,0.4)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-pulse">
+        <div v-if="isSunHazardActive" class="border-2 border-red-600 bg-red-950/70 rounded-xl p-4 sm:p-5 shadow-[0_0_35px_rgba(255,0,0,0.5)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-pulse backdrop-blur-md">
           <div class="flex items-center gap-3">
             <span class="text-3xl">☀️</span>
             <div>
-              <h3 class="text-red-400 font-serif font-bold text-sm uppercase tracking-wider">Alerta Solar: O Dia Amanheceu!</h3>
+              <h3 class="text-red-400 font-serif font-bold text-sm uppercase tracking-wider">Alerta Solar: O Sol Raiou!</h3>
               <p class="text-xs text-stone-300">Você está operando em campo aberto após as 06:00. O risco de dano solar agravado é iminente.</p>
             </div>
           </div>
@@ -95,11 +143,8 @@
         </div>
 
         <!-- CARD PRINCIPAL: STATUS DA OPERAÇÃO & CRONÔMETRO -->
-        <div class="border border-red-900/60 bg-[#090507]/90 rounded-xl p-6 sm:p-8 shadow-[0_0_40px_rgba(153,27,27,0.25)] space-y-6 relative overflow-hidden backdrop-blur-md">
+        <div class="border border-red-900/60 bg-[#090507]/90 rounded-xl p-6 sm:p-8 shadow-[0_0_50px_rgba(153,27,27,0.3)] space-y-6 relative overflow-hidden backdrop-blur-md">
           
-          <!-- EFEITO DE FUNDO -->
-          <div class="absolute -right-20 -top-20 w-64 h-64 bg-red-900/10 rounded-full blur-3xl pointer-events-none"></div>
-
           <!-- CABEÇALHO DA OPERAÇÃO -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
             <div class="space-y-1">
@@ -115,14 +160,15 @@
               </h1>
             </div>
 
-            <!-- BADGE DE STATUS -->
+            <!-- BADGE DE STATUS TÁTICO -->
             <div class="sm:text-right flex sm:flex-col items-center sm:items-end justify-between">
               <span class="text-[10px] text-stone-400 font-mono uppercase">Status Tático</span>
               <span 
-                class="px-3 py-1 rounded text-xs font-mono font-bold uppercase tracking-wider"
+                class="px-3 py-1 rounded text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5"
                 :class="isReady ? 'bg-green-950 text-green-400 border border-green-700/60 shadow-[0_0_12px_rgba(34,197,94,0.3)]' : 'bg-red-950 text-red-400 border border-red-800/60 shadow-[0_0_12px_rgba(239,68,68,0.3)] animate-pulse'"
               >
-                {{ isReady ? '✔ Pronto para Coleta' : '⏳ Em Execução' }}
+                <span>{{ isReady ? '✔' : '⏳' }}</span>
+                <span>{{ isReady ? 'Pronto para Coleta' : 'Em Execução' }}</span>
               </span>
             </div>
           </div>
@@ -148,7 +194,7 @@
             <div class="md:col-span-2 space-y-3">
               <div class="flex justify-between text-xs font-mono">
                 <span class="text-stone-300">
-                  Progresso: <strong class="text-gold">{{ activeMission.currentStage || 0 }} / {{ activeMission.totalStages || 1 }} Etapas Concluídas</strong>
+                  Progresso: <strong class="text-gold">{{ completedStagesDisplay }} / {{ totalStagesDisplay }} Etapas Concluídas</strong>
                 </span>
                 <span class="text-stone-400 font-bold">
                   {{ progressPercentage }}%
@@ -183,7 +229,7 @@
 
             <div class="space-y-3">
               <div 
-                v-for="step in activeMission.currentReport?.steps || []" 
+                v-for="step in displaySteps" 
                 :key="step.order"
                 class="p-4 rounded-xl border transition-all duration-300 space-y-2"
                 :class="{
@@ -231,7 +277,7 @@
 
                 <!-- DADOS ROLADOS -->
                 <div v-if="step.status === 'COMPLETED' && step.rolls" class="text-[11px] text-stone-400 font-mono pl-8 pt-1 flex flex-wrap items-center gap-2">
-                  <span>🎲 Dados: <strong class="text-white">[{{ step.rolls.join(', ') }}]</strong></span>
+                  <span>🎲 Dados: <strong class="text-white">[{{ Array.isArray(step.rolls) ? step.rolls.join(', ') : step.rolls }}]</strong></span>
                   <span>&rarr;</span>
                   <span :class="step.passed ? 'text-green-400 font-bold' : 'text-red-400 font-bold'">
                     {{ step.successes }} {{ step.successes === 1 ? 'sucesso' : 'sucessos' }}
@@ -241,19 +287,19 @@
             </div>
           </div>
 
-          <!-- PAINEL DO CICLO NOTURNO INTEGRADO -->
-          <div class="bg-black/50 border border-cyan-950 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-stone-300">
+          <!-- PAINEL DO CICLO NOTURNO & CLIMA DINÂMICO INTEGRADO -->
+          <div class="bg-black/60 border border-cyan-950 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-stone-300">
             <div class="flex items-center gap-3">
-              <span class="text-xl">🌙</span>
+              <span class="text-2xl">{{ weatherIcon }}</span>
               <div>
-                <span class="text-[10px] text-stone-400 uppercase block">Relógio Noturno</span>
-                <span class="font-bold text-cyan-300">{{ liveNightTime }}</span>
+                <span class="text-[10px] text-stone-400 uppercase block">Clima & Horário</span>
+                <span class="font-bold text-cyan-300">{{ weatherDescription }} ({{ liveNightTime }})</span>
               </div>
             </div>
             <div class="text-center sm:text-right">
               <span class="text-[10px] text-stone-400 uppercase block">Horas até o Amanhecer</span>
               <span :class="isSunHazardActive ? 'text-red-400 font-bold animate-pulse' : 'text-gold font-bold'">
-                {{ hoursRemaining }}h restantes
+                {{ isDaytime ? '☀️ AMANHECEU' : `${hoursRemaining}h restantes` }}
               </span>
             </div>
           </div>
@@ -390,7 +436,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '../services/api'
 import { confirmAction, notifySuccess, notifyError } from '../utils/gothicAlerts'
@@ -417,6 +463,13 @@ const isReady = computed(() => {
   return now.value >= new Date(activeMission.value.expiresAt).getTime()
 })
 
+// Assiste isReady: ao bater 00:00, busca o relatório final atualizado imediatamente
+watch(() => isReady.value, async (ready) => {
+  if (ready && characterId.value) {
+    await fetchActiveMission()
+  }
+})
+
 const formattedTimeRemaining = computed(() => {
   if (!activeMission.value?.expiresAt) return '00:00'
   const diff = new Date(activeMission.value.expiresAt).getTime() - now.value
@@ -426,12 +479,31 @@ const formattedTimeRemaining = computed(() => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 })
 
+const totalStagesDisplay = computed(() => {
+  return activeMission.value?.totalStages || activeMission.value?.currentReport?.steps?.length || 1
+})
+
+const completedStagesDisplay = computed(() => {
+  if (isReady.value) return totalStagesDisplay.value
+  return activeMission.value?.currentStage || 0
+})
+
 const progressPercentage = computed(() => {
   if (isReady.value) return 100
-  if (!activeMission.value?.totalStages) return 0
-  const current = activeMission.value?.currentStage || 0
-  const total = activeMission.value?.totalStages || 1
+  const total = totalStagesDisplay.value
+  const current = completedStagesDisplay.value
   return Math.min(100, Math.round((current / total) * 100))
+})
+
+// Garante que todas as etapas fiquem COMPLETED quando isReady for verdadeiro
+const displaySteps = computed(() => {
+  const steps = activeMission.value?.currentReport?.steps || []
+  if (!isReady.value) return steps
+
+  return steps.map((s: any) => ({
+    ...s,
+    status: 'COMPLETED'
+  }))
 })
 
 const missionCategoryLabel = computed(() => {
@@ -463,22 +535,53 @@ const hoursRemaining = computed(() => {
   return Math.max(0, 10 - Math.floor(minsSpent / 60))
 })
 
-const handleBackNavigation = () => {
-  if (activeMission.value && !isReady.value) {
-    confirmAction(
-      'MISSÃO EM ANDAMENTO',
-      'A operação continuará rodando nas sombras em tempo real. Deseja retornar ao Hub?',
-      'Ir ao Hub',
-      'Permanecer na Missão'
-    ).then(confirmed => {
-      if (confirmed) {
-        router.push(`/personagem/hub?id=${characterId.value}`)
-      }
-    })
-  } else {
-    router.push(`/personagem/hub?id=${characterId.value}`)
+// FASE DO CLIMA E HORÁRIO DINÂMICO
+const weatherPhase = computed(() => {
+  const minsSpent = nightStatus.value?.nightMinutesSpent || 0
+  if (minsSpent >= 600) return 'DAYLIGHT'
+  if (minsSpent >= 540) return 'PRE_DAWN'      // 05:00 às 06:00
+  if (minsSpent >= 360) return 'LATE_NIGHT'     // 02:00 às 05:00
+  return 'DEEP_NIGHT'                           // 20:00 às 02:00
+})
+
+const ambientThemeClass = computed(() => {
+  switch (weatherPhase.value) {
+    case 'DAYLIGHT':
+      return 'bg-[#180404]'
+    case 'PRE_DAWN':
+      return 'bg-[#0f0408]'
+    case 'LATE_NIGHT':
+      return 'bg-[#060207]'
+    default:
+      return 'bg-[#02050b]'
   }
-}
+})
+
+const weatherIcon = computed(() => {
+  switch (weatherPhase.value) {
+    case 'DAYLIGHT':
+      return '☀️'
+    case 'PRE_DAWN':
+      return '🌅'
+    case 'LATE_NIGHT':
+      return '🌫️'
+    default:
+      return '🌧️'
+  }
+})
+
+const weatherDescription = computed(() => {
+  switch (weatherPhase.value) {
+    case 'DAYLIGHT':
+      return 'Dia Pleno • Fogo Solar (Rötschreck)'
+    case 'PRE_DAWN':
+      return 'Pré-Amanhecer • Horizonte Avermelhado'
+    case 'LATE_NIGHT':
+      return 'Madrugada Tensa • Névoa Sombria'
+    default:
+      return 'Noite Fechada • Garoa Fria de Nocturna'
+  }
+})
 
 const fetchCharacter = async () => {
   try {
@@ -599,8 +702,8 @@ onMounted(async () => {
 
   tickerInterval = setInterval(async () => {
     now.value = Date.now()
-    // Atualização leve das etapas a cada 10s se estiver em progresso
-    if (activeMission.value && !isReady.value && Math.floor(now.value / 1000) % 10 === 0) {
+    // Atualização das etapas a cada 5s se estiver em progresso
+    if (activeMission.value && !isReady.value && Math.floor(now.value / 1000) % 5 === 0) {
       await fetchActiveMission()
     }
   }, 1000)
@@ -610,3 +713,14 @@ onUnmounted(() => {
   if (tickerInterval) clearInterval(tickerInterval)
 })
 </script>
+
+<style scoped>
+@keyframes rain {
+  0% { background-position: 0 0; }
+  100% { background-position: 100px 200px; }
+}
+
+.animate-rain {
+  animation: rain 1.5s linear infinite;
+}
+</style>
