@@ -35,7 +35,7 @@
         </div>
         
         <div class="flex items-center gap-6 text-[10px] font-sans tracking-widest uppercase text-parchment-dim">
-          <div class="hidden md:block">Domínio: <span class="text-parchment font-bold ml-1">{{ character?.chronicle || 'Alto do Mirante' }}</span></div>
+          <div class="hidden md:block">Refúgio: <span class="text-gold font-bold ml-1">🏠 {{ characterHavenName }}</span></div>
           <div class="hidden sm:block">Status: <span class="text-vamp-c2 font-bold ml-1">Noite Ativa</span></div>
           <button @click="router.push('/personagem/ficha?id=' + characterId)" class="border border-gold-dim px-4 py-1.5 text-gold hover:bg-gold/10 transition-colors rounded-sm shadow-[0_0_10px_rgba(201,168,76,0.1)]">
             Ficha Completa
@@ -249,9 +249,9 @@
 
           <div class="p-5 space-y-6">
             <div class="bg-black/40 border border-vamp-border p-4 rounded-md text-center shadow-inner">
-              <div class="text-[9px] text-parchment-dim uppercase tracking-widest mb-1.5 font-serif">Setor Atual</div>
-              <div class="text-lg font-bold text-parchment font-serif tracking-wider">{{ character.chronicle || 'Alto do Mirante' }}</div>
-              <div class="text-[10px] text-vamp-c2 uppercase mt-2 tracking-widest">Domínio da Camarilla</div>
+              <div class="text-[9px] text-parchment-dim uppercase tracking-widest mb-1.5 font-serif">Refúgio Seguro</div>
+              <div class="text-lg font-bold text-parchment font-serif tracking-wider">🏠 {{ characterHavenName }}</div>
+              <div class="text-[10px] text-cyan-400 uppercase mt-2 tracking-widest">Santuário Protegido da Luz</div>
             </div>
 
             <div>
@@ -375,7 +375,7 @@ const handleImageError = (e: Event) => {
   if (target) target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'600\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%231a0b12\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23c9a84c\' font-family=\'serif\' font-size=\'48\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3E%E2%98%A5%3C/text%3E%3C/svg%3E';
 }
 
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api, { API_BASE_URL } from '../services/api'
 import NightClockWidget from '../components/NightClockWidget.vue'
@@ -390,6 +390,16 @@ const character = ref<any>(null)
 const characterId = ref<string>('')
 const nightClockRef = ref<any>(null)
 const currentNightStatus = ref<any>(null)
+
+const characterHavenName = computed(() => {
+  if (currentNightStatus.value?.havenLocation?.name) {
+    return currentNightStatus.value.havenLocation.name
+  }
+  if (character.value?.Haven?.DefinitionLocation?.name) {
+    return character.value.Haven.DefinitionLocation.name
+  }
+  return character.value?.chronicle || 'Belenzinho'
+})
 
 const onNightStatusUpdated = (status: any) => {
   currentNightStatus.value = status
