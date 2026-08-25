@@ -122,11 +122,19 @@
         </div>
       </section>
 
-      <!-- CENTRO: Feed e Ações -->
+      <!-- CENTRO: Terminal de Operações e Feed -->
       <section class="xl:col-span-6 flex flex-col gap-6">
-        <div class="demiplane-box rounded-lg flex flex-col flex-1 min-h-[500px]">
+        <!-- WIDGET DE CICLO NOTURNO E TRÂNSITO -->
+        <NightClockWidget 
+          v-if="characterId" 
+          :characterId="characterId" 
+          ref="nightClockRef" 
+          @status-updated="onNightStatusUpdated" 
+        />
+
+        <div class="demiplane-box rounded-lg overflow-hidden flex flex-col flex-1">
           <div class="bg-black/80 border-b border-vamp-border p-3 flex justify-between items-center text-[10px] uppercase tracking-widest text-parchment-dim font-serif">
-            <span>Transmissões e Eventos</span>
+            <span>Terminal de Operações e Vigilância</span>
             <span class="text-gold">REDE GLOBAL</span>
           </div>
 
@@ -311,6 +319,7 @@ const handleImageError = (e: Event) => {
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api, { API_BASE_URL } from '../services/api'
+import NightClockWidget from '../components/NightClockWidget.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -318,6 +327,12 @@ const route = useRoute()
 const loading = ref(true)
 const character = ref<any>(null)
 const characterId = ref<string>('')
+const nightClockRef = ref<any>(null)
+const currentNightStatus = ref<any>(null)
+
+const onNightStatusUpdated = (status: any) => {
+  currentNightStatus.value = status
+}
 
 // Missions AFK
 const activeMission = ref<any>(null)
@@ -333,6 +348,7 @@ const awakenCharacter = async () => {
     const res = await api.post(`/api/character-vampires/${character.value.id}/awaken`);
     character.value.isAwake = res.data.character.isAwake;
     character.value.hunger = res.data.character.hunger;
+    await nightClockRef.value?.fetchStatus();
   } catch (err) {
     alert('Erro ao despertar.');
   } finally {
@@ -398,6 +414,7 @@ const resolveActiveMission = async () => {
     alert(`🎉 Operação Finalizada!\nResultado: ${report.isSuccess ? 'SUCESSO' : 'FALHA'}\n${report.finalChanges?.join('\n') || ''}`)
     activeMission.value = null
     await fetchCharacter()
+    await nightClockRef.value?.fetchStatus()
   } catch (e: any) {
     console.error(e)
     alert(e.response?.data?.error || 'Erro ao resolver missão')

@@ -11,7 +11,15 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-4">
+      <div class="flex flex-wrap items-center gap-4">
+        <!-- Widget do Ciclo Noturno -->
+        <NightClockWidget 
+          v-if="characterId" 
+          :characterId="characterId" 
+          ref="nightClockRef" 
+          @status-updated="onNightStatusUpdated" 
+        />
+
         <!-- Status de Missão Ativa no Header -->
         <div v-if="activeMission" class="flex items-center gap-3 px-3 py-1.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-xs font-mono">
           <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
@@ -195,6 +203,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '../services/api'
+import NightClockWidget from '../components/NightClockWidget.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -202,6 +211,12 @@ const characterId = ref<string>('')
 const loading = ref(true)
 const exploring = ref(false)
 const dispatching = ref(false)
+const nightClockRef = ref<any>(null)
+const currentNightStatus = ref<any>(null)
+
+const onNightStatusUpdated = (status: any) => {
+  currentNightStatus.value = status
+}
 
 const mapNodes = ref<any[]>([])
 const sidebarNode = ref<any>(null)
@@ -348,6 +363,7 @@ const dispatchMission = async (mission: any) => {
     })
     alert(`Operação '${mission.title}' iniciada com sucesso!`)
     await fetchActiveMission()
+    await nightClockRef.value?.fetchStatus()
   } catch (e: any) {
     console.error(e)
     alert(e.response?.data?.error || 'Erro ao despachar missão')
@@ -366,6 +382,7 @@ const resolveActiveMission = async () => {
     alert(`Missão Finalizada!\nResultado: ${report.isSuccess ? 'SUCESSO' : 'FALHA'}\n${report.finalChanges?.join('\n') || ''}`)
     activeMission.value = null
     await fetchActiveMission()
+    await nightClockRef.value?.fetchStatus()
   } catch (e: any) {
     console.error(e)
     alert(e.response?.data?.error || 'Erro ao resolver missão')
