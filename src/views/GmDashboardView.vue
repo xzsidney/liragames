@@ -946,7 +946,7 @@ const formatDate = (dateStr: string) => {
 // ==================== API ACTIONS ====================
 const checkStatus = async () => {
   try {
-    const res = await api.get('/gm/status');
+    const res = await api.get('/api/gm/status');
     masterInfo.value = res.data.master;
     isLeadMaster.value = masterInfo.value?.id === '37339df8-b042-458d-8d9c-d15cf18adbd8' || masterInfo.value?.role === 'ADMIN';
   } catch (err: any) {
@@ -958,7 +958,7 @@ const checkStatus = async () => {
 
 const loadOverview = async () => {
   try {
-    const res = await api.get('/gm/dashboard/overview');
+    const res = await api.get('/api/gm/dashboard/overview');
     overviewStats.value = res.data.stats;
     recentLogs.value = res.data.recentLogs || [];
     isLeadMaster.value = res.data.isLeadMaster || isLeadMaster.value;
@@ -969,7 +969,7 @@ const loadOverview = async () => {
 
 const loadPlayers = async () => {
   try {
-    const res = await api.get('/gm/players');
+    const res = await api.get('/api/gm/players');
     playersList.value = res.data;
   } catch (err) {
     console.error('Erro ao carregar jogadores:', err);
@@ -979,9 +979,9 @@ const loadPlayers = async () => {
 const loadCompendium = async () => {
   try {
     const [npcsRes, locsRes, eqsRes] = await Promise.all([
-      api.get('/gm/compendium/npcs'),
-      api.get('/gm/compendium/locations'),
-      api.get('/gm/compendium/equipments')
+      api.get('/api/gm/compendium/npcs'),
+      api.get('/api/gm/compendium/locations'),
+      api.get('/api/gm/compendium/equipments')
     ]);
     compendiumNpcs.value = npcsRes.data;
     compendiumLocations.value = locsRes.data;
@@ -994,7 +994,7 @@ const loadCompendium = async () => {
 const loadAdventures = async () => {
   loading.value = true;
   try {
-    const res = await api.get('/gm/story/adventures');
+    const res = await api.get('/api/gm/story/adventures');
     adventures.value = res.data;
   } catch (err: any) {
     errorMsg.value = err.response?.data?.error || 'Erro ao carregar crônicas';
@@ -1006,7 +1006,7 @@ const loadAdventures = async () => {
 const openAdventureDetail = async (adventureId: string) => {
   loading.value = true;
   try {
-    const res = await api.get(`/gm/story/adventures/${adventureId}`);
+    const res = await api.get(`/api/gm/story/adventures/${adventureId}`);
     activeAdventureDetail.value = res.data;
     if (res.data.nodes && res.data.nodes.length > 0) {
       // Se tiver nó inicial, seleciona ele, senão seleciona o primeiro
@@ -1052,10 +1052,10 @@ const openAdventureModal = (adv?: any) => {
 const saveAdventure = async () => {
   try {
     if (adventureForm.value.id) {
-      await api.put(`/gm/story/adventures/${adventureForm.value.id}`, adventureForm.value);
+      await api.put(`/api/gm/story/adventures/${adventureForm.value.id}`, adventureForm.value);
       successMsg.value = 'Crônica atualizada com sucesso!';
     } else {
-      await api.post('/gm/story/adventures', adventureForm.value);
+      await api.post('/api/gm/story/adventures', adventureForm.value);
       successMsg.value = 'Nova crônica criada com sucesso!';
     }
     showAdventureModal.value = false;
@@ -1068,7 +1068,7 @@ const saveAdventure = async () => {
 const confirmDeleteAdventure = async (adv: any) => {
   if (!confirm(`Deseja realmente excluir a crônica "${adv.title}" e todas as suas cenas?`)) return;
   try {
-    await api.delete(`/gm/story/adventures/${adv.id}`);
+    await api.delete(`/api/gm/story/adventures/${adv.id}`);
     successMsg.value = 'Crônica excluída com sucesso!';
     await loadAdventures();
   } catch (err: any) {
@@ -1098,10 +1098,10 @@ const openNodeModal = (node?: any) => {
 const saveNode = async () => {
   try {
     if (nodeForm.value.id) {
-      await api.put(`/gm/story/nodes/${nodeForm.value.id}`, nodeForm.value);
+      await api.put(`/api/gm/story/nodes/${nodeForm.value.id}`, nodeForm.value);
       successMsg.value = 'Cena atualizada com sucesso!';
     } else {
-      await api.post('/gm/story/nodes', nodeForm.value);
+      await api.post('/api/gm/story/nodes', nodeForm.value);
       successMsg.value = 'Nova cena adicionada!';
     }
     showNodeModal.value = false;
@@ -1113,7 +1113,7 @@ const saveNode = async () => {
 
 const setAsStartingNode = async (nodeId: string) => {
   try {
-    await api.put(`/gm/story/adventures/${activeAdventureDetail.value.id}`, { firstNodeId: nodeId });
+    await api.put(`/api/gm/story/adventures/${activeAdventureDetail.value.id}`, { firstNodeId: nodeId });
     activeAdventureDetail.value.firstNodeId = nodeId;
     successMsg.value = 'Nó inicial da crônica definido com sucesso!';
   } catch (err: any) {
@@ -1124,7 +1124,7 @@ const setAsStartingNode = async (nodeId: string) => {
 const confirmDeleteNode = async (node: any) => {
   if (!confirm('Deseja realmente excluir esta cena e suas escolhas?')) return;
   try {
-    await api.delete(`/gm/story/nodes/${node.id}`);
+    await api.delete(`/api/gm/story/nodes/${node.id}`);
     successMsg.value = 'Cena excluída com sucesso!';
     await openAdventureDetail(activeAdventureDetail.value.id);
   } catch (err: any) {
@@ -1155,10 +1155,10 @@ const openChoiceModal = (choice?: any, nodeId?: string) => {
 const saveChoice = async () => {
   try {
     if (choiceForm.value.id) {
-      await api.put(`/gm/story/choices/${choiceForm.value.id}`, choiceForm.value);
+      await api.put(`/api/gm/story/choices/${choiceForm.value.id}`, choiceForm.value);
       successMsg.value = 'Escolha atualizada!';
     } else {
-      await api.post('/gm/story/choices', choiceForm.value);
+      await api.post('/api/gm/story/choices', choiceForm.value);
       successMsg.value = 'Nova escolha vinculada!';
     }
     showChoiceModal.value = false;
@@ -1171,7 +1171,7 @@ const saveChoice = async () => {
 const confirmDeleteChoice = async (choice: any) => {
   if (!confirm('Deseja excluir esta opção de escolha?')) return;
   try {
-    await api.delete(`/gm/story/choices/${choice.id}`);
+    await api.delete(`/api/gm/story/choices/${choice.id}`);
     successMsg.value = 'Escolha excluída!';
     await openAdventureDetail(activeAdventureDetail.value.id);
   } catch (err: any) {
@@ -1182,7 +1182,7 @@ const confirmDeleteChoice = async (choice: any) => {
 // ==================== MISSIONS CRUD ====================
 const loadMissions = async () => {
   try {
-    const res = await api.get('/gm/missions-idle');
+    const res = await api.get('/api/gm/missions-idle');
     missions.value = res.data;
   } catch (err: any) {
     console.error('Erro ao carregar missões:', err);
@@ -1201,10 +1201,10 @@ const openMissionModal = (mission?: any) => {
 const saveMission = async () => {
   try {
     if (missionForm.value.id) {
-      await api.put(`/gm/missions-idle/${missionForm.value.id}`, missionForm.value);
+      await api.put(`/api/gm/missions-idle/${missionForm.value.id}`, missionForm.value);
       successMsg.value = 'Missão AFK atualizada!';
     } else {
-      await api.post('/gm/missions-idle', missionForm.value);
+      await api.post('/api/gm/missions-idle', missionForm.value);
       successMsg.value = 'Nova missão AFK criada!';
     }
     showMissionModal.value = false;
@@ -1221,7 +1221,7 @@ const openMissionDetail = (missionId: string) => {
 const confirmDeleteMission = async (mission: any) => {
   if (!confirm(`Deseja excluir a missão "${mission.title}"?`)) return;
   try {
-    await api.delete(`/gm/missions-idle/${mission.id}`);
+    await api.delete(`/api/gm/missions-idle/${mission.id}`);
     successMsg.value = 'Missão excluída com sucesso!';
     await loadMissions();
   } catch (err: any) {
