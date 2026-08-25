@@ -843,44 +843,148 @@
 
     <!-- MODAL MISSÃO AFK -->
     <div v-if="showMissionModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div class="bg-zinc-950 border border-blood-red/40 w-full max-w-lg rounded-2xl p-6 space-y-6 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
-        <h3 class="font-serif text-xl text-blood-red font-bold">{{ missionForm.id ? 'Editar Missão AFK' : 'Nova Missão AFK' }}</h3>
-        <div class="space-y-4 text-xs font-serif">
+      <div class="bg-zinc-950 border border-blood-red/40 w-full max-w-2xl rounded-2xl p-6 md:p-8 space-y-6 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-start border-b border-white/10 pb-4">
           <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Título da Missão</label>
-            <input v-model="missionForm.title" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment focus:border-blood-red outline-none" placeholder="Ex: Caçada pelas Ruas da Sé" />
+            <span class="text-[10px] font-mono uppercase tracking-widest text-blood-red">Configuração Tática da Missão</span>
+            <h3 class="font-serif text-xl md:text-2xl text-parchment font-bold">{{ missionForm.id ? 'Editar Missão AFK' : 'Nova Missão AFK' }}</h3>
           </div>
-          <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Categoria</label>
-            <select v-model="missionForm.category" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment outline-none">
-              <option value="HUNT">🩸 Caçada de Sangue (Alimentação)</option>
-              <option value="OPERATION">🎯 Operação Tática (Incursão)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Distrito / Local de Nocturna (Opcional)</label>
-            <select v-model="missionForm.locationId" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment outline-none">
-              <option :value="null">🏙️ Cidade Inteira (Global)</option>
-              <option v-for="loc in compendiumLocations" :key="loc.id" :value="loc.id">
-                {{ loc.name }} ({{ loc.attributes?.dominio_faccao || 'Zona' }})
-              </option>
-            </select>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
+          <button @click="showMissionModal = false" class="text-gray-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <div class="space-y-5 text-xs font-serif">
+          <!-- DADOS GERAIS -->
+          <div class="space-y-3">
             <div>
-              <label class="block text-gray-400 mb-1">Duração (Minutos)</label>
-              <input type="number" v-model.number="missionForm.durationMinutes" min="1" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment outline-none" />
+              <label class="block text-gray-400 uppercase tracking-wider mb-1">Título da Missão *</label>
+              <input v-model="missionForm.title" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment focus:border-blood-red outline-none" placeholder="Ex: Caçada pelas Ruas da Sé" />
             </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-gray-400 uppercase tracking-wider mb-1">Categoria</label>
+                <select v-model="missionForm.category" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none">
+                  <option value="HUNT">🩸 Caçada de Sangue (Alimentação)</option>
+                  <option value="OPERATION">🎯 Operação Tática (Incursão)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-gray-400 uppercase tracking-wider mb-1">Distrito / Local de Nocturna (Opcional)</label>
+                <select v-model="missionForm.locationId" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none">
+                  <option :value="null">🏙️ Cidade Inteira (Global)</option>
+                  <option v-for="loc in compendiumLocations" :key="loc.id" :value="loc.id">
+                    {{ loc.name }} ({{ loc.attributes?.dominio_faccao || 'Zona' }})
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block text-gray-400 mb-1">Duração (Minutos)</label>
+                <input type="number" v-model.number="missionForm.durationMinutes" min="1" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none" />
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-1">Dificuldade Base (D10)</label>
+                <input type="number" v-model.number="missionForm.baseDifficulty" min="1" max="10" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none" />
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-1">Limite de Conclusões</label>
+                <input type="number" v-model.number="missionForm.maxCompletions" placeholder="Vazio = Ilimitado" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none" />
+              </div>
+            </div>
+
             <div>
-              <label class="block text-gray-400 mb-1">Dificuldade Base</label>
-              <input type="number" v-model.number="missionForm.baseDifficulty" min="1" max="10" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment outline-none" />
+              <label class="block text-gray-400 uppercase tracking-wider mb-1">Descrição Imersiva</label>
+              <textarea v-model="missionForm.description" rows="2" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none" placeholder="Contexto da operação..."></textarea>
             </div>
           </div>
-          <div>
-            <label class="block text-gray-400 uppercase tracking-wider mb-1">Descrição Imersiva</label>
-            <textarea v-model="missionForm.description" rows="3" class="w-full bg-black border border-white/10 rounded-lg p-3 text-parchment outline-none"></textarea>
+
+          <!-- SEÇÃO 1: RECOMPENSAS DE SUCESSO (BÔNUS) -->
+          <div class="p-4 rounded-xl border border-green-700/40 bg-green-950/20 space-y-3">
+            <h4 class="text-xs font-serif uppercase tracking-widest text-green-400 font-bold flex items-center gap-2">
+              <span>🏆</span> Recompensas em Caso de Sucesso
+            </h4>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[10px] text-green-300 mb-1">XP Concedido (+)</label>
+                <input type="number" v-model.number="missionForm.rewardsJson.exp" min="0" max="100" class="w-full bg-black border border-green-800/40 rounded-lg p-2 text-xs text-parchment outline-none" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-green-300 mb-1">Redução de Fome (Saciada)</label>
+                <select v-model.number="missionForm.rewardsJson.hunger" class="w-full bg-black border border-green-800/40 rounded-lg p-2 text-xs text-parchment outline-none">
+                  <option :value="0">0 (Sem alteração de fome)</option>
+                  <option :value="-1">-1 Fome (Petisco)</option>
+                  <option :value="-2">-2 Fome (Alimentação Boa)</option>
+                  <option :value="-3">-3 Fome (Banquete de Sangue)</option>
+                  <option :value="-5">-5 Fome (Saciamento Total)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] text-green-300 mb-1">Cura Força de Vontade (- Dano)</label>
+                <input type="number" v-model.number="missionForm.rewardsJson.willpowerDamageSuperficial" min="-5" max="0" placeholder="Ex: -1" class="w-full bg-black border border-green-800/40 rounded-lg p-2 text-xs text-parchment outline-none" />
+              </div>
+            </div>
+
+            <!-- BÔNUS ESPECIAL DE PERÍCIA/ATRIBUTO -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-green-800/20">
+              <div>
+                <label class="block text-[10px] text-gray-400 mb-1">Bônus Especial em Perícia (Opcional)</label>
+                <select v-model="missionForm.rewardsJson.skillBonus.name" class="w-full bg-black border border-white/10 rounded-lg p-2 text-xs text-parchment outline-none">
+                  <option value="">Nenhum</option>
+                  <option v-for="sk in skillsList" :key="sk" :value="sk">+1 ponto em {{ sk }}</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] text-gray-400 mb-1">Bônus Especial em Atributo (Opcional)</label>
+                <select v-model="missionForm.rewardsJson.attributeBonus.name" class="w-full bg-black border border-white/10 rounded-lg p-2 text-xs text-parchment outline-none">
+                  <option value="">Nenhum</option>
+                  <option v-for="attr in attributesList" :key="attr" :value="attr">+1 ponto em {{ attr }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 2: PENALIDADES DE FALHA (ÔNUS) -->
+          <div class="p-4 rounded-xl border border-red-800/40 bg-red-950/20 space-y-3">
+            <h4 class="text-xs font-serif uppercase tracking-widest text-red-400 font-bold flex items-center gap-2">
+              <span>⚠️</span> Penalidades em Caso de Falha
+            </h4>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[10px] text-red-300 mb-1">Aumento de Fome (+)</label>
+                <select v-model.number="missionForm.penaltiesJson.hunger" class="w-full bg-black border border-red-800/40 rounded-lg p-2 text-xs text-parchment outline-none">
+                  <option :value="0">0 (Sem aumento de fome)</option>
+                  <option :value="1">+1 Fome (Esforço/Frustração)</option>
+                  <option :value="2">+2 Fome (Gasto Intenso de Sangue)</option>
+                  <option :value="3">+3 Fome (Frenesi Iminente)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] text-red-300 mb-1">Dano Vitalidade Superficial (+)</label>
+                <input type="number" v-model.number="missionForm.penaltiesJson.healthDamageSuperficial" min="0" max="10" class="w-full bg-black border border-red-800/40 rounded-lg p-2 text-xs text-parchment outline-none" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-red-300 mb-1">Dano Vitalidade Agravado (+)</label>
+                <input type="number" v-model.number="missionForm.penaltiesJson.healthDamageAggravated" min="0" max="5" class="w-full bg-black border border-red-800/40 rounded-lg p-2 text-xs text-parchment outline-none" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-red-800/20">
+              <div>
+                <label class="block text-[10px] text-red-300 mb-1">Dano Vontade Superficial (+)</label>
+                <input type="number" v-model.number="missionForm.penaltiesJson.willpowerDamageSuperficial" min="0" max="10" class="w-full bg-black border border-red-800/40 rounded-lg p-2 text-xs text-parchment outline-none" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-red-300 mb-1">Manchas de Humanidade / Pecado (+)</label>
+                <input type="number" v-model.number="missionForm.penaltiesJson.stains" min="0" max="5" class="w-full bg-black border border-red-800/40 rounded-lg p-2 text-xs text-parchment outline-none" />
+              </div>
+            </div>
           </div>
         </div>
+
         <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
           <button @click="showMissionModal = false" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:text-white text-xs uppercase font-serif">Cancelar</button>
           <button @click="saveMission" class="px-5 py-2 rounded-lg bg-blood-red text-white hover:bg-red-700 text-xs uppercase font-serif font-bold">Salvar Missão</button>
@@ -1150,7 +1254,32 @@ const showChoiceModal = ref(false);
 const choiceForm = ref<any>({ id: '', nodeId: '', choiceText: '', attributeReq: '', skillReq: '', difficulty: 1, successNodeId: '', failureNodeId: '', customStyle: null });
 
 const showMissionModal = ref(false);
-const missionForm = ref<any>({ id: '', title: '', description: '', durationMinutes: 2, baseDifficulty: 5, category: 'OPERATION' });
+const defaultMissionForm = () => ({
+  id: '',
+  title: '',
+  description: '',
+  locationId: null,
+  durationMinutes: 2,
+  baseDifficulty: 5,
+  category: 'OPERATION',
+  maxCompletions: null,
+  rewardsJson: {
+    exp: 5,
+    hunger: -2,
+    willpowerDamageSuperficial: 0,
+    humanity: 0,
+    skillBonus: { name: '', value: 1 },
+    attributeBonus: { name: '', value: 1 }
+  },
+  penaltiesJson: {
+    hunger: 1,
+    healthDamageSuperficial: 1,
+    healthDamageAggravated: 0,
+    willpowerDamageSuperficial: 1,
+    stains: 0
+  }
+});
+const missionForm = ref<any>(defaultMissionForm());
 
 const showPlayerLocationsModal = ref(false);
 const selectedPlayerForLocations = ref<any>(null);
@@ -1492,9 +1621,31 @@ const openMissionModal = async (mission?: any) => {
     } catch (e) {}
   }
   if (mission) {
-    missionForm.value = { ...mission, locationId: mission.locationId || null };
+    const rawRewards = typeof mission.rewardsJson === 'string' ? JSON.parse(mission.rewardsJson) : (mission.rewardsJson || {});
+    const rawPenalties = typeof mission.penaltiesJson === 'string' ? JSON.parse(mission.penaltiesJson) : (mission.penaltiesJson || {});
+
+    missionForm.value = {
+      ...mission,
+      locationId: mission.locationId || null,
+      maxCompletions: mission.maxCompletions ?? null,
+      rewardsJson: {
+        exp: rawRewards.exp ?? 5,
+        hunger: rawRewards.hunger ?? -2,
+        willpowerDamageSuperficial: rawRewards.willpowerDamageSuperficial ?? 0,
+        humanity: rawRewards.humanity ?? 0,
+        skillBonus: rawRewards.skillBonus || { name: '', value: 1 },
+        attributeBonus: rawRewards.attributeBonus || { name: '', value: 1 }
+      },
+      penaltiesJson: {
+        hunger: rawPenalties.hunger ?? 1,
+        healthDamageSuperficial: rawPenalties.healthDamageSuperficial ?? 1,
+        healthDamageAggravated: rawPenalties.healthDamageAggravated ?? 0,
+        willpowerDamageSuperficial: rawPenalties.willpowerDamageSuperficial ?? 1,
+        stains: rawPenalties.stains ?? 0
+      }
+    };
   } else {
-    missionForm.value = { id: '', title: '', description: '', locationId: null, durationMinutes: 2, baseDifficulty: 5, category: 'OPERATION' };
+    missionForm.value = defaultMissionForm();
   }
   showMissionModal.value = true;
 };
