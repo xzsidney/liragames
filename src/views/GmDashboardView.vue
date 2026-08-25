@@ -957,6 +957,139 @@
       </div>
     </div>
 
+    <!-- ==================== MODAL DE ETAPAS DA MISSÃO (ACTIONS STUDIO) ==================== -->
+    <div v-if="showMissionStepsModal && activeMissionForSteps" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+      <div class="border border-blood-red/40 bg-zinc-950 max-w-3xl w-full rounded-2xl p-6 md:p-8 space-y-6 shadow-[0_0_40px_rgba(192,57,43,0.3)] max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-start border-b border-white/10 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono uppercase tracking-widest text-blood-red">Etapas & Testes Mecânicos V5</span>
+              <span class="text-[9px] px-2 py-0.5 rounded font-mono uppercase" :class="activeMissionForSteps.category === 'HUNT' ? 'bg-red-950 text-red-300' : 'bg-blue-950 text-blue-300'">
+                {{ activeMissionForSteps.category === 'HUNT' ? 'Caçada' : 'Operação' }}
+              </span>
+            </div>
+            <h2 class="text-xl md:text-2xl font-serif text-parchment font-bold">{{ activeMissionForSteps.title }}</h2>
+            <p class="text-xs text-gray-400">Configure os testes de atributos/perícias e a narrativa de sucesso e falha para cada etapa da missão.</p>
+          </div>
+          <button @click="showMissionStepsModal = false" class="text-gray-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-400 font-mono">{{ activeMissionForSteps.Actions?.length || 0 }} etapas cadastradas</span>
+          <button @click="openNewActionModal" class="px-4 py-2 rounded-lg bg-blood-red hover:bg-red-700 text-white font-serif font-bold text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(192,57,43,0.4)]">
+            + Adicionar Nova Etapa
+          </button>
+        </div>
+
+        <!-- LISTA DE ETAPAS -->
+        <div v-if="!activeMissionForSteps.Actions || activeMissionForSteps.Actions.length === 0" class="text-center py-10 text-xs text-gray-500 font-serif italic border border-white/5 rounded-xl bg-black/40">
+          Nenhuma etapa mecânica cadastrada nesta missão. Adicione uma etapa para que o motor de simulação V5 possa rolar dados e gerar o relatório para o jogador.
+        </div>
+
+        <div v-else class="space-y-4">
+          <div v-for="(act, idx) in activeMissionForSteps.Actions" :key="act.id" class="border border-white/10 bg-black/60 rounded-xl p-4 space-y-3 hover:border-gold/30 transition-all">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-blood-red text-white text-xs font-mono font-bold flex items-center justify-center">
+                  {{ act.stepOrder || Number(idx) + 1 }}
+                </span>
+                <h4 class="font-serif text-sm font-bold text-parchment">{{ act.name }}</h4>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/10 text-gold text-[10px] font-mono">
+                  {{ act.attributeReq || 'Atributo' }} + {{ act.skillReq || 'Perícia' }} (Dif. {{ act.difficulty }})
+                </span>
+                <button @click="editAction(act)" class="px-2 py-1 rounded bg-white/5 hover:bg-white/15 text-gray-300 text-[10px] uppercase font-serif">Editar</button>
+                <button @click="confirmDeleteAction(act)" class="px-2 py-1 rounded bg-red-950/40 hover:bg-red-900 text-red-300 text-[10px] uppercase font-serif">Excluir</button>
+              </div>
+            </div>
+
+            <p class="text-xs text-gray-400 font-light leading-relaxed">{{ act.description }}</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-white/5 text-xs">
+              <div class="p-2.5 rounded bg-green-950/20 border border-green-800/30 text-green-300">
+                <span class="font-bold block text-[10px] uppercase tracking-wider text-green-400 mb-1">✔ Narrativa de Sucesso:</span>
+                <span class="font-light italic">{{ act.successText }}</span>
+              </div>
+              <div class="p-2.5 rounded bg-red-950/20 border border-red-800/30 text-red-300">
+                <span class="font-bold block text-[10px] uppercase tracking-wider text-red-400 mb-1">✖ Narrativa de Falha:</span>
+                <span class="font-light italic">{{ act.failureText }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-4 border-t border-white/10">
+          <button @click="showMissionStepsModal = false" class="px-5 py-2 rounded-lg bg-white/10 text-gray-300 hover:text-white text-xs uppercase font-serif">Concluir Edição</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL DE FORMULÁRIO DE ETAPA ==================== -->
+    <div v-if="showActionFormModal" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 backdrop-blur-md animate-fade-in">
+      <div class="border border-blood-red/40 bg-zinc-950 max-w-xl w-full rounded-2xl p-6 md:p-8 space-y-5 shadow-2xl">
+        <div class="flex justify-between items-start border-b border-white/10 pb-4">
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-widest text-blood-red">{{ actionForm.id ? 'Editar Etapa' : 'Nova Etapa' }}</span>
+            <h2 class="text-xl font-serif text-parchment font-bold">{{ actionForm.id ? 'Modificar Teste Mecânico' : 'Criar Teste da Missão' }}</h2>
+          </div>
+          <button @click="showActionFormModal = false" class="text-gray-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <div class="space-y-4 text-xs font-serif">
+          <div class="grid grid-cols-3 gap-3">
+            <div class="col-span-2">
+              <label class="block text-gray-400 uppercase tracking-wider mb-1">Nome da Etapa *</label>
+              <input v-model="actionForm.name" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none" placeholder="Ex: Infiltração Silenciosa" />
+            </div>
+            <div>
+              <label class="block text-gray-400 uppercase tracking-wider mb-1">Ordem</label>
+              <input type="number" v-model.number="actionForm.stepOrder" min="1" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-gray-400 uppercase tracking-wider mb-1">Atributo V5</label>
+              <select v-model="actionForm.attributeReq" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none">
+                <option v-for="attr in attributesList" :key="attr" :value="attr">{{ attr }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-gray-400 uppercase tracking-wider mb-1">Perícia V5</label>
+              <select v-model="actionForm.skillReq" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none">
+                <option v-for="sk in skillsList" :key="sk" :value="sk">{{ sk }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-gray-400 uppercase tracking-wider mb-1">Dificuldade</label>
+              <input type="number" v-model.number="actionForm.difficulty" min="1" max="10" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-gray-400 uppercase tracking-wider mb-1">Descrição da Ação</label>
+            <textarea v-model="actionForm.description" rows="2" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-parchment outline-none" placeholder="Descreva o que o vampiro faz nesta etapa..."></textarea>
+          </div>
+
+          <div>
+            <label class="block text-green-400 uppercase tracking-wider mb-1">Texto de Sucesso *</label>
+            <textarea v-model="actionForm.successText" rows="2" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-green-200 outline-none" placeholder="Narrativa exibida quando o teste for bem-sucedido..."></textarea>
+          </div>
+
+          <div>
+            <label class="block text-red-400 uppercase tracking-wider mb-1">Texto de Falha *</label>
+            <textarea v-model="actionForm.failureText" rows="2" class="w-full bg-black border border-white/10 rounded-lg p-2.5 text-red-200 outline-none" placeholder="Narrativa exibida quando o teste falhar..."></textarea>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-white/10">
+          <button @click="showActionFormModal = false" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 hover:text-white text-xs uppercase font-serif">Cancelar</button>
+          <button @click="saveAction" class="px-5 py-2 rounded-lg bg-blood-red hover:bg-red-700 text-white font-serif font-bold text-xs uppercase">Salvar Etapa</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -1023,6 +1156,22 @@ const showPlayerLocationsModal = ref(false);
 const selectedPlayerForLocations = ref<any>(null);
 const grantLocationForm = ref<any>({ locationId: '', status: 'DISCOVERED' });
 const grantingLocation = ref(false);
+
+const showMissionStepsModal = ref(false);
+const activeMissionForSteps = ref<any>(null);
+const showActionFormModal = ref(false);
+const actionForm = ref<any>({
+  id: '',
+  missionId: '',
+  name: '',
+  description: '',
+  stepOrder: 1,
+  difficulty: 6,
+  attributeReq: 'Destreza',
+  skillReq: 'Furtividade',
+  successText: '',
+  failureText: ''
+});
 
 // ==================== LIFECYCLE ====================
 onMounted(async () => {
@@ -1366,8 +1515,69 @@ const saveMission = async () => {
   }
 };
 
-const openMissionDetail = (missionId: string) => {
-  alert('Editor de etapas da missão: ' + missionId);
+const openMissionDetail = async (missionId: string) => {
+  try {
+    const res = await api.get(`/api/gm/missions-idle/${missionId}`);
+    activeMissionForSteps.value = res.data;
+    showMissionStepsModal.value = true;
+  } catch (err: any) {
+    errorMsg.value = err.response?.data?.error || 'Erro ao carregar etapas da missão';
+  }
+};
+
+const openNewActionModal = () => {
+  const currentCount = activeMissionForSteps.value?.Actions?.length || 0;
+  actionForm.value = {
+    id: '',
+    missionId: activeMissionForSteps.value?.id || '',
+    name: '',
+    description: '',
+    stepOrder: currentCount + 1,
+    difficulty: activeMissionForSteps.value?.baseDifficulty || 6,
+    attributeReq: 'Destreza',
+    skillReq: 'Furtividade',
+    successText: '',
+    failureText: ''
+  };
+  showActionFormModal.value = true;
+};
+
+const editAction = (act: any) => {
+  actionForm.value = { ...act };
+  showActionFormModal.value = true;
+};
+
+const saveAction = async () => {
+  if (!actionForm.value.name || !actionForm.value.successText || !actionForm.value.failureText) {
+    errorMsg.value = 'Preencha o nome da etapa e os textos de sucesso e falha.';
+    return;
+  }
+  try {
+    if (actionForm.value.id) {
+      await api.put(`/api/gm/missions-idle/actions/${actionForm.value.id}`, actionForm.value);
+      successMsg.value = 'Etapa mecânica atualizada!';
+    } else {
+      await api.post(`/api/gm/missions-idle/${activeMissionForSteps.value.id}/actions`, actionForm.value);
+      successMsg.value = 'Nova etapa mecânica criada!';
+    }
+    showActionFormModal.value = false;
+    await openMissionDetail(activeMissionForSteps.value.id);
+    await loadMissions();
+  } catch (err: any) {
+    errorMsg.value = err.response?.data?.error || 'Erro ao salvar etapa';
+  }
+};
+
+const confirmDeleteAction = async (act: any) => {
+  if (!confirm(`Deseja excluir a etapa "${act.name}"?`)) return;
+  try {
+    await api.delete(`/api/gm/missions-idle/actions/${act.id}`);
+    successMsg.value = 'Etapa excluída!';
+    await openMissionDetail(activeMissionForSteps.value.id);
+    await loadMissions();
+  } catch (err: any) {
+    errorMsg.value = err.response?.data?.error || 'Erro ao excluir etapa';
+  }
 };
 
 const confirmDeleteMission = async (mission: any) => {
