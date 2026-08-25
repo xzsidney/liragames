@@ -191,13 +191,21 @@
               >
                 🏆 Coletar Recompensas & Sangue
               </button>
-              <button 
-                v-else
-                @click="router.push('/personagem/radar?id=' + characterId)"
-                class="flex-1 py-2 rounded border border-cyan-500/40 bg-cyan-950/20 hover:bg-cyan-900/40 text-cyan-300 text-xs font-serif uppercase tracking-wider transition-all"
-              >
-                Ver Operação no Radar Tático
-              </button>
+              <template v-else>
+                <button 
+                  @click="showActiveMissionModal = true"
+                  class="flex-1 py-2 rounded bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 text-cyan-300 text-xs font-serif uppercase tracking-wider transition-all"
+                >
+                  📜 Inspecionar Dossiê Ao Vivo
+                </button>
+                <button 
+                  @click="router.push('/personagem/radar?id=' + characterId)"
+                  class="px-3 py-2 rounded border border-white/20 bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-serif uppercase tracking-wider transition-all"
+                  title="Abrir no Radar"
+                >
+                  📡 Radar
+                </button>
+              </template>
             </div>
           </div>
 
@@ -339,6 +347,16 @@
       </div>
     </div>
 
+    <!-- MODAL DO DOSSIÊ TÁTICO / ETAPAS AO VIVO E CANCELAMENTO -->
+    <ActiveMissionModal 
+      :visible="showActiveMissionModal" 
+      :activeMission="activeMission" 
+      :timeRemaining="formatTimeRemaining(activeMission?.expiresAt)" 
+      @close="showActiveMissionModal = false" 
+      @resolved="resolveActiveMission" 
+      @cancelled="onMissionCancelled" 
+    />
+
     <!-- BARRA INFERIOR / DOCK DO CICLO NOTURNO -->
     <NightClockWidget 
       v-if="characterId" 
@@ -349,7 +367,8 @@
 
   </div>
 </template>
-\n<script setup lang="ts">
+
+<script setup lang="ts">
 const handleImageError = (e: Event) => {
   const target = e.target as HTMLImageElement;
   if (target) target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'600\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%231a0b12\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23c9a84c\' font-family=\'serif\' font-size=\'48\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3E%E2%98%A5%3C/text%3E%3C/svg%3E';
@@ -359,6 +378,8 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api, { API_BASE_URL } from '../services/api'
 import NightClockWidget from '../components/NightClockWidget.vue'
+import ActiveMissionModal from '../components/ActiveMissionModal.vue'
+import { notifySuccess, notifyError } from '../utils/gothicAlerts'
 
 const router = useRouter()
 const route = useRoute()
@@ -375,10 +396,18 @@ const onNightStatusUpdated = (status: any) => {
 
 // Missions AFK
 const activeMission = ref<any>(null)
+const showActiveMissionModal = ref(false)
 let timerInterval: any = null
 const now = ref(new Date())
 
 const isAwakening = ref(false)
+
+const onMissionCancelled = async () => {
+  activeMission.value = null
+  showActiveMissionModal.value = false
+  await fetchActiveMission()
+  await nightClockRef.value?.fetchStatus()
+}
 
 const awakenCharacter = async () => {
   if (!character.value) return;
@@ -387,9 +416,10 @@ const awakenCharacter = async () => {
     const res = await api.post(`/api/character-vampires/${character.value.id}/awaken`);
     character.value.isAwake = res.data.character.isAwake;
     character.value.hunger = res.data.character.hunger;
+    notifySuccess('Despertar Concluído', 'O sangue atendeu ao chamado da noite.')
     await nightClockRef.value?.fetchStatus();
-  } catch (err) {
-    alert('Erro ao despertar.');
+  } catch (err: any) {
+    notifyError('Erro ao Despertar', err.response?.data?.error || 'Não foi possível acordar.')
   } finally {
     isAwakening.value = false;
   }

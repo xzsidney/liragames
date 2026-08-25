@@ -13,11 +13,27 @@
 
       <div class="flex items-center gap-4">
         <!-- Status de Missão Ativa no Header -->
-        <div v-if="activeMission" class="flex items-center gap-3 px-3 py-1.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-xs font-mono">
+        <div v-if="activeMission" class="flex items-center gap-2.5 px-3 py-1.5 rounded bg-cyan-950/90 border border-cyan-500/50 text-xs font-mono shadow-[0_0_15px_rgba(0,255,255,0.2)]">
           <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-          <span class="text-cyan-300 uppercase tracking-wider text-[11px]">Operação: {{ activeMission.currentReport?.title || 'Em Curso' }}</span>
-          <span class="text-gold font-bold">{{ activeMission.readyToResolve ? 'Pronto para Coleta' : timeRemainingDisplay }}</span>
-          <button v-if="activeMission.readyToResolve" @click="resolveActiveMission" class="ml-2 px-2 py-0.5 rounded bg-green-600 text-black font-bold uppercase text-[10px]">Coletar</button>
+          <span class="text-cyan-300 uppercase tracking-wider text-[11px] truncate max-w-[150px] sm:max-w-[200px]">
+            {{ activeMission.currentReport?.title || 'Operação' }}
+          </span>
+          <span class="text-gold font-bold">{{ activeMission.readyToResolve ? 'Pronto' : timeRemainingDisplay }}</span>
+          
+          <button 
+            v-if="activeMission.readyToResolve" 
+            @click.stop="resolveActiveMission" 
+            class="ml-1 px-2.5 py-0.5 rounded bg-gold hover:bg-gold-light text-black font-bold uppercase text-[10px] shadow-[0_0_10px_rgba(212,175,55,0.4)] animate-bounce"
+          >
+            Coletar
+          </button>
+          <button 
+            v-else 
+            @click.stop="showActiveMissionModal = true" 
+            class="ml-1 px-2 py-0.5 rounded bg-cyan-900/60 hover:bg-cyan-800 border border-cyan-500/40 text-cyan-200 uppercase text-[10px] font-bold"
+          >
+            📜 Dossiê
+          </button>
         </div>
 
         <button @click="router.push(`/personagem/hub?id=${characterId}`)" class="text-cyan-500 hover:text-cyan-300 transition text-xs uppercase tracking-widest font-serif border border-cyan-500/30 px-4 py-2 rounded hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] hover:bg-cyan-900/20">
@@ -231,6 +247,16 @@
       </div>
     </div>
 
+    <!-- MODAL DO DOSSIÊ TÁTICO / ETAPAS AO VIVO E CANCELAMENTO -->
+    <ActiveMissionModal 
+      :visible="showActiveMissionModal" 
+      :activeMission="activeMission" 
+      :timeRemaining="timeRemainingDisplay" 
+      @close="showActiveMissionModal = false" 
+      @resolved="resolveActiveMission" 
+      @cancelled="onMissionCancelled" 
+    />
+
     <!-- BARRA INFERIOR / DOCK DO CICLO NOTURNO -->
     <NightClockWidget 
       v-if="characterId" 
@@ -247,6 +273,8 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '../services/api'
 import NightClockWidget from '../components/NightClockWidget.vue'
+import ActiveMissionModal from '../components/ActiveMissionModal.vue'
+import { notifySuccess, notifyError } from '../utils/gothicAlerts'
 
 const router = useRouter()
 const route = useRoute()
@@ -265,11 +293,19 @@ const mapNodes = ref<any[]>([])
 const sidebarNode = ref<any>(null)
 const activeMission = ref<any>(null)
 const showResultModal = ref(false)
+const showActiveMissionModal = ref(false)
 const finalReport = ref<any>(null)
 
 const closeResultModal = () => {
   showResultModal.value = false
   finalReport.value = null
+}
+
+const onMissionCancelled = async () => {
+  activeMission.value = null
+  showActiveMissionModal.value = false
+  await fetchActiveMission()
+  await nightClockRef.value?.fetchStatus()
 }
 
 const tooltip = ref({
@@ -392,12 +428,12 @@ const exploreCurrentLocation = async () => {
     await api.post(`/api/radar/locations/${sidebarNode.value.id}/explore`, {
       characterId: characterId.value
     })
-    alert(`Distrito '${sidebarNode.value.nome}' mapeado com sucesso!`)
+    notifySuccess('Território Mapeado', `Distrito '${sidebarNode.value.nome}' agora está totalmente explorado!`)
     await fetchLocations()
     sidebarNode.value = mapNodes.value.find(n => n.id === sidebarNode.value.id) || null
-  } catch (e) {
+  } catch (e: any) {
     console.error('Erro ao explorar local:', e)
-    alert('Erro ao explorar local')
+    notifyError('Erro ao Mapear', 'Não foi possível enviar a expedição de reconhecimento.')
   } finally {
     exploring.value = false
   }
@@ -411,12 +447,12 @@ const dispatchMission = async (mission: any) => {
       characterId: characterId.value,
       definitionMissionIdleId: mission.id
     })
-    alert(`Operação '${mission.title}' iniciada com sucesso!`)
+    notifySuccess('Incursão Iniciada', `Operação '${mission.title}' iniciada no distrito!`)
     await fetchActiveMission()
     await nightClockRef.value?.fetchStatus()
   } catch (e: any) {
     console.error(e)
-    alert(e.response?.data?.error || 'Erro ao despachar missão')
+    notifyError('Falha no Despacho', e.response?.data?.error || 'Não foi possível iniciar a operação.')
   } finally {
     dispatching.value = false
   }
@@ -430,12 +466,13 @@ const resolveActiveMission = async () => {
     })
     finalReport.value = res.data.report
     showResultModal.value = true
+    showActiveMissionModal.value = false
     activeMission.value = null
     await fetchActiveMission()
     await nightClockRef.value?.fetchStatus()
   } catch (e: any) {
     console.error(e)
-    alert(e.response?.data?.error || 'Erro ao resolver missão')
+    notifyError('Erro ao Resolver', e.response?.data?.error || 'Não foi possível resolver a operação.')
   }
 }
 

@@ -153,6 +153,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
+import { confirmAction, notifySuccess, notifyError } from '../utils/gothicAlerts'
 
 const props = defineProps<{
   characterId: string
@@ -183,22 +184,27 @@ const fetchStatus = async () => {
 
 const awakenNight = async () => {
   if (!props.characterId || isProcessing.value) return
-  if (!confirm('Deseja avançar para a próxima noite? O vampiro retornará ao refúgio e realizará o Rouse Check de Fome do V5.')) return
+  const confirmed = await confirmAction(
+    'AVANÇAR PARA A PRÓXIMA NOITE?',
+    'O vampiro retornará ao seu refúgio e realizará o Teste de Despertar (Rouse Check) de Fome do V5.',
+    'Sim, Despertar',
+    'Permanecer na Noite'
+  )
+  if (!confirmed) return
 
   try {
     isProcessing.value = true
     const res = await api.post(`/api/night-cycle/${props.characterId}/awaken`)
     const { rouseSuccess, hungerIncreased, willpowerHealed } = res.data
 
-    let msg = `🌙 Uma nova noite cai sobre Nocturna!\n`
-    msg += `🎲 Rouse Check: ${rouseSuccess ? 'SUCESSO (Fome mantida)' : `FALHA (${hungerIncreased ? '+1 Fome!' : 'Fome no Limite'})`}\n`
-    if (willpowerHealed > 0) msg += `🧠 Força de Vontade recuperada (+${willpowerHealed}).`
+    let msg = `🎲 Rouse Check: ${rouseSuccess ? 'SUCESSO (Fome mantida)' : `FALHA (${hungerIncreased ? '+1 Fome!' : 'Fome no Limite'})`}`
+    if (willpowerHealed > 0) msg += ` | 🧠 Força de Vontade recuperada (+${willpowerHealed}).`
 
-    alert(msg)
+    notifySuccess('Uma Nova Noite Cai Sobre Nocturna', msg)
     await fetchStatus()
   } catch (e: any) {
     console.error(e)
-    alert(e.response?.data?.error || 'Erro ao avançar noite')
+    notifyError('Erro ao Avançar Noite', e.response?.data?.error || 'Não foi possível avançar a noite.')
   } finally {
     isProcessing.value = false
   }
@@ -209,12 +215,12 @@ const takeShelter = async (type: string) => {
   try {
     isProcessing.value = true
     const res = await api.post(`/api/night-cycle/${props.characterId}/shelter`, { shelterType: type })
-    alert(res.data.message)
+    notifySuccess('Abrigo Conquistado', res.data.message)
     showEmergencyModal.value = false
     await fetchStatus()
   } catch (e: any) {
     console.error(e)
-    alert(e.response?.data?.error || 'Erro ao buscar abrigo')
+    notifyError('Falha no Abrigo', e.response?.data?.error || 'Não foi possível encontrar abrigo.')
   } finally {
     isProcessing.value = false
   }
