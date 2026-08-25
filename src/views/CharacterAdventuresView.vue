@@ -114,9 +114,9 @@
               </p>
 
               <!-- DADOS ROLADOS (SE CONCLUÍDO) -->
-              <div v-if="step.status === 'COMPLETED' && step.rolls" class="pl-7 text-[10px] font-mono text-gray-500 flex items-center gap-3 pt-1 border-t border-white/5">
-                <span>Dados V5: <strong class="text-gray-300">[{{ step.rolls.join(', ') }}]</strong></span>
-                <span>Sucessos Obtidos: <strong :class="step.passed ? 'text-green-400' : 'text-red-400'">{{ step.successes }}</strong></span>
+              <div v-if="step.status === 'COMPLETED' && step.rolls && Array.isArray(step.rolls)" class="pl-7 text-[10px] font-mono text-gray-500 flex items-center gap-3 pt-1 border-t border-white/5">
+                <span>Dados V5: <strong class="text-gray-300">[{{ step.rolls?.join ? step.rolls.join(', ') : step.rolls }}]</strong></span>
+                <span>Sucessos Obtidos: <strong :class="step.passed ? 'text-green-400' : 'text-red-400'">{{ step.successes || 0 }}</strong></span>
               </div>
             </div>
           </div>
@@ -177,12 +177,12 @@
         </h3>
         
         <div class="space-y-3 max-h-[250px] overflow-y-auto pr-2">
-          <div v-for="(step, index) in finalReport.steps" :key="index" class="bg-black/80 border-l-2 p-3 text-xs space-y-1" :class="step.passed ? 'border-l-green-600' : 'border-l-vamp-c2'">
+          <div v-for="(step, index) in finalReport.steps || []" :key="index" class="bg-black/80 border-l-2 p-3 text-xs space-y-1" :class="step.passed ? 'border-l-green-600' : 'border-l-vamp-c2'">
             <div class="font-bold uppercase tracking-widest text-[11px]" :class="step.passed ? 'text-green-500' : 'text-vamp-c2'">
-              {{ step.actionName }} ({{ step.pool }})
+              {{ step.actionName }} ({{ step.pool || 'Teste' }})
             </div>
             <div class="text-gray-300">{{ step.narrative }}</div>
-            <div v-if="step.rolls" class="text-[10px] text-gray-500">Dados rolados: [{{ step.rolls.join(', ') }}] -> {{ step.successes }} sucessos</div>
+            <div v-if="step.rolls && Array.isArray(step.rolls)" class="text-[10px] text-gray-500">Dados rolados: [{{ step.rolls?.join ? step.rolls.join(', ') : step.rolls }}] -> {{ step.successes || 0 }} sucessos</div>
           </div>
         </div>
 
