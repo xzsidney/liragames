@@ -119,7 +119,7 @@ const router = createRouter({
 })
 
 // Navigation Guard
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to) => {
   const token = sessionStorage.getItem('lira_token') || localStorage.getItem('token') || localStorage.getItem('lira_token')
   const userStr = sessionStorage.getItem('lira_user') || localStorage.getItem('lira_user')
   let user: any = null
@@ -132,22 +132,21 @@ router.beforeEach((to, _from, next) => {
   }
   
   if (to.meta.requiresAuth && !token) {
-    next({ name: 'login' })
+    return { name: 'login' }
   } else if (to.name === 'login' && token) {
     if (user && user.role === 'MESTRE') {
-      next({ name: 'gm-dashboard' })
+      return { name: 'gm-dashboard' }
     } else {
-      next({ name: 'dashboard' })
+      return { name: 'dashboard' }
     }
   } else if (to.meta.role === 'MESTRE') {
     if (user && user.role === 'MESTRE') {
-      next()
+      return true
     } else {
-      next({ name: 'dashboard' })
+      return { name: 'dashboard' }
     }
-  } else {
-    next()
   }
+  return true
 })
 
 export default router
