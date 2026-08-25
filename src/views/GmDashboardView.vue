@@ -927,6 +927,22 @@
               </div>
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-green-800/20">
+              <div>
+                <label class="block text-[10px] text-green-300 mb-1">💵 Recursos / Dinheiro em Espólio (R$)</label>
+                <input type="number" v-model.number="missionForm.rewardsJson.money" min="0" max="50000" placeholder="Ex: 500" class="w-full bg-black border border-green-800/40 rounded-lg p-2 text-xs text-parchment outline-none" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-green-300 mb-1">🗡️ Drop de Equipamento / Item de Arsenal (Opcional)</label>
+                <select v-model="missionForm.rewardsJson.equipmentDropId" class="w-full bg-black border border-green-800/40 rounded-lg p-2 text-xs text-parchment outline-none">
+                  <option value="">Nenhum item dropado</option>
+                  <option v-for="eq in compendiumEquipments" :key="eq.id" :value="eq.id">
+                    {{ eq.name }} ({{ eq.type }} - Dano: {{ eq.damage || 'N/A' }})
+                  </option>
+                </select>
+              </div>
+            </div>
+
             <!-- BÔNUS ESPECIAL DE PERÍCIA/ATRIBUTO -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-green-800/20">
               <div>
@@ -1266,6 +1282,8 @@ const defaultMissionForm = () => ({
   rewardsJson: {
     exp: 5,
     hunger: -2,
+    money: 0,
+    equipmentDropId: '',
     willpowerDamageSuperficial: 0,
     humanity: 0,
     skillBonus: { name: '', value: 1 },
@@ -1614,10 +1632,14 @@ const loadMissions = async () => {
 };
 
 const openMissionModal = async (mission?: any) => {
-  if (compendiumLocations.value.length === 0) {
+  if (compendiumLocations.value.length === 0 || compendiumEquipments.value.length === 0) {
     try {
-      const locRes = await api.get('/api/gm/compendium/locations');
+      const [locRes, eqRes] = await Promise.all([
+        api.get('/api/gm/compendium/locations'),
+        api.get('/api/gm/compendium/equipments')
+      ]);
       compendiumLocations.value = locRes.data;
+      compendiumEquipments.value = eqRes.data;
     } catch (e) {}
   }
   if (mission) {
@@ -1631,6 +1653,8 @@ const openMissionModal = async (mission?: any) => {
       rewardsJson: {
         exp: rawRewards.exp ?? 5,
         hunger: rawRewards.hunger ?? -2,
+        money: rawRewards.money ?? 0,
+        equipmentDropId: rawRewards.equipmentDropId || '',
         willpowerDamageSuperficial: rawRewards.willpowerDamageSuperficial ?? 0,
         humanity: rawRewards.humanity ?? 0,
         skillBonus: rawRewards.skillBonus || { name: '', value: 1 },
