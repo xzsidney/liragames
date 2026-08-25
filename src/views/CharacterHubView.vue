@@ -401,8 +401,9 @@ const characterHavenName = computed(() => {
   return character.value?.chronicle || 'Belenzinho'
 })
 
-const onNightStatusUpdated = (status: any) => {
+const onNightStatusUpdated = async (status: any) => {
   currentNightStatus.value = status
+  await fetchActiveMission()
 }
 
 // Missions AFK
