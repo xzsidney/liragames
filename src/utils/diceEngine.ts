@@ -28,6 +28,7 @@ export interface ActiveDie {
   faceNormals: FaceData[]
   settled: boolean
   finalValue?: number
+  floatingBadge?: THREE.Sprite
 }
 
 export class Dice3DEngine {
@@ -61,8 +62,8 @@ export class Dice3DEngine {
     // Câmera com perspectiva de cima
     const width = this.canvas.clientWidth || window.innerWidth
     const height = this.canvas.clientHeight || window.innerHeight
-    this.camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100)
-    this.camera.position.set(0, 22, 14)
+    this.camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100)
+    this.camera.position.set(0, 24, 15)
     this.camera.lookAt(0, 0, 0)
 
     // Renderer
@@ -89,19 +90,17 @@ export class Dice3DEngine {
     this.setupBoundaries()
 
     // Ordem das 10 faces (5 superiores, 5 inferiores)
-    // Faces superiores: 10, 2, 8, 4, 6
-    // Faces inferiores: 1, 9, 3, 7, 5
     const faceValues = [10, 2, 8, 4, 6, 1, 9, 3, 7, 5]
 
-    // Construção da Geometria Monolítica do D10 com UVs perfeitas
-    const { geometry, shape, normals } = this.buildD10GeometryAndPhysics(faceValues)
+    // Construção da Geometria Monolítica do D10 com Projeção Conforme
+    const { geometry, shape, normals, textPositions } = this.buildD10GeometryAndPhysics(faceValues)
     this.d10Geometry = geometry
     this.d10Shape = shape
     this.d10FaceNormals = normals
 
-    // Criar materiais das 10 faces
-    this.regularMaterials = faceValues.map(v => this.createFaceMaterial(v, 'regular'))
-    this.hungerMaterials = faceValues.map(v => this.createFaceMaterial(v, 'hunger'))
+    // Criar materiais das 10 faces com alinhamento milimétrico
+    this.regularMaterials = faceValues.map((v, i) => this.createFaceMaterial(v, 'regular', textPositions[i]))
+    this.hungerMaterials = faceValues.map((v, i) => this.createFaceMaterial(v, 'hunger', textPositions[i]))
 
     // Loop
     this.animate = this.animate.bind(this)
@@ -154,7 +153,7 @@ export class Dice3DEngine {
   }
 
   private setupLighting() {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.95)
     this.scene.add(ambientLight)
 
     const dirLight = new THREE.DirectionalLight(0xfff5ea, 2.2)
@@ -216,7 +215,7 @@ export class Dice3DEngine {
   }
 
   /**
-   * Constrói a geometria 3D do D10 com grupos multi-materiais para cada uma das 10 faces
+   * Constrói a geometria 3D do D10 com Projeção Conforme (Zero Distorção UV)
    */
   private buildD10GeometryAndPhysics(faceValues: number[]) {
     const scale = 1.35
@@ -237,7 +236,6 @@ export class Dice3DEngine {
       vertices.push(new THREE.Vector3(x, y, z))
     }
 
-    // Definição das 5 faces superiores e 5 inferiores
     const upperKites = [
       { vApex: 0, vLeft: 11, vCenter: 2, vRight: 3 },
       { vApex: 0, vLeft: 3,  vCenter: 4, vRight: 5 },
@@ -259,26 +257,22 @@ export class Dice3DEngine {
     const uvs: number[] = []
     const faceNormalsList: FaceData[] = []
     const cannonFaces: number[][] = []
+    const textPositions: { x: number; y: number; kitePoly: number[][] }[] = []
 
     const geometry = new THREE.BufferGeometry()
 
     let faceIndex = 0
 
-    // Coordenadas UV do kite no canvas 512x512
-    const uvApex = [0.5, 0.98]
-    const uvLeft = [0.03, 0.5]
-    const uvCenter = [0.5, 0.02]
-    const uvRight = [0.97, 0.5]
-
-    // 1. Processar faces superiores (0 a 4)
-    for (let i = 0; i < upperKites.length; i++) {
-      const k = upperKites[i]
-      const val = faceValues[faceIndex]
-      const pApex = vertices[k.vApex]
-      const pLeft = vertices[k.vLeft]
-      const pCenter = vertices[k.vCenter]
-      const pRight = vertices[k.vRight]
-
+    // Processador com Projeção Conforme Planar Exata
+    const addKiteFace = (
+      val: number,
+      pApex: THREE.Vector3,
+      pLeft: THREE.Vector3,
+      pCenter: THREE.Vector3,
+      pRight: THREE.Vector3,
+      cannonIndices: number[]
+    ) => {
+      // Vetor Normal da Face
       const vA = new THREE.Vector3().subVectors(pLeft, pApex)
       const vB = new THREE.Vector3().subVectors(pRight, pApex)
       let norm = new THREE.Vector3().crossVectors(vA, vB).normalize()
@@ -288,59 +282,97 @@ export class Dice3DEngine {
 
       faceNormalsList.push({ value: val, normal: norm.clone() })
 
+      // Eixo Y no plano da face (do Centro em direção ao Apex)
+      const axisY = new THREE.Vector3().subVectors(pApex, pCenter).normalize()
+      // Eixo X no plano da face (da Esquerda para a Direita)
+      const axisX = new THREE.Vector3().crossVectors(axisY, norm).normalize()
+      if (axisX.dot(new THREE.Vector3().subVectors(pRight, pLeft)) < 0) {
+        axisX.negate()
+      }
+
+      // Projetar os 4 vértices no plano 2D local
+      const proj = (p: THREE.Vector3) => {
+        const d = new THREE.Vector3().subVectors(p, fCenter)
+        return { x: d.dot(axisX), y: d.dot(axisY) }
+      }
+
+      const ptApex = proj(pApex)
+      const ptLeft = proj(pLeft)
+      const ptCenter = proj(pCenter)
+      const ptRight = proj(pRight)
+
+      // Bounding box da face
+      const minX = Math.min(ptApex.x, ptLeft.x, ptCenter.x, ptRight.x)
+      const maxX = Math.max(ptApex.x, ptLeft.x, ptCenter.x, ptRight.x)
+      const minY = Math.min(ptApex.y, ptLeft.y, ptCenter.y, ptRight.y)
+      const maxY = Math.max(ptApex.y, ptLeft.y, ptCenter.y, ptRight.y)
+
+      const spanX = (maxX - minX) * 1.12
+      const spanY = (maxY - minY) * 1.12
+      const midX = (minX + maxX) / 2
+      const midY = (minY + maxY) / 2
+
+      // Função de mapeamento Conforme para UV [0..1]
+      const toUV = (pt: { x: number; y: number }) => {
+        const u = (pt.x - midX) / spanX + 0.5
+        const v = (pt.y - midY) / spanY + 0.5
+        return [u, v]
+      }
+
+      const uvA = toUV(ptApex)
+      const uvL = toUV(ptLeft)
+      const uvC = toUV(ptCenter)
+      const uvR = toUV(ptRight)
+
+      // Salvar posição do centróide no canvas 512x512 para desenhar o texto exatamente no centro
+      const canvasPt = (uv: number[]) => [uv[0] * 512, (1 - uv[1]) * 512]
+      textPositions.push({
+        x: 256,
+        y: 256,
+        kitePoly: [canvasPt(uvA), canvasPt(uvR), canvasPt(uvC), canvasPt(uvL)]
+      })
+
       const startVertex = positions.length / 3
 
       // Triângulo 1 (Apex, Left, Center)
       positions.push(pApex.x, pApex.y, pApex.z, pLeft.x, pLeft.y, pLeft.z, pCenter.x, pCenter.y, pCenter.z)
       normals.push(norm.x, norm.y, norm.z, norm.x, norm.y, norm.z, norm.x, norm.y, norm.z)
-      uvs.push(uvApex[0], uvApex[1], uvLeft[0], uvLeft[1], uvCenter[0], uvCenter[1])
+      uvs.push(uvA[0], uvA[1], uvL[0], uvL[1], uvC[0], uvC[1])
 
       // Triângulo 2 (Apex, Center, Right)
       positions.push(pApex.x, pApex.y, pApex.z, pCenter.x, pCenter.y, pCenter.z, pRight.x, pRight.y, pRight.z)
       normals.push(norm.x, norm.y, norm.z, norm.x, norm.y, norm.z, norm.x, norm.y, norm.z)
-      uvs.push(uvApex[0], uvApex[1], uvCenter[0], uvCenter[1], uvRight[0], uvRight[1])
+      uvs.push(uvA[0], uvA[1], uvC[0], uvC[1], uvR[0], uvR[1])
 
-      // Adicionar grupo de material para esta face
       geometry.addGroup(startVertex, 6, faceIndex)
-
-      cannonFaces.push([k.vApex, k.vRight, k.vCenter, k.vLeft])
+      cannonFaces.push(cannonIndices)
       faceIndex++
     }
 
-    // 2. Processar faces inferiores (5 a 9)
+    // 1. Faces Superiores
+    for (let i = 0; i < upperKites.length; i++) {
+      const k = upperKites[i]
+      addKiteFace(
+        faceValues[i],
+        vertices[k.vApex],
+        vertices[k.vLeft],
+        vertices[k.vCenter],
+        vertices[k.vRight],
+        [k.vApex, k.vRight, k.vCenter, k.vLeft]
+      )
+    }
+
+    // 2. Faces Inferiores
     for (let i = 0; i < lowerKites.length; i++) {
       const k = lowerKites[i]
-      const val = faceValues[faceIndex]
-      const pApex = vertices[k.vApex]
-      const pLeft = vertices[k.vLeft]
-      const pCenter = vertices[k.vCenter]
-      const pRight = vertices[k.vRight]
-
-      const vA = new THREE.Vector3().subVectors(pRight, pApex)
-      const vB = new THREE.Vector3().subVectors(pLeft, pApex)
-      let norm = new THREE.Vector3().crossVectors(vA, vB).normalize()
-
-      const fCenter = new THREE.Vector3().add(pApex).add(pLeft).add(pCenter).add(pRight).multiplyScalar(0.25)
-      if (norm.dot(fCenter) < 0) norm.negate()
-
-      faceNormalsList.push({ value: val, normal: norm.clone() })
-
-      const startVertex = positions.length / 3
-
-      // Triângulo 1 (Apex, Right, Center)
-      positions.push(pApex.x, pApex.y, pApex.z, pRight.x, pRight.y, pRight.z, pCenter.x, pCenter.y, pCenter.z)
-      normals.push(norm.x, norm.y, norm.z, norm.x, norm.y, norm.z, norm.x, norm.y, norm.z)
-      uvs.push(uvApex[0], uvApex[1], uvRight[0], uvRight[1], uvCenter[0], uvCenter[1])
-
-      // Triângulo 2 (Apex, Center, Left)
-      positions.push(pApex.x, pApex.y, pApex.z, pCenter.x, pCenter.y, pCenter.z, pLeft.x, pLeft.y, pLeft.z)
-      normals.push(norm.x, norm.y, norm.z, norm.x, norm.y, norm.z, norm.x, norm.y, norm.z)
-      uvs.push(uvApex[0], uvApex[1], uvCenter[0], uvCenter[1], uvLeft[0], uvLeft[1])
-
-      geometry.addGroup(startVertex, 6, faceIndex)
-
-      cannonFaces.push([k.vApex, k.vLeft, k.vCenter, k.vRight])
-      faceIndex++
+      addKiteFace(
+        faceValues[i + 5],
+        vertices[k.vApex],
+        vertices[k.vRight],
+        vertices[k.vCenter],
+        vertices[k.vLeft],
+        [k.vApex, k.vLeft, k.vCenter, k.vRight]
+      )
     }
 
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
@@ -353,65 +385,66 @@ export class Dice3DEngine {
       faces: cannonFaces
     })
 
-    return { geometry, shape, normals: faceNormalsList }
+    return { geometry, shape, normals: faceNormalsList, textPositions }
   }
 
   /**
-   * Gera a textura de uma face com fundo sombreado, borda metálica e o número perfeitamente gravado
+   * Gera a textura de uma face desenhando o polígono e o texto perfeitamente centralizados
    */
-  private createFaceMaterial(value: number, type: 'regular' | 'hunger'): THREE.MeshStandardMaterial {
+  private createFaceMaterial(
+    value: number,
+    type: 'regular' | 'hunger',
+    meta: { x: number; y: number; kitePoly: number[][] }
+  ): THREE.MeshStandardMaterial {
     const canvas = document.createElement('canvas')
     canvas.width = 512
     canvas.height = 512
     const ctx = canvas.getContext('2d')!
 
-    // Formato de pipa (kite) correspondente exatamente aos UVs
     ctx.save()
 
-    // Fundo da face
+    // 1. Fundo da Face
     const grad = ctx.createRadialGradient(256, 256, 30, 256, 256, 250)
     if (type === 'regular') {
-      grad.addColorStop(0, '#24232c')
-      grad.addColorStop(0.65, '#131219')
-      grad.addColorStop(1, '#08080c')
+      grad.addColorStop(0, '#26252e')
+      grad.addColorStop(0.65, '#14131a')
+      grad.addColorStop(1, '#09080d')
     } else {
-      grad.addColorStop(0, '#9e1111')
-      grad.addColorStop(0.65, '#690000')
-      grad.addColorStop(1, '#3a0000')
+      grad.addColorStop(0, '#a81313')
+      grad.addColorStop(0.65, '#6e0000')
+      grad.addColorStop(1, '#3b0000')
     }
     ctx.fillStyle = grad
     ctx.fillRect(0, 0, 512, 512)
 
-    // Borda do kite
-    ctx.beginPath()
-    ctx.moveTo(256, 12)
-    ctx.lineTo(496, 256)
-    ctx.lineTo(256, 500)
-    ctx.lineTo(16, 256)
-    ctx.closePath()
+    // 2. Traçado do Losango Conforme Exato
+    if (meta.kitePoly && meta.kitePoly.length === 4) {
+      ctx.beginPath()
+      ctx.moveTo(meta.kitePoly[0][0], meta.kitePoly[0][1])
+      ctx.lineTo(meta.kitePoly[1][0], meta.kitePoly[1][1])
+      ctx.lineTo(meta.kitePoly[2][0], meta.kitePoly[2][1])
+      ctx.lineTo(meta.kitePoly[3][0], meta.kitePoly[3][1])
+      ctx.closePath()
 
-    ctx.strokeStyle = type === 'regular' ? '#d4af37' : '#ff4444'
-    ctx.lineWidth = 14
-    ctx.stroke()
+      ctx.strokeStyle = type === 'regular' ? '#d4af37' : '#ff4444'
+      ctx.lineWidth = 14
+      ctx.stroke()
 
-    // Borda interna decorativa
-    ctx.beginPath()
-    ctx.moveTo(256, 40)
-    ctx.lineTo(468, 256)
-    ctx.lineTo(256, 472)
-    ctx.lineTo(44, 256)
-    ctx.closePath()
+      // Borda Interna Fina
+      ctx.strokeStyle = type === 'regular' ? 'rgba(212, 175, 55, 0.45)' : 'rgba(255, 120, 120, 0.45)'
+      ctx.lineWidth = 4
+      ctx.stroke()
+    }
 
-    ctx.strokeStyle = type === 'regular' ? 'rgba(212, 175, 55, 0.45)' : 'rgba(255, 120, 120, 0.45)'
-    ctx.lineWidth = 4
-    ctx.stroke()
-
-    // Tipografia Cinzel
+    // 3. Tipografia Cinzel Nítida e Proporcional
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.shadowColor = 'rgba(0, 0, 0, 0.95)'
-    ctx.shadowBlur = 10
+    ctx.shadowBlur = 12
     ctx.shadowOffsetY = 4
+
+    const tx = meta.x
+    const ty = meta.y
 
     if (type === 'regular') {
       ctx.fillStyle = '#ffdf66'
@@ -419,28 +452,28 @@ export class Dice3DEngine {
 
       if (value === 10) {
         ctx.font = 'bold 125px "Cinzel", "Georgia", serif'
-        ctx.fillText('10☥', 256, 256)
+        ctx.fillText('10☥', tx, ty)
       } else {
-        ctx.fillText(value.toString(), 256, 256)
+        ctx.fillText(value.toString(), tx, ty)
       }
     } else {
-      // Fome (Hunger Dice)
+      // Hunger Dice
       if (value === 10) {
         ctx.fillStyle = '#ff6b6b'
         ctx.font = 'bold 125px "Cinzel", "Georgia", serif'
-        ctx.fillText('10☥', 256, 256)
+        ctx.fillText('10☥', tx, ty)
       } else if (value === 1) {
         ctx.fillStyle = '#ff2222'
         ctx.font = 'bold 150px serif'
-        ctx.fillText('1☠', 256, 256)
+        ctx.fillText('1☠', tx, ty)
       } else if (value >= 6) {
         ctx.fillStyle = '#ffffff'
         ctx.font = 'bold 150px "Cinzel", "Georgia", serif'
-        ctx.fillText(value.toString(), 256, 256)
+        ctx.fillText(value.toString(), tx, ty)
       } else {
         ctx.fillStyle = 'rgba(255, 210, 210, 0.75)'
         ctx.font = 'bold 150px "Cinzel", "Georgia", serif'
-        ctx.fillText(value.toString(), 256, 256)
+        ctx.fillText(value.toString(), tx, ty)
       }
     }
 
@@ -457,6 +490,67 @@ export class Dice3DEngine {
       roughness: type === 'regular' ? 0.22 : 0.28,
       metalness: type === 'regular' ? 0.35 : 0.15
     })
+  }
+
+  /**
+   * Cria um Badge Flutuante em 3D sobre o dado quando ele para
+   */
+  private createFloatingBadge(value: number, type: 'regular' | 'hunger'): THREE.Sprite {
+    const canvas = document.createElement('canvas')
+    canvas.width = 256
+    canvas.height = 256
+    const ctx = canvas.getContext('2d')!
+
+    ctx.clearRect(0, 0, 256, 256)
+
+    // Círculo com brilho
+    const grad = ctx.createRadialGradient(128, 128, 20, 128, 128, 120)
+    if (type === 'regular') {
+      grad.addColorStop(0, value >= 6 ? 'rgba(30, 28, 38, 0.95)' : 'rgba(18, 18, 22, 0.9)')
+      grad.addColorStop(1, 'rgba(10, 10, 14, 0.85)')
+    } else {
+      grad.addColorStop(0, value === 1 ? 'rgba(120, 10, 10, 0.95)' : 'rgba(90, 8, 8, 0.95)')
+      grad.addColorStop(1, 'rgba(45, 4, 4, 0.85)')
+    }
+
+    ctx.fillStyle = grad
+    ctx.beginPath()
+    ctx.arc(128, 128, 110, 0, Math.PI * 2)
+    ctx.fill()
+
+    // Borda
+    ctx.strokeStyle = type === 'regular' 
+      ? (value === 10 ? '#ffd700' : value >= 6 ? '#d4af37' : '#666677')
+      : (value === 10 ? '#ff4d4d' : value === 1 ? '#ff1111' : '#ff6666')
+    ctx.lineWidth = 10
+    ctx.stroke()
+
+    // Texto
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.font = 'bold 110px "Cinzel", serif'
+    ctx.fillStyle = type === 'regular' 
+      ? (value >= 6 ? '#ffd700' : '#888899')
+      : (value === 1 ? '#ff3333' : '#ffffff')
+
+    if (value === 10) {
+      ctx.fillText('10☥', 128, 132)
+    } else if (value === 1 && type === 'hunger') {
+      ctx.font = 'bold 115px serif'
+      ctx.fillText('1☠', 128, 132)
+    } else {
+      ctx.fillText(value.toString(), 128, 132)
+    }
+
+    const texture = new THREE.CanvasTexture(canvas)
+    const spriteMat = new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true,
+      depthTest: false
+    })
+    const sprite = new THREE.Sprite(spriteMat)
+    sprite.scale.set(2.2, 2.2, 2.2)
+    return sprite
   }
 
   public rollDice(regularCount: number, hungerCount: number) {
@@ -485,14 +579,12 @@ export class Dice3DEngine {
   private spawnDie(type: 'regular' | 'hunger', index: number, total: number): ActiveDie {
     const id = `die_${Date.now()}_${index}`
 
-    // Malha monolítica com as 10 texturas integradas
     const materials = type === 'regular' ? this.regularMaterials : this.hungerMaterials
     const mesh = new THREE.Mesh(this.d10Geometry, materials)
     mesh.castShadow = true
     mesh.receiveShadow = true
     this.scene.add(mesh)
 
-    // Corpo Rígido no Cannon-es
     const body = new CANNON.Body({
       mass: 1.5,
       shape: this.d10Shape,
@@ -558,6 +650,10 @@ export class Dice3DEngine {
 
   public clearDice() {
     for (const die of this.dice) {
+      if (die.floatingBadge) {
+        this.scene.remove(die.floatingBadge)
+        die.floatingBadge.material.dispose()
+      }
       this.scene.remove(die.mesh)
       this.world.removeBody(die.body)
     }
@@ -583,6 +679,16 @@ export class Dice3DEngine {
         if (!die.settled) {
           die.settled = true
           die.finalValue = this.getUpwardFace(die)
+
+          // Criar badge flutuante acima do dado
+          const badge = this.createFloatingBadge(die.finalValue, die.type)
+          badge.position.set(
+            die.mesh.position.x,
+            die.mesh.position.y + 2.4,
+            die.mesh.position.z
+          )
+          this.scene.add(badge)
+          die.floatingBadge = badge
         }
       } else {
         allSettled = false
