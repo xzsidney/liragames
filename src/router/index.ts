@@ -15,6 +15,7 @@ import CharacterAdventuresView from '../views/CharacterAdventuresView.vue'
 import CharacterVisualNovelView from '../views/CharacterVisualNovelView.vue'
 import GmDashboardView from '../views/GmDashboardView.vue'
 import DiceTestView from '../views/DiceTestView.vue'
+import CharacterActiveMissionView from '../views/CharacterActiveMissionView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -73,6 +74,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/personagem/cacada',
     name: 'CharacterHunting',
     component: CharacterHuntingView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/personagem/missao-ativa',
+    name: 'character-active-mission',
+    component: CharacterActiveMissionView,
     meta: { requiresAuth: true }
   },
   {

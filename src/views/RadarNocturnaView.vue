@@ -13,28 +13,15 @@
 
       <div class="flex items-center gap-4">
         <!-- Status de Missão Ativa no Header -->
-        <div v-if="activeMission" class="flex items-center gap-2.5 px-3 py-1.5 rounded bg-cyan-950/90 border border-cyan-500/50 text-xs font-mono shadow-[0_0_15px_rgba(0,255,255,0.2)]">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-          <span class="text-cyan-300 uppercase tracking-wider text-[11px] truncate max-w-[150px] sm:max-w-[200px]">
-            {{ activeMission.currentReport?.title || 'Operação' }}
-          </span>
-          <span class="text-gold font-bold">{{ activeMission.readyToResolve ? 'Pronto' : timeRemainingDisplay }}</span>
-          
-          <button 
-            v-if="activeMission.readyToResolve" 
-            @click.stop="resolveActiveMission" 
-            class="ml-1 px-2.5 py-0.5 rounded bg-gold hover:bg-gold-light text-black font-bold uppercase text-[10px] shadow-[0_0_10px_rgba(212,175,55,0.4)] animate-bounce"
-          >
-            Coletar
-          </button>
-          <button 
-            v-else 
-            @click.stop="showActiveMissionModal = true" 
-            class="ml-1 px-2 py-0.5 rounded bg-cyan-900/60 hover:bg-cyan-800 border border-cyan-500/40 text-cyan-200 uppercase text-[10px] font-bold"
-          >
-            📜 Dossiê
-          </button>
-        </div>
+        <button 
+          v-if="activeMission" 
+          @click="router.push('/personagem/missao-ativa?id=' + characterId)" 
+          class="flex items-center gap-2 px-3 py-1.5 rounded bg-red-950/80 hover:bg-red-900 border border-red-500/50 text-xs font-mono text-red-300 shadow-[0_0_15px_rgba(255,0,0,0.2)] transition-all animate-pulse"
+          title="Ver missão em andamento"
+        >
+          <span class="w-2 h-2 rounded-full bg-red-400"></span>
+          <span class="uppercase tracking-wider font-bold">⚔️ Operação em Andamento</span>
+        </button>
 
         <button @click="returnToHaven" class="text-cyan-500 hover:text-cyan-300 transition text-xs uppercase tracking-widest font-serif border border-cyan-500/30 px-4 py-2 rounded hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] hover:bg-cyan-900/20 flex items-center gap-1.5">
           <span>🏠</span>
@@ -286,64 +273,10 @@
       </aside>
     </main>
 
-    <!-- MODAL GÓTICO DE RESULTADO / RECOMPENSAS DA OPERAÇÃO -->
-    <div v-if="showResultModal && finalReport" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-md">
-      <div class="border-2 border-red-700/80 bg-[#0a0507] p-6 sm:p-8 max-w-lg w-full relative rounded-xl shadow-[0_0_50px_rgba(255,0,0,0.35)] space-y-6 max-h-[90vh] overflow-y-auto font-sans">
-        <div class="text-center space-y-1">
-          <div class="text-2xl font-serif" :class="finalReport.isSuccess ? 'text-green-400' : 'text-red-500'">
-            {{ finalReport.isSuccess ? '🏆 OPERAÇÃO CONCLUÍDA COM SUCESSO' : '💀 OPERAÇÃO INTERROMPIDA' }}
-          </div>
-          <h3 class="font-serif text-lg text-parchment font-bold uppercase tracking-wider">
-            {{ finalReport.title }}
-          </h3>
-        </div>
-        
-        <!-- ETAPAS E ROLAGENS DE DADOS -->
-        <div class="space-y-3 max-h-[220px] overflow-y-auto pr-2">
-          <div v-for="(step, index) in finalReport.steps || []" :key="index" class="bg-black/70 border-l-2 p-3 text-xs space-y-1 rounded-r" :class="step.passed ? 'border-l-green-500' : 'border-l-red-600'">
-            <div class="font-bold uppercase tracking-widest text-[11px] font-mono" :class="step.passed ? 'text-green-400' : 'text-red-400'">
-              {{ step.actionName }} ({{ step.pool || 'Teste' }})
-            </div>
-            <div class="text-gray-300 leading-relaxed">{{ step.narrative }}</div>
-            <div v-if="step.rolls && Array.isArray(step.rolls)" class="text-[10px] text-gray-500 font-mono">
-              🎲 Dados: [{{ step.rolls?.join ? step.rolls.join(', ') : step.rolls }}] → <strong :class="step.passed ? 'text-green-400' : 'text-red-400'">{{ step.successes || 0 }} sucessos</strong>
-            </div>
-          </div>
-        </div>
-
-        <!-- RECOMPENSAS E IMPACTOS -->
-        <div v-if="finalReport.finalChanges && finalReport.finalChanges.length > 0" class="border-t border-white/10 pt-3">
-          <h4 class="text-gold font-serif uppercase tracking-widest text-xs mb-2 font-bold flex items-center gap-1.5">
-            <span>✨</span> Recompensas & Impactos na Ficha
-          </h4>
-          <div class="space-y-1.5 text-xs text-parchment font-mono">
-            <div v-for="(change, i) in finalReport.finalChanges" :key="i" class="p-2.5 bg-black/60 border border-white/10 rounded flex items-center gap-2">
-              <span>{{ change }}</span>
-            </div>
-          </div>
-        </div>
-        
-        <button @click="closeResultModal" class="w-full bg-vamp-c2 hover:bg-red-600 text-white p-3 font-serif uppercase tracking-widest font-bold transition-all rounded shadow-[0_0_15px_rgba(192,57,43,0.5)]">
-          Compreendido
-        </button>
-      </div>
-    </div>
-
-    <!-- MODAL DO DOSSIÊ TÁTICO / ETAPAS AO VIVO E CANCELAMENTO -->
-    <ActiveMissionModal 
-      :visible="showActiveMissionModal" 
-      :activeMission="activeMission" 
-      :timeRemaining="timeRemainingDisplay" 
-      @close="showActiveMissionModal = false" 
-      @resolved="resolveActiveMission" 
-      @cancelled="onMissionCancelled" 
-    />
-
     <!-- BARRA INFERIOR / DOCK DO CICLO NOTURNO -->
     <NightClockWidget 
       v-if="characterId" 
       :characterId="characterId" 
-      ref="nightClockRef" 
       @status-updated="onNightStatusUpdated" 
     />
 
@@ -351,11 +284,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '../services/api'
 import NightClockWidget from '../components/NightClockWidget.vue'
-import ActiveMissionModal from '../components/ActiveMissionModal.vue'
 import { notifySuccess, notifyError } from '../utils/gothicAlerts'
 
 const router = useRouter()
@@ -364,11 +296,7 @@ const characterId = ref<string>('')
 const loading = ref(true)
 const exploring = ref(false)
 const dispatching = ref(false)
-const nightClockRef = ref<any>(null)
 const currentNightStatus = ref<any>(null)
-
-const now = ref(Date.now())
-let tickerInterval: any = null
 
 const onNightStatusUpdated = (status: any) => {
   currentNightStatus.value = status
@@ -377,21 +305,6 @@ const onNightStatusUpdated = (status: any) => {
 const mapNodes = ref<any[]>([])
 const sidebarNode = ref<any>(null)
 const activeMission = ref<any>(null)
-const showResultModal = ref(false)
-const showActiveMissionModal = ref(false)
-const finalReport = ref<any>(null)
-
-const closeResultModal = () => {
-  showResultModal.value = false
-  finalReport.value = null
-}
-
-const onMissionCancelled = async () => {
-  activeMission.value = null
-  showActiveMissionModal.value = false
-  await fetchActiveMission()
-  await nightClockRef.value?.fetchStatus()
-}
 
 const returnToHaven = () => {
   router.push(`/personagem/hub?id=${characterId.value}`)
@@ -541,9 +454,7 @@ const startReconMission = async () => {
       characterId: characterId.value
     })
     notifySuccess('Expedição Iniciada', `Missão de Reconhecimento iniciada para ${sidebarNode.value.nome}!`)
-    await fetchActiveMission()
-    await nightClockRef.value?.fetchStatus()
-    showActiveMissionModal.value = true
+    router.push(`/personagem/missao-ativa?id=${characterId.value}`)
   } catch (e: any) {
     console.error('Erro ao iniciar reconhecimento:', e)
     notifyError('Falha no Reconhecimento', e.response?.data?.error || 'Não foi possível iniciar a expedição.')
@@ -561,8 +472,7 @@ const dispatchMission = async (mission: any) => {
       definitionMissionIdleId: mission.id
     })
     notifySuccess('Incursão Iniciada', `Operação '${mission.title}' iniciada no distrito!`)
-    await fetchActiveMission()
-    await nightClockRef.value?.fetchStatus()
+    router.push(`/personagem/missao-ativa?id=${characterId.value}`)
   } catch (e: any) {
     console.error(e)
     notifyError('Falha no Despacho', e.response?.data?.error || 'Não foi possível iniciar a operação.')
@@ -570,37 +480,6 @@ const dispatchMission = async (mission: any) => {
     dispatching.value = false
   }
 }
-
-const resolveActiveMission = async () => {
-  if (!activeMission.value) return
-  try {
-    const res = await api.post('/api/missions-idle/resolve', {
-      activeMissionId: activeMission.value.id
-    })
-    finalReport.value = res.data.report
-    showResultModal.value = true
-    showActiveMissionModal.value = false
-    activeMission.value = null
-    await fetchActiveMission()
-    await fetchLocations()
-    if (sidebarNode.value) {
-      sidebarNode.value = mapNodes.value.find(n => n.id === sidebarNode.value.id) || null
-    }
-    await nightClockRef.value?.fetchStatus()
-  } catch (e: any) {
-    console.error(e)
-    notifyError('Erro ao Resolver', e.response?.data?.error || 'Não foi possível resolver a operação.')
-  }
-}
-
-const timeRemainingDisplay = computed(() => {
-  if (!activeMission.value || !activeMission.value.expiresAt) return ''
-  const diff = new Date(activeMission.value.expiresAt).getTime() - now.value
-  if (diff <= 0) return 'Pronto para Coleta'
-  const mins = Math.floor(diff / 60000)
-  const secs = Math.floor((diff % 60000) / 1000)
-  return `${mins}m ${secs.toString().padStart(2, '0')}s`
-})
 
 const showTooltip = (e: MouseEvent, node: any) => {
   const target = e.target as HTMLElement
@@ -640,13 +519,6 @@ const closeSidebarIfClickOutside = (e: MouseEvent) => {
 onMounted(async () => {
   await fetchLocations()
   await fetchActiveMission()
-  tickerInterval = setInterval(() => {
-    now.value = Date.now()
-  }, 1000)
-})
-
-onUnmounted(() => {
-  if (tickerInterval) clearInterval(tickerInterval)
 })
 </script>
 

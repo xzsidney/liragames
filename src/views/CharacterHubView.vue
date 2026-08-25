@@ -138,14 +138,26 @@
               <div class="text-xs text-parchment leading-relaxed"><strong class="text-vamp-c2">Acesso Concedido:</strong> Conexão estabelecida com a rede Nocturna. O sangue está em temperatura ideal para a noite de caça.</div>
             </div>
             
-            <div v-if="activeMission" class="bg-black/40 border border-gold-dim/30 border-l-2 border-l-gold p-4 rounded-sm shadow-md">
-              <div class="text-[9px] text-parchment-dim/60 mb-2 tracking-widest uppercase font-serif">OPERAÇÃO EM ANDAMENTO</div>
-              <div class="text-xs text-parchment leading-relaxed"><strong class="text-gold">Despacho Ativo:</strong> {{ activeMission.DefinitionMissionIdle?.title }}</div>
-              <div class="text-[11px] text-parchment-dim mt-2 italic">{{ activeMission.DefinitionMissionIdle?.description }}</div>
-              <div class="mt-4 flex items-center justify-between border-t border-vamp-border/30 pt-3">
-                 <span class="text-xs text-gold font-mono tracking-widest bg-black/50 px-2 py-1 rounded">TEMPO: {{ formatTimeRemaining(activeMission.expiresAt) }}</span>
-                 <button v-if="isMissionExpired(activeMission.expiresAt)" @click="resolveActiveMission()" class="text-[10px] font-bold border border-gold text-gold px-4 py-1.5 hover:bg-gold hover:text-black transition-colors rounded-sm uppercase tracking-widest shadow-[0_0_10px_rgba(201,168,76,0.3)]">Resolver</button>
+            <!-- CARD DE OPERAÇÃO EM ANDAMENTO NO HUB -->
+            <div v-if="activeMission" class="bg-black/60 border border-red-700/60 border-l-4 border-l-vamp-c2 p-4 rounded-sm shadow-md space-y-3 animate-fade-in">
+              <div class="flex justify-between items-center text-[10px] font-mono uppercase tracking-widest text-red-400">
+                <span class="flex items-center gap-1.5 font-bold">
+                  <span class="w-2 h-2 rounded-full bg-vamp-c2 animate-ping"></span>
+                  Operação Ativa em Nocturna
+                </span>
+                <span class="text-gold font-bold">{{ activeMission.readyToResolve ? 'Pronto para Coleta' : 'Em Campo' }}</span>
               </div>
+              <div>
+                <h4 class="font-serif text-sm font-bold text-parchment">{{ activeMission.currentReport?.title || activeMission.DefinitionMissionIdle?.title || 'Operação de Campo' }}</h4>
+                <p class="text-xs text-stone-400 font-light mt-1">{{ activeMission.DefinitionMissionIdle?.description }}</p>
+              </div>
+              <button 
+                @click="router.push('/personagem/missao-ativa?id=' + characterId)" 
+                class="w-full py-2.5 rounded bg-red-950/80 hover:bg-red-900 border border-red-500/60 text-red-200 text-xs font-serif font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(255,0,0,0.3)] flex items-center justify-center gap-2"
+              >
+                <span>⚔️</span>
+                <span>Acessar Centro de Operação (Missão Ativa)</span>
+              </button>
             </div>
 
             <div class="bg-black/40 border border-vamp-border/50 border-l-2 border-l-gold-dim p-4 rounded-sm shadow-md opacity-80 hover:opacity-100 transition-opacity">
@@ -153,60 +165,6 @@
               <div class="text-xs text-parchment leading-relaxed"><strong class="text-gold-dim">Boato:</strong> Relatos de confronto armado entre forças civis armadas e uma entidade não catalogada nas linhas férreas. Ameaça de área elevada para Nível 3.</div>
             </div>
 
-          </div>
-
-          <!-- CARD DE OPERAÇÃO ATIVA / MISSÃO EM ANDAMENTO -->
-          <div v-if="activeMission" class="p-4 mx-5 my-3 rounded-lg border border-vamp-c2 bg-black/80 shadow-[0_0_20px_rgba(192,57,43,0.3)] space-y-3 animate-fade-in">
-            <div class="flex justify-between items-center text-[10px] font-mono uppercase tracking-widest text-vamp-c2">
-              <span class="flex items-center gap-1.5 font-bold">
-                <span class="w-2 h-2 rounded-full bg-vamp-c2 animate-ping"></span>
-                Operação em Andamento
-              </span>
-              <span>Etapa {{ activeMission.currentStage || 1 }}/{{ activeMission.totalStages || 1 }}</span>
-            </div>
-
-            <div>
-              <h4 class="font-serif text-sm font-bold text-parchment">{{ activeMission.currentReport?.title || activeMission.DefinitionMissionIdle?.title || 'Caçada Urbana' }}</h4>
-              <p class="text-[11px] text-gray-400 font-light mt-0.5">Vampiro despachado em território de Nocturna.</p>
-            </div>
-
-            <div class="space-y-1">
-              <div class="flex justify-between text-[10px] font-mono text-gray-400">
-                <span>Progresso</span>
-                <span class="text-gold font-bold">{{ isMissionExpired(activeMission.expiresAt) ? 'Concluído' : formatTimeRemaining(activeMission.expiresAt) }}</span>
-              </div>
-              <div class="w-full bg-zinc-900 h-2 rounded overflow-hidden border border-white/10">
-                <div 
-                  class="bg-vamp-c2 h-full transition-all duration-1000 shadow-[0_0_8px_rgba(192,57,43,0.8)]"
-                  :style="{ width: isMissionExpired(activeMission.expiresAt) ? '100%' : `${((activeMission.currentStage || 1) / (activeMission.totalStages || 1)) * 100}%` }"
-                ></div>
-              </div>
-            </div>
-
-            <div class="pt-1 flex gap-2">
-              <button 
-                v-if="isMissionExpired(activeMission.expiresAt) || activeMission.readyToResolve"
-                @click="resolveActiveMission"
-                class="flex-1 py-2.5 rounded bg-gold hover:bg-gold-light text-black text-xs font-serif font-bold uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)] animate-bounce"
-              >
-                🏆 Coletar Recompensas & Sangue
-              </button>
-              <template v-else>
-                <button 
-                  @click="showActiveMissionModal = true"
-                  class="flex-1 py-2 rounded bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 text-cyan-300 text-xs font-serif uppercase tracking-wider transition-all"
-                >
-                  📜 Inspecionar Dossiê Ao Vivo
-                </button>
-                <button 
-                  @click="router.push('/personagem/radar?id=' + characterId)"
-                  class="px-3 py-2 rounded border border-white/20 bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-serif uppercase tracking-wider transition-all"
-                  title="Abrir no Radar"
-                >
-                  📡 Radar
-                </button>
-              </template>
-            </div>
           </div>
 
           <!-- Botões de Ação -->
@@ -304,59 +262,6 @@
 
     </main>
     
-    <!-- MODAL GÓTICO DE RESULTADO / RECOMPENSAS DA OPERAÇÃO -->
-    <div v-if="showResultModal && finalReport" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-md">
-      <div class="border-2 border-red-700/80 bg-[#0a0507] p-6 sm:p-8 max-w-lg w-full relative rounded-xl shadow-[0_0_50px_rgba(255,0,0,0.35)] space-y-6 max-h-[90vh] overflow-y-auto font-sans">
-        <div class="text-center space-y-1">
-          <div class="text-2xl font-serif" :class="finalReport.isSuccess ? 'text-green-400' : 'text-red-500'">
-            {{ finalReport.isSuccess ? '🏆 OPERAÇÃO CONCLUÍDA COM SUCESSO' : '💀 OPERAÇÃO INTERROMPIDA' }}
-          </div>
-          <h3 class="font-serif text-lg text-parchment font-bold uppercase tracking-wider">
-            {{ finalReport.title }}
-          </h3>
-        </div>
-        
-        <!-- ETAPAS E ROLAGENS DE DADOS -->
-        <div class="space-y-3 max-h-[220px] overflow-y-auto pr-2">
-          <div v-for="(step, index) in finalReport.steps || []" :key="index" class="bg-black/70 border-l-2 p-3 text-xs space-y-1 rounded-r" :class="step.passed ? 'border-l-green-500' : 'border-l-red-600'">
-            <div class="font-bold uppercase tracking-widest text-[11px] font-mono" :class="step.passed ? 'text-green-400' : 'text-red-400'">
-              {{ step.actionName }} ({{ step.pool || 'Teste' }})
-            </div>
-            <div class="text-gray-300 leading-relaxed">{{ step.narrative }}</div>
-            <div v-if="step.rolls && Array.isArray(step.rolls)" class="text-[10px] text-gray-500 font-mono">
-              🎲 Dados: [{{ step.rolls?.join ? step.rolls.join(', ') : step.rolls }}] → <strong :class="step.passed ? 'text-green-400' : 'text-red-400'">{{ step.successes || 0 }} sucessos</strong>
-            </div>
-          </div>
-        </div>
-
-        <!-- RECOMPENSAS E IMPACTOS -->
-        <div v-if="finalReport.finalChanges && finalReport.finalChanges.length > 0" class="border-t border-white/10 pt-3">
-          <h4 class="text-gold font-serif uppercase tracking-widest text-xs mb-2 font-bold flex items-center gap-1.5">
-            <span>✨</span> Recompensas & Impactos na Ficha
-          </h4>
-          <div class="space-y-1.5 text-xs text-parchment font-mono">
-            <div v-for="(change, i) in finalReport.finalChanges" :key="i" class="p-2.5 bg-black/60 border border-white/10 rounded flex items-center gap-2">
-              <span>{{ change }}</span>
-            </div>
-          </div>
-        </div>
-        
-        <button @click="closeResultModal" class="w-full bg-vamp-c2 hover:bg-red-600 text-white p-3 font-serif uppercase tracking-widest font-bold transition-all rounded shadow-[0_0_15px_rgba(192,57,43,0.5)]">
-          Compreendido
-        </button>
-      </div>
-    </div>
-
-    <!-- MODAL DO DOSSIÊ TÁTICO / ETAPAS AO VIVO E CANCELAMENTO -->
-    <ActiveMissionModal 
-      :visible="showActiveMissionModal" 
-      :activeMission="activeMission" 
-      :timeRemaining="formatTimeRemaining(activeMission?.expiresAt)" 
-      @close="showActiveMissionModal = false" 
-      @resolved="resolveActiveMission" 
-      @cancelled="onMissionCancelled" 
-    />
-
     <!-- BARRA INFERIOR / DOCK DO CICLO NOTURNO -->
     <NightClockWidget 
       v-if="characterId" 
@@ -375,11 +280,10 @@ const handleImageError = (e: Event) => {
   if (target) target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'600\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%231a0b12\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23c9a84c\' font-family=\'serif\' font-size=\'48\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3E%E2%98%A5%3C/text%3E%3C/svg%3E';
 }
 
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api, { API_BASE_URL } from '../services/api'
 import NightClockWidget from '../components/NightClockWidget.vue'
-import ActiveMissionModal from '../components/ActiveMissionModal.vue'
 import { notifySuccess, notifyError } from '../utils/gothicAlerts'
 
 const router = useRouter()
@@ -408,18 +312,7 @@ const onNightStatusUpdated = async (status: any) => {
 
 // Missions AFK
 const activeMission = ref<any>(null)
-const showActiveMissionModal = ref(false)
-let timerInterval: any = null
-const now = ref(new Date())
-
 const isAwakening = ref(false)
-
-const onMissionCancelled = async () => {
-  activeMission.value = null
-  showActiveMissionModal.value = false
-  await fetchActiveMission()
-  await nightClockRef.value?.fetchStatus()
-}
 
 const awakenCharacter = async () => {
   if (!character.value) return;
@@ -467,58 +360,8 @@ const fetchActiveMission = async () => {
   }
 }
 
-const formatTimeRemaining = (expiresAtStr: string) => {
-  if (!expiresAtStr) return '00:00:00'
-  const exp = new Date(expiresAtStr).getTime()
-  const diff = exp - now.value.getTime()
-  if (diff <= 0) return '00:00:00'
-  
-  const h = Math.floor((diff / (1000 * 60 * 60)) % 24)
-  const m = Math.floor((diff / 1000 / 60) % 60)
-  const s = Math.floor((diff / 1000) % 60)
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-}
-
-const isMissionExpired = (expiresAtStr: string) => {
-  if (!expiresAtStr) return false
-  const exp = new Date(expiresAtStr).getTime()
-  return now.value.getTime() >= exp
-}
-
-const showResultModal = ref(false)
-const finalReport = ref<any>(null)
-
-const closeResultModal = () => {
-  showResultModal.value = false
-  finalReport.value = null
-}
-
-const resolveActiveMission = async () => {
-  if (!activeMission.value) return
-  try {
-    const res = await api.post('/api/missions-idle/resolve', {
-      activeMissionId: activeMission.value.id
-    })
-    finalReport.value = res.data.report
-    showResultModal.value = true
-    activeMission.value = null
-    await fetchCharacter()
-    await nightClockRef.value?.fetchStatus()
-  } catch (e: any) {
-    console.error(e)
-    alert(e.response?.data?.error || 'Erro ao resolver missão')
-  }
-}
-
 onMounted(() => {
   fetchCharacter()
-  timerInterval = setInterval(() => {
-    now.value = new Date()
-  }, 1000)
-})
-
-onUnmounted(() => {
-  if (timerInterval) clearInterval(timerInterval)
 })
 </script>
 <style scoped>
