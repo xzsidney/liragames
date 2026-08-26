@@ -390,11 +390,13 @@
             </span>
           </div>
           <h2 class="text-xl sm:text-2xl font-serif font-bold text-parchment">
-            {{ selectedActivity.mission?.title || selectedActivity.resultData?.title || 'Operação de Campo' }}
+            {{ selectedActivity.resultData?.report?.title || selectedActivity.resultData?.title || selectedActivity.mission?.title || 'Operação de Campo' }}
           </h2>
           <div class="text-xs text-stone-400 font-mono flex items-center gap-3 pt-1">
             <span>📅 {{ formatActivityDate(selectedActivity.createdAt) }}</span>
-            <span v-if="selectedActivity.mission?.Location?.name">• 📍 {{ selectedActivity.mission.Location.name }}</span>
+            <span v-if="selectedActivity.resultData?.report?.targetLocation || selectedActivity.mission?.Location?.name">
+              • 📍 {{ selectedActivity.resultData?.report?.targetLocation || selectedActivity.mission?.Location?.name }}
+            </span>
           </div>
         </div>
 
@@ -412,13 +414,13 @@
           <div class="space-y-2.5">
             <div 
               v-for="step in selectedActivity.resultData.report.steps" 
-              :key="step.stepId || step.order"
+              :key="step.stepId || step.stepOrder || step.order"
               class="bg-black/60 border border-white/10 rounded-xl p-3.5 space-y-1.5"
             >
               <div class="flex justify-between items-center text-xs">
                 <span class="font-serif font-bold text-stone-200 flex items-center gap-1.5">
                   <span class="w-5 h-5 rounded-full bg-black border border-white/20 flex items-center justify-center text-[10px]">
-                    {{ step.order }}
+                    {{ step.stepOrder || step.order }}
                   </span>
                   {{ step.actionName }}
                 </span>
@@ -433,7 +435,7 @@
                 {{ step.narrative }}
               </p>
               <div v-if="step.rolls" class="text-[10px] font-mono text-stone-400 pl-6 flex items-center gap-2">
-                <span>Dados: [{{ Array.isArray(step.rolls) ? step.rolls.join(', ') : step.rolls }}]</span>
+                <span>🎲 {{ step.pool ? `${step.pool} &rarr; ` : '' }}Dados: <strong class="text-white">[{{ Array.isArray(step.rolls) ? step.rolls.join(', ') : step.rolls }}]</strong></span>
                 <span>&rarr;</span>
                 <span :class="step.passed ? 'text-green-400 font-bold' : 'text-red-400 font-bold'">
                   {{ step.successes }} {{ step.successes === 1 ? 'sucesso' : 'sucessos' }}
@@ -616,14 +618,31 @@ const fetchRecentActivities = async () => {
   if (!characterId.value) return
   try {
     const res = await api.get(`/api/character-vampires/${characterId.value}/activities`)
-    recentActivities.value = res.data || []
+    const rawList = res.data || []
+    recentActivities.value = rawList.slice(0, 3).map((act: any) => {
+      let rData = act.resultData
+      if (typeof rData === 'string') {
+        try { rData = JSON.parse(rData) } catch {}
+      }
+      if (rData && typeof rData.rewards === 'string') {
+        try { rData.rewards = JSON.parse(rData.rewards) } catch {}
+      }
+      if (rData && typeof rData.report === 'string') {
+        try { rData.report = JSON.parse(rData.report) } catch {}
+      }
+      if (rData && rData.report && typeof rData.report.steps === 'string') {
+        try { rData.report.steps = JSON.parse(rData.report.steps) } catch {}
+      }
+      act.resultData = rData
+      return act
+    })
   } catch (e) {
     console.error('Erro ao buscar atividades recentes:', e)
   }
 }
 
-onMounted(() => {
-  fetchCharacter()
+onMounted(async () => {
+  await fetchCharacter()
 })
 </script>
 
