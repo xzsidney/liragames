@@ -314,6 +314,116 @@
               </div>
             </div>
 
+            <!-- COMBATE & ARSENAL (EQUIPAMENTOS) -->
+            <div v-if="activeTab === 'equipment'" class="space-y-8 max-w-4xl animate-fade-in">
+              
+              <!-- HEADER COM ATALHO PRO MERCADO NEGRO -->
+              <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-white/10">
+                <div>
+                  <div class="font-serif text-[11px] tracking-[3px] uppercase text-gold-dim flex items-center gap-4">
+                    ARSENAL & EQUIPAMENTOS DE COMBATE
+                    <div class="flex-1 h-px bg-gradient-to-r from-gold-dim/50 to-transparent hidden sm:block"></div>
+                  </div>
+                  <p class="text-xs text-stone-400 font-sans mt-1">Armas e blindagens prontas para uso em campo ou guardadas no seu refúgio.</p>
+                </div>
+                <button 
+                  @click="router.push('/personagem/inventario?id=' + characterId)" 
+                  class="px-4 py-2 bg-gold/15 hover:bg-gold/30 border border-gold/40 text-gold text-xs font-serif uppercase tracking-widest rounded transition-all shrink-0 flex items-center gap-1.5 shadow-[0_0_15px_rgba(212,175,55,0.15)]"
+                >
+                  <span>🏪</span> Acessar Mercado Negro & Loja
+                </button>
+              </div>
+
+              <!-- SEÇÃO: EQUIPADOS EM PRONTO USO -->
+              <div class="space-y-4">
+                <h3 class="font-serif text-xs text-gold uppercase tracking-widest font-bold flex items-center gap-2">
+                  <span>⚔️</span> Equipamentos em Pronto Uso
+                </h3>
+
+                <div v-if="character?.CharacterVampireEquipments?.filter((e: any) => e.equipped).length" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div 
+                    v-for="item in character.CharacterVampireEquipments.filter((e: any) => e.equipped)" 
+                    :key="item.id"
+                    class="bg-black/60 border-2 border-blood-red/70 rounded-xl p-5 shadow-[0_0_20px_rgba(185,28,28,0.2)] flex flex-col justify-between space-y-3"
+                  >
+                    <div>
+                      <div class="flex justify-between items-start mb-1.5">
+                        <span class="text-[10px] font-serif uppercase tracking-widest text-gold-dim">
+                          {{ item.DefinitionEquipment?.type }}
+                        </span>
+                        <span class="text-[9px] font-mono uppercase bg-blood-red/30 text-blood-bright border border-blood-red/60 px-2 py-0.5 rounded font-bold">
+                          Equipado
+                        </span>
+                      </div>
+                      <h4 class="font-serif text-base text-parchment font-bold">{{ item.DefinitionEquipment?.name }}</h4>
+                      <p class="text-xs text-stone-400 font-light mt-1 line-clamp-2 leading-relaxed">{{ item.DefinitionEquipment?.description }}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-[11px] font-mono bg-black/40 p-2.5 rounded border border-white/5 text-stone-300">
+                      <div v-if="item.DefinitionEquipment?.damage">Dano: <strong class="text-red-400">{{ item.DefinitionEquipment.damage }}</strong></div>
+                      <div v-if="item.DefinitionEquipment?.armorLevel">Proteção: <strong class="text-gold">{{ item.DefinitionEquipment.armorLevel }}</strong></div>
+                      <div v-if="item.DefinitionEquipment?.range">Alcance: <strong>{{ item.DefinitionEquipment.range }}m</strong></div>
+                      <div v-if="item.DefinitionEquipment?.concealment">Ocultamento: <strong>{{ item.DefinitionEquipment.concealment }}</strong></div>
+                    </div>
+
+                    <button 
+                      @click="toggleEquipOnSheet(item)"
+                      class="w-full py-1.5 rounded border border-white/10 hover:bg-white/10 text-stone-400 hover:text-white text-xs font-serif uppercase tracking-wider transition-all"
+                    >
+                      Guardar no Refúgio
+                    </button>
+                  </div>
+                </div>
+
+                <div v-else class="p-6 text-center text-xs text-stone-500 font-serif italic border border-white/5 rounded-xl bg-black/20">
+                  Nenhuma arma ou armadura está equipada em pronto uso no momento.
+                </div>
+              </div>
+
+              <!-- SEÇÃO: ARSENAL GUARDADO NO ABRIGO / RESERVA -->
+              <div class="space-y-4 pt-4 border-t border-white/5">
+                <h3 class="font-serif text-xs text-stone-300 uppercase tracking-widest font-bold flex items-center gap-2">
+                  <span>🎒</span> Arsenal Guardado no Refúgio
+                </h3>
+
+                <div v-if="character?.CharacterVampireEquipments?.filter((e: any) => !e.equipped).length" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div 
+                    v-for="item in character.CharacterVampireEquipments.filter((e: any) => !e.equipped)" 
+                    :key="item.id"
+                    class="bg-black/40 border border-white/10 hover:border-white/20 rounded-xl p-4 flex flex-col justify-between space-y-3"
+                  >
+                    <div>
+                      <div class="flex justify-between items-start mb-1">
+                        <span class="text-[10px] font-serif uppercase tracking-widest text-stone-500">
+                          {{ item.DefinitionEquipment?.type }}
+                        </span>
+                        <span class="text-[9px] font-mono text-stone-500">Qtd: {{ item.quantity }}</span>
+                      </div>
+                      <h4 class="font-serif text-sm text-stone-200 font-bold">{{ item.DefinitionEquipment?.name }}</h4>
+                      <p class="text-xs text-stone-400 font-light mt-1 line-clamp-2 leading-relaxed">{{ item.DefinitionEquipment?.description }}</p>
+                    </div>
+
+                    <div class="flex items-center justify-between text-[11px] font-mono text-stone-400 pt-1">
+                      <span v-if="item.DefinitionEquipment?.damage">Dano: <strong class="text-red-400">{{ item.DefinitionEquipment.damage }}</strong></span>
+                      <span v-if="item.DefinitionEquipment?.armorLevel">Proteção: <strong class="text-gold">{{ item.DefinitionEquipment.armorLevel }}</strong></span>
+                    </div>
+
+                    <button 
+                      @click="toggleEquipOnSheet(item)"
+                      class="w-full py-1.5 rounded bg-blood-red/70 hover:bg-blood-red text-white text-xs font-serif uppercase tracking-wider transition-all"
+                    >
+                      Equipar para Combate
+                    </button>
+                  </div>
+                </div>
+
+                <div v-else class="p-6 text-center text-xs text-stone-500 font-serif italic border border-white/5 rounded-xl bg-black/20">
+                  Nenhum item reserva guardado no refúgio.
+                </div>
+              </div>
+
+            </div>
+
           </div>
         </div>
       </div>
@@ -674,6 +784,16 @@ const fetchCharacter = async () => {
     router.push('/jogador/vampire')
   } finally {
     loading.value = false
+  }
+}
+
+const toggleEquipOnSheet = async (item: any) => {
+  try {
+    const res = await api.put(`/api/character-vampires/${characterId.value}/equipments/${item.definitionEquipmentId}/equip`);
+    item.equipped = res.data.equipped ? 1 : 0;
+  } catch (err) {
+    console.error('Erro ao alternar equipamento:', err);
+    alert('Não foi possível alternar o status do equipamento.');
   }
 }
 
