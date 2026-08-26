@@ -1,24 +1,29 @@
 <template>
   <div>
     <!-- INLINE MODE (COLOCADO ABAIXO DA HUMANIDADE NA COLUNA DA ESQUERDA) -->
-    <div v-if="inline" class="bg-black/60 border border-white/10 p-4 rounded-xl space-y-3.5 shadow-inner">
-      <div class="flex items-center gap-3.5">
-        
-        <!-- CÍRCULO ESTILIZADO (IMG 2) -->
-        <div class="w-14 h-14 rounded-full border-2 border-cyan-900/60 relative flex flex-col items-center justify-center bg-black/90 shadow-[0_0_15px_rgba(0,255,255,0.15)] shrink-0">
-          <div class="absolute -top-1 w-2.5 h-1 bg-cyan-400 rounded-full shadow-[0_0_8px_#00ffff]"></div>
-          <span class="text-[10px] mb-0.5">🌙</span>
-          <span class="text-cyan-400 font-mono font-bold text-xs tracking-wider">{{ liveTimeFormatted.substring(0, 5) }}</span>
+    <div v-if="inline" class="bg-black/60 border border-white/10 p-4 rounded-xl space-y-4 shadow-inner">
+      <!-- TEXTOS INFORMATIVOS NO TOPO -->
+      <div class="font-mono space-y-1 pb-2 border-b border-white/5 text-left">
+        <div class="flex justify-between items-center text-[10px] text-stone-400 uppercase tracking-wider">
+          <span>Janela de Caça:</span>
+          <strong class="text-stone-200 font-bold">20:00 às 06:00</strong>
         </div>
+        <div class="flex justify-between items-center text-xs uppercase tracking-wider font-bold">
+          <span class="text-stone-400 font-mono text-[10px]">Restam:</span>
+          <span :class="isSunHazardActive ? 'text-red-400 animate-pulse' : 'text-cyan-300'">
+            {{ isDaytime ? '☀️ AMANHECEU' : timeRemainingDisplay }}
+          </span>
+        </div>
+      </div>
 
-        <!-- TEXTOS INFORMATIVOS -->
-        <div class="flex-1 min-w-0 font-mono text-left">
-          <div class="text-[10px] text-stone-400 uppercase tracking-wider">
-            JANELA DE CAÇA: <strong class="text-stone-200">20:00 às 06:00</strong>
-          </div>
-          <div class="text-xs uppercase tracking-wider font-bold mt-1" :class="isSunHazardActive ? 'text-red-400 animate-pulse' : 'text-stone-400'">
-            RESTAM: <span :class="isSunHazardActive ? 'text-red-400' : 'text-cyan-300'">{{ isDaytime ? '☀️ AMANHECEU' : timeRemainingDisplay }}</span>
-          </div>
+      <!-- CÍRCULO ESTILIZADO CENTRALIZADO -->
+      <div class="flex justify-center my-1">
+        <div class="w-18 h-18 py-2 px-4 rounded-full border-2 border-cyan-900/60 relative flex flex-col items-center justify-center bg-black/90 shadow-[0_0_20px_rgba(0,255,255,0.2)]">
+          <div class="absolute -top-1 w-3 h-1 bg-cyan-400 rounded-full shadow-[0_0_10px_#00ffff]"></div>
+          <span class="text-xs mb-0.5">🌙</span>
+          <span class="text-cyan-300 font-mono font-bold text-sm tracking-widest drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]">
+            {{ liveTimeFormatted.substring(0, 5) }}
+          </span>
         </div>
       </div>
 
@@ -44,7 +49,7 @@
         v-else 
         @click="awakenNight" 
         :disabled="isProcessing"
-        class="w-full py-2 rounded-lg bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-500/50 text-cyan-300 hover:text-white text-xs font-serif font-bold uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(0,255,255,0.15)] disabled:opacity-50 flex items-center justify-center gap-1.5"
+        class="w-full py-2.5 rounded-lg bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-500/50 text-cyan-300 hover:text-white text-xs font-serif font-bold uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(0,255,255,0.15)] disabled:opacity-50 flex items-center justify-center gap-1.5"
       >
         <span>🌙</span>
         <span>{{ isProcessing ? 'Descansando...' : 'Avançar Noite / Dormir' }}</span>
