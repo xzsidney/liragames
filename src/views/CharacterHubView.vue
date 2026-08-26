@@ -114,13 +114,26 @@
                   <div v-for="i in 10" :key="i" class="h-2 flex-1 rounded-sm border border-white/10 bg-black/50" :class="i <= character.humanity ? 'bg-gold-dim border-gold/40' : ''"></div>
                 </div>
               </div>
+
+              <!-- RELÓGIO NOTURNO / CICLO NOTURNO INLINE (CIRCULAR) -->
+              <div class="pt-2">
+                <NightClockWidget 
+                  v-if="characterId" 
+                  :characterId="characterId" 
+                  :isHub="true"
+                  :inline="true"
+                  ref="nightClockRef" 
+                  @status-updated="onNightStatusUpdated" 
+                />
+              </div>
+
             </div>
           </div>
         </div>
       </section>
 
       <!-- ========================================================================= -->
-      <!-- CENTRO: Terminal de Operações & Diário de Bordo Vivo (6 col) -->
+      <!-- CENTRO: Terminal de Operações & Feed de Vigilância (6 col) -->
       <!-- ========================================================================= -->
       <section class="xl:col-span-6 flex flex-col gap-6">
         <div class="demiplane-box rounded-2xl overflow-hidden flex flex-col flex-1 bg-black/70 border border-white/10 shadow-xl">
@@ -133,10 +146,10 @@
             <span class="text-gold font-mono">REDE NOCTURNA</span>
           </div>
 
-          <div class="p-5 flex-1 space-y-5 overflow-y-auto">
+          <div class="p-5 flex-1 space-y-6 overflow-y-auto">
             
-            <!-- CARD DE OPERAÇÃO ATIVA EM CAMPO -->
-            <div v-if="activeMission" class="bg-black/80 border-2 border-red-600/70 border-l-4 border-l-vamp-c2 p-5 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.25)] space-y-3 animate-fade-in">
+            <!-- CARD DE OPERAÇÃO ATIVA EM CAMPO (SE HOUVER) -->
+            <div v-if="activeMission" class="bg-black/80 border-2 border-red-600/70 border-l-4 border-l-vamp-c2 p-5 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.25)] space-y-2 animate-fade-in">
               <div class="flex justify-between items-center text-xs font-mono uppercase tracking-widest text-red-400">
                 <span class="flex items-center gap-2 font-bold">
                   <span class="w-2.5 h-2.5 rounded-full bg-vamp-c2 animate-ping"></span>
@@ -151,14 +164,33 @@
                 <h4 class="font-serif text-base font-bold text-parchment">{{ activeMission.currentReport?.title || activeMission.DefinitionMissionIdle?.title || 'Operação de Campo' }}</h4>
                 <p class="text-xs text-stone-400 font-light mt-1">{{ activeMission.DefinitionMissionIdle?.description }}</p>
               </div>
+            </div>
 
-              <button 
-                @click="router.push('/personagem/missao-ativa?id=' + characterId)" 
-                class="w-full py-2.5 rounded-lg bg-red-950/90 hover:bg-blood-red border border-red-500/60 text-white text-xs font-serif font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(255,0,0,0.3)] flex items-center justify-center gap-2"
-              >
-                <span>⚔️</span>
-                <span>Acessar Centro de Operação (Missão Ativa)</span>
-              </button>
+            <!-- VIGILÂNCIA URBANA, RUÍDOS & NOTÍCIAS (MUNDO VIVO) -->
+            <div class="space-y-3">
+              <div class="flex justify-between items-center pb-2 border-b border-white/5">
+                <span class="text-[11px] font-serif uppercase tracking-[2px] text-parchment-dim font-bold flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-vamp-c2 animate-pulse"></span>
+                  Ruídos & Vigilância Urbana
+                </span>
+                <span class="text-[10px] font-mono text-stone-500">Transmissão Direta</span>
+              </div>
+
+              <!-- RUÍDO 1: STATUS DO SISTEMA -->
+              <div class="bg-black/50 border border-vamp-border/60 border-l-2 border-l-vamp-c2 p-4 rounded-xl shadow-md space-y-1">
+                <div class="text-[9px] text-stone-400 tracking-widest uppercase font-serif">SISTEMA V.5.2 • CONEXÃO SEGURA</div>
+                <div class="text-xs text-parchment leading-relaxed">
+                  <strong class="text-vamp-c2">Acesso Concedido:</strong> Conexão estabelecida com a rede Nocturna. O sangue está em temperatura ideal para a noite de caça.
+                </div>
+              </div>
+
+              <!-- RUÍDO 2: BOATO URBANO / GM -->
+              <div class="bg-black/50 border border-vamp-border/60 border-l-2 border-l-gold-dim p-4 rounded-xl shadow-md space-y-1">
+                <div class="text-[9px] text-stone-400 tracking-widest uppercase font-serif">HÁ 34 MINUTOS • PÁTIO DOS SUSPIROS</div>
+                <div class="text-xs text-parchment leading-relaxed">
+                  <strong class="text-gold-dim">Boato:</strong> Relatos de confronto armado entre forças civis e uma entidade não catalogada nas linhas férreas. Ameaça de área elevada para Nível 3.
+                </div>
+              </div>
             </div>
 
             <!-- REGISTRO OPERACIONAL RECENTE (HISTÓRICO REAL) -->
@@ -216,16 +248,10 @@
                 </div>
               </div>
 
-              <!-- CASO NÃO TENHA ATIVIDADES RECENTES -->
-              <div v-else class="p-8 text-center text-xs text-stone-500 font-serif italic border border-white/5 rounded-xl bg-black/40 space-y-3">
-                <div class="text-3xl">📡</div>
+              <!-- CASO NÃO TENHA ATIVIDADES RECENTES (SEM BOTÃO!) -->
+              <div v-else class="p-8 text-center text-xs text-stone-500 font-serif italic border border-white/5 rounded-xl bg-black/40">
+                <div class="text-2xl mb-2">📡</div>
                 <p>Nenhuma operação recente registrada no terminal.</p>
-                <button 
-                  @click="router.push('/personagem/radar?id=' + characterId)" 
-                  class="px-4 py-2 bg-cyan-950 hover:bg-cyan-600 border border-cyan-500/40 text-cyan-300 hover:text-black font-serif text-[11px] uppercase tracking-wider rounded-lg transition-all font-bold"
-                >
-                  Iniciar Varredura no Radar
-                </button>
               </div>
 
             </div>
@@ -338,15 +364,6 @@
       </section>
 
     </main>
-    
-    <!-- BARRA INFERIOR / DOCK DO CICLO NOTURNO -->
-    <NightClockWidget 
-      v-if="characterId" 
-      :characterId="characterId" 
-      :isHub="true"
-      ref="nightClockRef" 
-      @status-updated="onNightStatusUpdated" 
-    />
 
   </div>
 </template>

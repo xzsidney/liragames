@@ -1,7 +1,58 @@
 <template>
   <div>
-    <!-- DOCK / FOOTER FIXO NA PARTE INFERIOR DA TELA -->
-    <footer class="fixed bottom-0 left-0 right-0 z-40 bg-[#030712]/95 border-t border-cyan-500/30 backdrop-blur-md px-4 sm:px-8 py-2.5 shadow-[0_-5px_25px_rgba(0,0,0,0.8)] font-mono text-xs select-none">
+    <!-- INLINE MODE (COLOCADO ABAIXO DA HUMANIDADE NA COLUNA DA ESQUERDA) -->
+    <div v-if="inline" class="bg-black/60 border border-white/10 p-4 rounded-xl space-y-3.5 shadow-inner">
+      <div class="flex items-center gap-3.5">
+        
+        <!-- CÍRCULO ESTILIZADO (IMG 2) -->
+        <div class="w-14 h-14 rounded-full border-2 border-cyan-900/60 relative flex flex-col items-center justify-center bg-black/90 shadow-[0_0_15px_rgba(0,255,255,0.15)] shrink-0">
+          <div class="absolute -top-1 w-2.5 h-1 bg-cyan-400 rounded-full shadow-[0_0_8px_#00ffff]"></div>
+          <span class="text-[10px] mb-0.5">🌙</span>
+          <span class="text-cyan-400 font-mono font-bold text-xs tracking-wider">{{ liveTimeFormatted.substring(0, 5) }}</span>
+        </div>
+
+        <!-- TEXTOS INFORMATIVOS -->
+        <div class="flex-1 min-w-0 font-mono text-left">
+          <div class="text-[10px] text-stone-400 uppercase tracking-wider">
+            JANELA DE CAÇA: <strong class="text-stone-200">20:00 às 06:00</strong>
+          </div>
+          <div class="text-xs uppercase tracking-wider font-bold mt-1" :class="isSunHazardActive ? 'text-red-400 animate-pulse' : 'text-stone-400'">
+            RESTAM: <span :class="isSunHazardActive ? 'text-red-400' : 'text-cyan-300'">{{ isDaytime ? '☀️ AMANHECEU' : timeRemainingDisplay }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BARRA DE PROGRESSO -->
+      <div class="w-full bg-black/80 h-1.5 rounded-full overflow-hidden border border-cyan-950/80">
+        <div 
+          class="h-full transition-all duration-500 rounded-full" 
+          :class="isSunHazardActive ? 'bg-red-500 animate-pulse' : 'bg-gradient-to-r from-cyan-500 via-blue-500 to-amber-400'"
+          :style="{ width: `${progressPercent}%` }"
+        ></div>
+      </div>
+
+      <!-- BOTÃO DE AVANÇAR NOITE / DORMIR -->
+      <button 
+        v-if="isSunHazardActive" 
+        @click="showEmergencyModal = true"
+        class="w-full py-2 rounded-lg bg-red-950/90 hover:bg-red-900 border border-red-500 text-red-200 text-xs font-serif font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(255,0,0,0.4)] animate-bounce"
+      >
+        ☀️ Perigo Solar (Abrigo)
+      </button>
+
+      <button 
+        v-else 
+        @click="awakenNight" 
+        :disabled="isProcessing"
+        class="w-full py-2 rounded-lg bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-500/50 text-cyan-300 hover:text-white text-xs font-serif font-bold uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(0,255,255,0.15)] disabled:opacity-50 flex items-center justify-center gap-1.5"
+      >
+        <span>🌙</span>
+        <span>{{ isProcessing ? 'Descansando...' : 'Avançar Noite / Dormir' }}</span>
+      </button>
+    </div>
+
+    <!-- DOCK / FOOTER FIXO NA PARTE INFERIOR DA TELA (QUANDO NÃO FOR INLINE) -->
+    <footer v-else class="fixed bottom-0 left-0 right-0 z-40 bg-[#030712]/95 border-t border-cyan-500/30 backdrop-blur-md px-4 sm:px-8 py-2.5 shadow-[0_-5px_25px_rgba(0,0,0,0.8)] font-mono text-xs select-none">
       <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
         
         <!-- ESQUERDA: Ícone, Status e Local Atual -->
@@ -179,6 +230,7 @@ import { confirmAction, notifySuccess, notifyError } from '../utils/gothicAlerts
 const props = defineProps<{
   characterId: string
   isHub?: boolean
+  inline?: boolean
 }>()
 
 const emit = defineEmits(['status-updated'])
@@ -226,6 +278,14 @@ const hoursRemainingDisplay = computed(() => {
   const minsSpent = nightStatus.value?.nightMinutesSpent || 0
   const rem = Math.max(0, 10 - Math.floor(minsSpent / 60))
   return rem
+})
+
+const timeRemainingDisplay = computed(() => {
+  const minsSpent = nightStatus.value?.nightMinutesSpent || 0
+  const remMins = Math.max(0, 600 - minsSpent)
+  const h = Math.floor(remMins / 60)
+  const m = remMins % 60
+  return `${h}H ${m.toString().padStart(2, '0')}M`
 })
 
 const progressPercent = computed(() => {
