@@ -235,6 +235,7 @@
                 :class="{
                   'bg-green-950/20 border-green-700/50 shadow-[0_0_15px_rgba(34,197,94,0.1)]': step.status === 'COMPLETED' && step.passed,
                   'bg-red-950/30 border-red-800/60 shadow-[0_0_15px_rgba(239,68,68,0.15)]': step.status === 'COMPLETED' && !step.passed,
+                  'bg-amber-950/40 border-amber-500/70 shadow-[0_0_20px_rgba(245,158,11,0.2)] animate-pulse': step.status === 'FROZEN_SUN',
                   'bg-yellow-950/20 border-yellow-500/50 animate-pulse shadow-[0_0_15px_rgba(234,179,8,0.15)]': step.status === 'IN_PROGRESS',
                   'bg-black/40 border-white/5 opacity-50': step.status === 'LOCKED'
                 }"
@@ -247,6 +248,7 @@
                       :class="{
                         'bg-green-600 text-black': step.status === 'COMPLETED' && step.passed,
                         'bg-red-600 text-white': step.status === 'COMPLETED' && !step.passed,
+                        'bg-amber-500 text-black font-bold': step.status === 'FROZEN_SUN',
                         'bg-yellow-500 text-black animate-spin': step.status === 'IN_PROGRESS',
                         'bg-zinc-800 text-gray-400': step.status === 'LOCKED'
                       }"
@@ -259,6 +261,9 @@
                   <div class="flex items-center gap-2 text-[11px] font-mono">
                     <span v-if="step.status === 'COMPLETED'" class="px-2.5 py-0.5 rounded font-bold uppercase" :class="step.passed ? 'bg-green-950 text-green-400 border border-green-800' : 'bg-red-950 text-red-400 border border-red-800'">
                       {{ step.passed ? '✔ Sucesso' : '✖ Falha' }}
+                    </span>
+                    <span v-else-if="step.status === 'FROZEN_SUN'" class="px-2.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500 font-bold uppercase">
+                      ⛔ Interrompida pelo Sol
                     </span>
                     <span v-else-if="step.status === 'IN_PROGRESS'" class="px-2.5 py-0.5 rounded bg-yellow-950 text-yellow-400 border border-yellow-700 font-bold uppercase">
                       ⏳ Executando
@@ -499,21 +504,15 @@ const completedStagesDisplay = computed(() => {
 })
 
 const progressPercentage = computed(() => {
+  if (isSunHazardActive.value) return 0
   if (isReady.value) return 100
   const total = totalStagesDisplay.value
   const current = completedStagesDisplay.value
   return Math.min(100, Math.round((current / total) * 100))
 })
 
-// Garante que todas as etapas fiquem COMPLETED quando isReady for verdadeiro
 const displaySteps = computed(() => {
-  const steps = activeMission.value?.currentReport?.steps || []
-  if (!isReady.value) return steps
-
-  return steps.map((s: any) => ({
-    ...s,
-    status: 'COMPLETED'
-  }))
+  return activeMission.value?.currentReport?.steps || []
 })
 
 const missionCategoryLabel = computed(() => {
