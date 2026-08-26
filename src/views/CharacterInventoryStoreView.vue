@@ -302,15 +302,24 @@
             </div>
 
             <button 
+              v-if="!isRetainerHired(lacaio.id)"
               @click="hireRetainer(lacaio)"
-              :disabled="(character?.money || 0) < lacaio.cost"
+              :disabled="(character?.money || 0) < lacaio.cost || hiringId === lacaio.id"
               class="w-full py-2.5 px-3 rounded-lg font-serif text-xs uppercase tracking-wider transition-all duration-300 font-bold flex items-center justify-center gap-2"
               :class="(character?.money || 0) >= lacaio.cost 
                 ? 'bg-cyan-950 hover:bg-cyan-600 border border-cyan-500/50 text-cyan-300 hover:text-black shadow-[0_0_15px_rgba(6,182,212,0.2)]' 
                 : 'bg-stone-900 border border-stone-800 text-stone-600 cursor-not-allowed'"
             >
+              <span v-if="hiringId === lacaio.id" class="animate-spin">⏳</span>
               <span>{{ (character?.money || 0) >= lacaio.cost ? '🤝 Contratar Especialista' : '⛔ Saldo Insuficiente' }}</span>
             </button>
+
+            <div 
+              v-else
+              class="w-full py-2.5 px-3 rounded-lg font-serif text-xs uppercase tracking-wider font-bold text-center bg-cyan-950/80 border border-cyan-500 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+            >
+              ✔ A Serviço do Refúgio
+            </div>
           </div>
         </div>
 
@@ -336,6 +345,8 @@ const inventoryItems = ref<any[]>([])
 const storeCatalog = ref<any[]>([])
 const loading = ref(true)
 const buyingId = ref<string | null>(null)
+const hiringId = ref<string | null>(null)
+const hiredRetainers = ref<string[]>([])
 
 // Filtros da Loja
 const storeSearch = ref('')
@@ -443,6 +454,7 @@ const fetchCharacterAndInventory = async () => {
     const resChar = await api.get(`/api/character-vampires/${id}`)
     character.value = resChar.data
     inventoryItems.value = resChar.data.CharacterVampireEquipments || []
+    hiredRetainers.value = resChar.data.Haven?.attributes?.retainers || []
 
     const resCatalog = await api.get('/api/definition-equipments')
     storeCatalog.value = resCatalog.data || []
@@ -451,6 +463,10 @@ const fetchCharacterAndInventory = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const isRetainerHired = (retainerId: string) => {
+  return hiredRetainers.value.includes(retainerId)
 }
 
 const toggleEquip = async (item: any) => {
@@ -507,23 +523,30 @@ const buyItem = async (equipment: any) => {
 
 const hireRetainer = async (lacaio: any) => {
   if ((character.value?.money || 0) < lacaio.cost) {
-    notifyError('Saldo Insuficiente', 'Você não possui dinheiro suficiente para contratar este lacaio.')
+    notifyError('Saldo Insuficiente', 'Você não possui dinheiro suficiente para contratar este especialista.')
     return
   }
 
   try {
-    const newMoney = Math.max(0, (character.value.money || 0) - lacaio.cost)
-    await api.put(`/api/character-vampires/${characterId.value}`, {
-      money: newMoney
+    hiringId.value = lacaio.id
+    const res = await api.post(`/api/character-vampires/${characterId.value}/retainers`, {
+      retainerId: lacaio.id,
+      cost: lacaio.cost
     })
-    character.value.money = newMoney
+    
+    if (res.data.newMoney !== undefined) {
+      character.value.money = res.data.newMoney
+    }
+    hiredRetainers.value = res.data.retainers || []
 
     notifySuccess(
-      'Lacaio Contratado!',
-      `"${lacaio.name}" agora presta serviços jurados ao seu refúgio!`
+      'Especialista Contratado!',
+      res.data.message || `"${lacaio.name}" agora presta serviços jurados ao seu refúgio!`
     )
-  } catch (err) {
-    notifyError('Erro na Contratação', 'Não foi possível formalizar o pacto de sangue com o lacaio.')
+  } catch (err: any) {
+    notifyError('Erro na Contratação', err.response?.data?.error || 'Não foi possível contratar o especialista.')
+  } finally {
+    hiringId.value = null
   }
 }
 

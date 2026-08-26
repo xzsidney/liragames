@@ -18,6 +18,7 @@ import DiceTestView from '../views/DiceTestView.vue'
 import CharacterActiveMissionView from '../views/CharacterActiveMissionView.vue'
 import CharacterHotelShelterView from '../views/CharacterHotelShelterView.vue'
 import CharacterSewerShelterView from '../views/CharacterSewerShelterView.vue'
+import CharacterHavenView from '../views/CharacterHavenView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -94,6 +95,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/personagem/abrigo-esgoto',
     name: 'character-sewer-shelter',
     component: CharacterSewerShelterView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/personagem/refugio',
+    name: 'character-haven',
+    component: CharacterHavenView,
     meta: { requiresAuth: true }
   },
   {

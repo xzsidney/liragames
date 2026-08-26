@@ -1,6 +1,6 @@
 
 <template>
-  <div class="min-h-screen demiplane-bg text-parchment font-sans relative overflow-x-hidden selection:bg-blood-red selection:text-white pb-10">
+  <div class="min-h-screen demiplane-bg text-parchment font-sans relative overflow-x-hidden selection:bg-blood-red selection:text-white pb-24">
 
     <!-- SUBTLE NOISE/TEXTURE -->
     <div class="fixed inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay z-0" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
@@ -34,12 +34,11 @@
           </div>
         </div>
         
-        <div class="flex items-center gap-6 text-[10px] font-sans tracking-widest uppercase text-parchment-dim">
-          <div class="hidden md:block">Refúgio: <span class="text-gold font-bold ml-1">🏠 {{ characterHavenName }}</span></div>
-          <div class="hidden sm:block">Status: <span class="text-vamp-c2 font-bold ml-1">Noite Ativa</span></div>
-          <button @click="router.push('/personagem/ficha?id=' + characterId)" class="border border-gold-dim px-4 py-1.5 text-gold hover:bg-gold/10 transition-colors rounded-sm shadow-[0_0_10px_rgba(201,168,76,0.1)]">
-            Ficha Completa
-          </button>
+        <div class="flex items-center gap-6 text-xs font-sans tracking-wider uppercase text-parchment-dim">
+          <div class="flex items-center gap-2">
+            <span class="text-stone-400 font-serif">📍 Posição Atual:</span>
+            <span class="text-gold font-bold font-serif">{{ currentLocationName }}</span>
+          </div>
         </div>
       </div>
     </header>
@@ -48,39 +47,45 @@
       <div class="animate-spin w-12 h-12 border-2 border-vamp-border border-t-vamp-c2 rounded-full shadow-[0_0_15px_rgba(192,57,43,0.5)]"></div>
     </div>
 
-    <!-- MAIN DASHBOARD -->
+    <!-- MAIN DASHBOARD (3 COLUNAS) -->
     <main v-else-if="character" class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-12 grid grid-cols-1 xl:grid-cols-12 gap-6 relative z-10">
       
-      <!-- ESQUERDA: Identidade Operativa -->
+      <!-- ========================================================================= -->
+      <!-- ESQUERDA: Identidade & Vitalidade do Personagem (3 col) -->
+      <!-- ========================================================================= -->
       <section class="xl:col-span-3 flex flex-col gap-6">
-        <div class="demiplane-box rounded-lg overflow-hidden">
-          <div class="bg-black/80 border-b border-vamp-border p-3 flex justify-between items-center text-[10px] uppercase tracking-widest text-parchment-dim font-serif">
-            <span>Identidade</span>
+        <div class="demiplane-box rounded-2xl overflow-hidden bg-black/70 border border-white/10 shadow-xl">
+          <div class="bg-black/80 border-b border-vamp-border p-3.5 flex justify-between items-center text-[10px] uppercase tracking-widest text-parchment-dim font-serif">
+            <span>Identidade Operativa</span>
             <span class="text-vamp-c2">#{{ character.id.substring(0,6).toUpperCase() }}</span>
           </div>
 
           <div class="p-5 space-y-6">
             <!-- AVATAR (PREMIUM) -->
-            <div class="relative w-full aspect-[3/4] border border-vamp-border rounded-md overflow-hidden bg-bg-deep group shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+            <div class="relative w-full aspect-[3/4] border border-vamp-border rounded-xl overflow-hidden bg-bg-deep group shadow-[0_0_20px_rgba(0,0,0,0.8)]">
               <img 
                 :src="character.avatarUrl ? (character.avatarUrl.startsWith('http') || character.avatarUrl.startsWith('data:')) ? character.avatarUrl : API_BASE_URL + character.avatarUrl : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'600\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%231a0b12\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23c9a84c\' font-family=\'serif\' font-size=\'48\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3E%E2%98%A5%3C/text%3E%3C/svg%3E'" 
                 @error="handleImageError"
-                class="w-full h-full object-cover object-top saturate-[0.8] group-hover:saturate-100 transition-all duration-700" 
+                class="w-full h-full object-cover object-top saturate-[0.85] group-hover:saturate-100 transition-all duration-700" 
               />
               <div class="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/40 to-transparent opacity-90"></div>
               <div class="absolute bottom-0 left-0 right-0 p-4">
                 <div class="text-xl font-serif font-bold text-parchment tracking-wider uppercase drop-shadow-lg">{{ character.name }}</div>
-                <div class="text-xs text-gold uppercase font-serif tracking-widest mt-1">
+                <div class="text-xs text-gold uppercase font-serif tracking-widest mt-0.5">
                   {{ character.DefinitionClan?.name || 'Clã Desconhecido' }}
+                </div>
+                <div v-if="character.concept" class="text-[10px] text-stone-400 font-sans italic mt-1 truncate">
+                  {{ character.concept }}
                 </div>
               </div>
             </div>
 
-            <!-- BARRAS DE STATUS (PREMIUM) -->
-            <div class="space-y-5">
+            <!-- BARRAS DE STATUS VITAIS -->
+            <div class="space-y-4">
+              <!-- FOME -->
               <div>
                 <div class="flex justify-between text-[10px] uppercase tracking-widest mb-1.5 font-serif text-parchment-dim">
-                  <span>Fome (Hunger)</span>
+                  <span class="flex items-center gap-1"><span>🩸</span> Fome (Hunger)</span>
                   <span class="text-vamp-c2 font-bold">{{ character.hunger }} / 5</span>
                 </div>
                 <div class="flex gap-1">
@@ -88,175 +93,247 @@
                 </div>
               </div>
 
+              <!-- FORÇA DE VONTADE -->
               <div>
                 <div class="flex justify-between text-[10px] uppercase tracking-widest mb-1.5 font-serif text-parchment-dim">
-                  <span>Força de Vontade</span>
-                  <span class="text-blue-500/80 font-bold">{{ character.willpowerMax - character.willpowerDamageSuperficial - character.willpowerDamageAggravated }} / {{ character.willpowerMax }}</span>
+                  <span class="flex items-center gap-1"><span>🔵</span> Força de Vontade</span>
+                  <span class="text-blue-400 font-bold">{{ character.willpowerMax - character.willpowerDamageSuperficial - character.willpowerDamageAggravated }} / {{ character.willpowerMax }}</span>
                 </div>
                 <div class="flex gap-1">
-                  <div v-for="i in character.willpowerMax" :key="i" class="h-2 flex-1 rounded-sm border border-blue-900/50 bg-black/50" :class="i <= (character.willpowerMax - character.willpowerDamageSuperficial - character.willpowerDamageAggravated) ? 'bg-blue-600/70 border-blue-500/50 shadow-[0_0_8px_rgba(37,99,235,0.4)]' : ''"></div>
+                  <div v-for="i in character.willpowerMax" :key="i" class="h-2 flex-1 rounded-sm border border-blue-900/50 bg-black/50" :class="i <= (character.willpowerMax - character.willpowerDamageSuperficial - character.willpowerDamageAggravated) ? 'bg-blue-600/80 border-blue-500 shadow-[0_0_8px_rgba(37,99,235,0.4)]' : ''"></div>
                 </div>
               </div>
 
+              <!-- HUMANIDADE -->
               <div>
                 <div class="flex justify-between text-[10px] uppercase tracking-widest mb-1.5 font-serif text-parchment-dim">
-                  <span>Humanidade</span>
-                  <span class="text-parchment font-bold">{{ character.humanity }} / 10</span>
+                  <span class="flex items-center gap-1"><span>⚪</span> Humanidade</span>
+                  <span class="text-gold font-bold">{{ character.humanity }} / 10</span>
                 </div>
                 <div class="flex gap-1">
-                  <div v-for="i in 10" :key="i" class="h-2 flex-1 rounded-sm border border-white/10 bg-black/50" :class="i <= character.humanity ? 'bg-parchment-dim border-parchment/50' : ''"></div>
+                  <div v-for="i in 10" :key="i" class="h-2 flex-1 rounded-sm border border-white/10 bg-black/50" :class="i <= character.humanity ? 'bg-gold-dim border-gold/40' : ''"></div>
                 </div>
-              </div>
-
-              <!-- CARTEIRA / SALDO DE RECURSOS -->
-              <div class="bg-black/50 border border-white/10 p-3 rounded-lg flex items-center justify-between">
-                <span class="text-[10px] uppercase font-serif tracking-widest text-parchment-dim flex items-center gap-1.5">
-                  <span>💵</span> Carteira / Dinheiro
-                </span>
-                <span class="text-xs font-mono font-bold text-green-400">
-                  R$ {{ Number(character.money || 0).toLocaleString('pt-BR') }}
-                </span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- CENTRO: Terminal de Operações e Feed -->
+      <!-- ========================================================================= -->
+      <!-- CENTRO: Terminal de Operações & Diário de Bordo Vivo (6 col) -->
+      <!-- ========================================================================= -->
       <section class="xl:col-span-6 flex flex-col gap-6">
-        <div class="demiplane-box rounded-lg overflow-hidden flex flex-col flex-1">
-          <div class="bg-black/80 border-b border-vamp-border p-3 flex justify-between items-center text-[10px] uppercase tracking-widest text-parchment-dim font-serif">
-            <span>Terminal de Operações e Vigilância</span>
-            <span class="text-gold">REDE GLOBAL</span>
+        <div class="demiplane-box rounded-2xl overflow-hidden flex flex-col flex-1 bg-black/70 border border-white/10 shadow-xl">
+          
+          <div class="bg-black/80 border-b border-vamp-border p-3.5 flex justify-between items-center text-[10px] uppercase tracking-widest text-parchment-dim font-serif">
+            <span class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              Diário Operacional & Terminal de Bordo
+            </span>
+            <span class="text-gold font-mono">REDE NOCTURNA</span>
           </div>
 
-          <!-- Feed -->
-          <div class="p-5 flex-1 space-y-4 overflow-y-auto">
+          <div class="p-5 flex-1 space-y-5 overflow-y-auto">
             
-            <div class="bg-black/40 border border-vamp-border/50 border-l-2 border-l-vamp-c2 p-4 rounded-sm shadow-md">
-              <div class="text-[9px] text-parchment-dim/60 mb-2 tracking-widest uppercase font-serif">SISTEMA V.5.2 • AGORA</div>
-              <div class="text-xs text-parchment leading-relaxed"><strong class="text-vamp-c2">Acesso Concedido:</strong> Conexão estabelecida com a rede Nocturna. O sangue está em temperatura ideal para a noite de caça.</div>
-            </div>
-            
-            <!-- CARD DE OPERAÇÃO EM ANDAMENTO NO HUB -->
-            <div v-if="activeMission" class="bg-black/60 border border-red-700/60 border-l-4 border-l-vamp-c2 p-4 rounded-sm shadow-md space-y-3 animate-fade-in">
-              <div class="flex justify-between items-center text-[10px] font-mono uppercase tracking-widest text-red-400">
-                <span class="flex items-center gap-1.5 font-bold">
-                  <span class="w-2 h-2 rounded-full bg-vamp-c2 animate-ping"></span>
-                  Operação Ativa em Nocturna
+            <!-- CARD DE OPERAÇÃO ATIVA EM CAMPO -->
+            <div v-if="activeMission" class="bg-black/80 border-2 border-red-600/70 border-l-4 border-l-vamp-c2 p-5 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.25)] space-y-3 animate-fade-in">
+              <div class="flex justify-between items-center text-xs font-mono uppercase tracking-widest text-red-400">
+                <span class="flex items-center gap-2 font-bold">
+                  <span class="w-2.5 h-2.5 rounded-full bg-vamp-c2 animate-ping"></span>
+                  Operação Ativa em Campo
                 </span>
-                <span class="text-gold font-bold">{{ activeMission.readyToResolve ? 'Pronto para Coleta' : 'Em Campo' }}</span>
+                <span class="text-gold font-bold px-2 py-0.5 rounded bg-black/60 border border-gold/40">
+                  {{ activeMission.readyToResolve ? 'Pronto para Coleta' : 'Em Andamento' }}
+                </span>
               </div>
+              
               <div>
-                <h4 class="font-serif text-sm font-bold text-parchment">{{ activeMission.currentReport?.title || activeMission.DefinitionMissionIdle?.title || 'Operação de Campo' }}</h4>
+                <h4 class="font-serif text-base font-bold text-parchment">{{ activeMission.currentReport?.title || activeMission.DefinitionMissionIdle?.title || 'Operação de Campo' }}</h4>
                 <p class="text-xs text-stone-400 font-light mt-1">{{ activeMission.DefinitionMissionIdle?.description }}</p>
               </div>
+
               <button 
                 @click="router.push('/personagem/missao-ativa?id=' + characterId)" 
-                class="w-full py-2.5 rounded bg-red-950/80 hover:bg-red-900 border border-red-500/60 text-red-200 text-xs font-serif font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(255,0,0,0.3)] flex items-center justify-center gap-2"
+                class="w-full py-2.5 rounded-lg bg-red-950/90 hover:bg-blood-red border border-red-500/60 text-white text-xs font-serif font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(255,0,0,0.3)] flex items-center justify-center gap-2"
               >
                 <span>⚔️</span>
                 <span>Acessar Centro de Operação (Missão Ativa)</span>
               </button>
             </div>
 
-            <div class="bg-black/40 border border-vamp-border/50 border-l-2 border-l-gold-dim p-4 rounded-sm shadow-md opacity-80 hover:opacity-100 transition-opacity">
-              <div class="text-[9px] text-parchment-dim/60 mb-2 tracking-widest uppercase font-serif">HÁ 34 MINUTOS • PÁTIO DOS SUSPIROS</div>
-              <div class="text-xs text-parchment leading-relaxed"><strong class="text-gold-dim">Boato:</strong> Relatos de confronto armado entre forças civis armadas e uma entidade não catalogada nas linhas férreas. Ameaça de área elevada para Nível 3.</div>
+            <!-- REGISTRO OPERACIONAL RECENTE (HISTÓRICO REAL) -->
+            <div class="space-y-3">
+              <div class="flex justify-between items-center pb-2 border-b border-white/5">
+                <span class="text-[11px] font-serif uppercase tracking-[2px] text-gold-dim">
+                  Últimas Atividades Concluídas
+                </span>
+                <span class="text-[10px] font-mono text-stone-500">Histórico de Campo</span>
+              </div>
+
+              <!-- LISTA DE ATIVIDADES REAIS -->
+              <div v-if="recentActivities.length" class="space-y-3">
+                <div 
+                  v-for="act in recentActivities" 
+                  :key="act.id"
+                  class="bg-black/50 border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300 space-y-2"
+                >
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs">{{ act.activityType === 'IDLE_MISSION' ? '⚔️' : '📖' }}</span>
+                        <h5 class="font-serif text-xs font-bold text-parchment">
+                          {{ act.mission?.title || act.resultData?.title || 'Operação Tática' }}
+                        </h5>
+                      </div>
+                      <div class="text-[10px] font-mono text-stone-400 mt-0.5">
+                        {{ formatActivityDate(act.createdAt) }}
+                      </div>
+                    </div>
+
+                    <span 
+                      class="text-[9px] font-mono uppercase px-2 py-0.5 rounded border font-bold"
+                      :class="act.resultData?.success !== false ? 'bg-green-950/60 border-green-700/50 text-green-400' : 'bg-red-950/60 border-red-700/50 text-red-400'"
+                    >
+                      {{ act.resultData?.success !== false ? '✔ Concluída' : '☠ Abortada' }}
+                    </span>
+                  </div>
+
+                  <!-- RECOMPENSAS GANHAS -->
+                  <div class="flex flex-wrap items-center gap-2 text-[11px] font-mono pt-1">
+                    <span v-if="act.resultData?.rewards?.exp || act.mission?.rewardExp" class="bg-amber-950/40 text-gold px-2 py-0.5 rounded border border-amber-800/40">
+                      +{{ act.resultData?.rewards?.exp || act.mission?.rewardExp }} XP
+                    </span>
+                    <span v-if="act.resultData?.rewards?.money || act.mission?.rewardMoney" class="bg-green-950/40 text-green-400 px-2 py-0.5 rounded border border-green-800/40">
+                      +R$ {{ (act.resultData?.rewards?.money || act.mission?.rewardMoney).toLocaleString('pt-BR') }}
+                    </span>
+                    <span v-if="act.resultData?.rewards?.hunger" class="bg-red-950/40 text-red-300 px-2 py-0.5 rounded border border-red-800/40">
+                      Fome {{ act.resultData.rewards.hunger > 0 ? '+' : '' }}{{ act.resultData.rewards.hunger }}
+                    </span>
+                    <span v-if="act.resultData?.rewards?.equipmentDropName" class="bg-purple-950/40 text-purple-300 px-2 py-0.5 rounded border border-purple-800/40">
+                      🎁 {{ act.resultData.rewards.equipmentDropName }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CASO NÃO TENHA ATIVIDADES RECENTES -->
+              <div v-else class="p-8 text-center text-xs text-stone-500 font-serif italic border border-white/5 rounded-xl bg-black/40 space-y-3">
+                <div class="text-3xl">📡</div>
+                <p>Nenhuma operação recente registrada no terminal.</p>
+                <button 
+                  @click="router.push('/personagem/radar?id=' + characterId)" 
+                  class="px-4 py-2 bg-cyan-950 hover:bg-cyan-600 border border-cyan-500/40 text-cyan-300 hover:text-black font-serif text-[11px] uppercase tracking-wider rounded-lg transition-all font-bold"
+                >
+                  Iniciar Varredura no Radar
+                </button>
+              </div>
+
             </div>
 
-          </div>
-
-          <!-- Botões de Ação -->
-          <div class="p-5 border-t border-vamp-border bg-black/60 mt-auto rounded-b-lg">
-            <div class="text-[10px] uppercase tracking-widest text-parchment-dim mb-4 font-serif text-center">Ações Operacionais</div>
-            <div class="grid grid-cols-2 gap-4">
-              
-              <button @click="router.push('/personagem/radar?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-cyan-500/60 hover:shadow-[0_0_20px_rgba(0,255,255,0.15)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
-                <div class="text-2xl mb-2 text-cyan-400 group-hover:scale-110 transition-transform">📡</div>
-                <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Varredura Tática</div>
-                <div class="text-[9px] text-parchment-dim/60 uppercase">Mapa & Incursões Urbanas</div>
-              </button>
-              <button @click="router.push('/personagem/inventario?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-gold-dim hover:shadow-[0_0_20px_rgba(201,168,76,0.15)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
-                <div class="text-2xl mb-2 text-gold-dim group-hover:scale-110 transition-transform">💼</div>
-                <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Contatar Lacaios</div>
-                <div class="text-[9px] text-parchment-dim/60 uppercase">Finanças e Arsenal</div>
-              </button>
-              <button @click="router.push('/personagem/noticias?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-bg-mid hover:border-gray-700 hover:shadow-[0_0_20px_rgba(156,163,175,0.1)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
-                <div class="text-2xl mb-2 text-gray-400 group-hover:scale-110 transition-transform">🗞️</div>
-                <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Acessar Gazeta</div>
-                <div class="text-[9px] text-parchment-dim/60 uppercase">Informações da Noite</div>
-              </button>
-              <button @click="router.push('/personagem/cronicas?id=' + characterId)" class="bg-bg-card border border-vamp-border p-4 text-center rounded-md hover:bg-black hover:border-gold hover:shadow-[0_0_20px_rgba(201,168,76,0.2)] transition-all duration-300 group flex flex-col items-center justify-center min-h-[105px]">
-                <div class="text-2xl mb-2 text-gold group-hover:scale-110 transition-transform">📖</div>
-                <div class="text-xs font-serif font-bold text-parchment group-hover:text-white tracking-widest uppercase mb-1">Crônicas Narrativas</div>
-                <div class="text-[9px] text-parchment-dim/60 uppercase">Livro-Jogo Interativo (Solo)</div>
-              </button>
-            </div>
           </div>
         </div>
       </section>
 
-      <!-- DIREITA: Ameaça e Território -->
+      <!-- ========================================================================= -->
+      <!-- DIREITA: Ações Táticas & Navegação (3 col) -->
+      <!-- ========================================================================= -->
       <section class="xl:col-span-3 flex flex-col gap-6">
-        <div class="demiplane-box rounded-lg overflow-hidden">
-          <div class="bg-black/80 border-b border-vamp-border p-3 flex justify-between items-center text-[10px] uppercase tracking-widest text-parchment-dim font-serif">
-            <span>Vigilância Local</span>
-            <span class="text-vamp-c2 font-bold animate-pulse">ALERTA</span>
+        <div class="demiplane-box rounded-2xl overflow-hidden bg-black/70 border border-white/10 shadow-xl p-5 space-y-4">
+          
+          <div class="text-[11px] font-serif uppercase tracking-[2px] text-parchment-dim pb-3 border-b border-white/10 flex items-center justify-between">
+            <span>Ações Operacionais</span>
+            <span class="text-gold">ACESSO</span>
           </div>
 
-          <div class="p-5 space-y-6">
-            <div class="bg-black/40 border border-vamp-border p-4 rounded-md text-center shadow-inner">
-              <div class="text-[9px] text-parchment-dim uppercase tracking-widest mb-1.5 font-serif">Refúgio Seguro</div>
-              <div class="text-lg font-bold text-parchment font-serif tracking-wider">🏠 {{ characterHavenName }}</div>
-              <div class="text-[10px] text-cyan-400 uppercase mt-2 tracking-widest">Santuário Protegido da Luz</div>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-[10px] uppercase tracking-widest mb-2 font-serif text-parchment-dim">
-                <span>Inquisição</span>
-                <span class="text-vamp-c2 font-bold">NÍVEL 4/5</span>
-              </div>
-              <div class="h-2 bg-black/50 border border-vamp-border rounded-sm overflow-hidden mb-3">
-                <div class="h-full bg-vamp-c2 w-4/5 shadow-[0_0_8px_rgba(192,57,43,0.8)]"></div>
-              </div>
-              <p class="text-[11px] text-parchment-dim/80 leading-relaxed italic border-l-2 border-vamp-border pl-3">
-                Drones com leitura térmica operando nos helipontos. Qualquer quebra de Máscara acionará equipes de resposta em 3 turnos.
-              </p>
-            </div>
-
-            <div class="pt-5 border-t border-vamp-border">
-              <div class="text-[10px] uppercase tracking-widest text-parchment-dim mb-3 font-serif">Bolsa de Recursos</div>
-              <ul class="text-[11px] space-y-3 text-parchment-dim">
-                <li class="flex justify-between items-center border-b border-white/5 pb-1">
-                  <span>Financeiro</span>
-                  <strong class="text-gold font-serif">Nível {{ character.CharacterVampireBackgrounds?.find((b: any) => b.DefinitionBackground?.name === 'Recursos')?.value || 0 }}</strong>
-                </li>
-                <li class="flex justify-between items-center border-b border-white/5 pb-1">
-                  <span>Status (Cidade)</span>
-                  <strong class="text-gold font-serif">Nível {{ character.CharacterVampireBackgrounds?.find((b: any) => b.DefinitionBackground?.name === 'Status')?.value || 0 }}</strong>
-                </li>
-                <li class="flex justify-between items-center border-b border-white/5 pb-1">
-                  <span>Refúgio</span>
-                  <strong class="text-gold font-serif">Nível {{ character.CharacterVampireBackgrounds?.find((b: any) => b.DefinitionBackground?.name === 'Refúgio')?.value || 0 }}</strong>
-                </li>
-              </ul>
-            </div>
+          <!-- GRADE DE 6 ATALHOS TÁTICOS -->
+          <div class="grid grid-cols-1 gap-3">
             
-            <div class="pt-3">
-              <div class="text-[10px] uppercase tracking-widest text-parchment-dim mb-3 font-serif">Disciplinas</div>
-              <div class="text-[11px] space-y-1 text-parchment-dim/80 leading-relaxed max-h-[100px] overflow-y-auto">
-                <div v-for="disc in character.CharacterVampireDisciplines" :key="disc.id" class="flex justify-between">
-                  <span class="text-parchment font-serif">{{ disc.DefinitionDiscipline?.name }}</span> 
-                  <span class="text-vamp-c2">Nível {{ disc.value }}</span>
-                </div>
-                <div v-if="!character.CharacterVampireDisciplines?.length" class="italic text-gray-600">
-                  Nenhuma disciplina despertada.
-                </div>
+            <!-- 1. RADAR -->
+            <button 
+              @click="router.push('/personagem/radar?id=' + characterId)" 
+              class="w-full bg-black/60 hover:bg-cyan-950/40 border border-white/10 hover:border-cyan-500/60 p-3.5 rounded-xl transition-all duration-300 flex items-center gap-3.5 group text-left shadow-sm hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+            >
+              <div class="w-10 h-10 rounded-lg bg-black/80 border border-white/10 flex items-center justify-center text-xl text-cyan-400 group-hover:scale-110 transition-transform shrink-0">
+                📡
               </div>
-            </div>
+              <div class="min-w-0">
+                <div class="font-serif text-xs font-bold text-parchment group-hover:text-white uppercase tracking-wider">Varredura Tática</div>
+                <div class="text-[10px] text-stone-400 truncate">Radar Urbano dos 48 Distritos</div>
+              </div>
+            </button>
+
+            <!-- 2. MEU REFÚGIO -->
+            <button 
+              @click="router.push('/personagem/refugio?id=' + characterId)" 
+              class="w-full bg-black/60 hover:bg-amber-950/40 border border-white/10 hover:border-gold/60 p-3.5 rounded-xl transition-all duration-300 flex items-center gap-3.5 group text-left shadow-sm hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+            >
+              <div class="w-10 h-10 rounded-lg bg-black/80 border border-white/10 flex items-center justify-center text-xl text-gold group-hover:scale-110 transition-transform shrink-0">
+                🏠
+              </div>
+              <div class="min-w-0">
+                <div class="font-serif text-xs font-bold text-parchment group-hover:text-white uppercase tracking-wider">Meu Refúgio</div>
+                <div class="text-[10px] text-stone-400 truncate">Segurança, Lacaios & Sangue</div>
+              </div>
+            </button>
+
+            <!-- 3. MERCADO NEGRO -->
+            <button 
+              @click="router.push('/personagem/inventario?id=' + characterId)" 
+              class="w-full bg-black/60 hover:bg-amber-950/40 border border-white/10 hover:border-gold/60 p-3.5 rounded-xl transition-all duration-300 flex items-center gap-3.5 group text-left shadow-sm hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+            >
+              <div class="w-10 h-10 rounded-lg bg-black/80 border border-white/10 flex items-center justify-center text-xl text-gold-dim group-hover:scale-110 transition-transform shrink-0">
+                💼
+              </div>
+              <div class="min-w-0">
+                <div class="font-serif text-xs font-bold text-parchment group-hover:text-white uppercase tracking-wider">Mercado Negro</div>
+                <div class="text-[10px] text-stone-400 truncate">Arsenal & Especialistas</div>
+              </div>
+            </button>
+
+            <!-- 4. CRÔNICAS NARRATIVAS -->
+            <button 
+              @click="router.push('/personagem/cronicas?id=' + characterId)" 
+              class="w-full bg-black/60 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/60 p-3.5 rounded-xl transition-all duration-300 flex items-center gap-3.5 group text-left shadow-sm hover:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+            >
+              <div class="w-10 h-10 rounded-lg bg-black/80 border border-white/10 flex items-center justify-center text-xl text-purple-400 group-hover:scale-110 transition-transform shrink-0">
+                📖
+              </div>
+              <div class="min-w-0">
+                <div class="font-serif text-xs font-bold text-parchment group-hover:text-white uppercase tracking-wider">Crônicas Narrativas</div>
+                <div class="text-[10px] text-stone-400 truncate">Livro-Jogo Interativo (Solo)</div>
+              </div>
+            </button>
+
+            <!-- 5. GAZETA DA NOITE -->
+            <button 
+              @click="router.push('/personagem/noticias?id=' + characterId)" 
+              class="w-full bg-black/60 hover:bg-stone-900 border border-white/10 hover:border-white/30 p-3.5 rounded-xl transition-all duration-300 flex items-center gap-3.5 group text-left shadow-sm hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+            >
+              <div class="w-10 h-10 rounded-lg bg-black/80 border border-white/10 flex items-center justify-center text-xl text-stone-300 group-hover:scale-110 transition-transform shrink-0">
+                🗞️
+              </div>
+              <div class="min-w-0">
+                <div class="font-serif text-xs font-bold text-parchment group-hover:text-white uppercase tracking-wider">Gazeta da Noite</div>
+                <div class="text-[10px] text-stone-400 truncate">Informações & Desdobramentos</div>
+              </div>
+            </button>
+
+            <!-- 6. FICHA COMPLETA -->
+            <button 
+              @click="router.push('/personagem/ficha?id=' + characterId)" 
+              class="w-full bg-blood-red/10 hover:bg-blood-red/30 border border-blood-red/40 hover:border-blood-red p-3.5 rounded-xl transition-all duration-300 flex items-center gap-3.5 group text-left shadow-sm hover:shadow-[0_0_15px_rgba(185,28,28,0.3)]"
+            >
+              <div class="w-10 h-10 rounded-lg bg-black/80 border border-blood-red/50 flex items-center justify-center text-xl text-red-400 group-hover:scale-110 transition-transform shrink-0">
+                📜
+              </div>
+              <div class="min-w-0">
+                <div class="font-serif text-xs font-bold text-parchment group-hover:text-white uppercase tracking-wider">Ficha Completa</div>
+                <div class="text-[10px] text-stone-400 truncate">Atributos, Perícias & XP</div>
+              </div>
+            </button>
 
           </div>
+
         </div>
       </section>
 
@@ -275,11 +352,6 @@
 </template>
 
 <script setup lang="ts">
-const handleImageError = (e: Event) => {
-  const target = e.target as HTMLImageElement;
-  if (target) target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'600\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%231a0b12\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23c9a84c\' font-family=\'serif\' font-size=\'48\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3E%E2%98%A5%3C/text%3E%3C/svg%3E';
-}
-
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api, { API_BASE_URL } from '../services/api'
@@ -294,25 +366,40 @@ const character = ref<any>(null)
 const characterId = ref<string>('')
 const nightClockRef = ref<any>(null)
 const currentNightStatus = ref<any>(null)
+const activeMission = ref<any>(null)
+const recentActivities = ref<any[]>([])
+const isAwakening = ref(false)
 
-const characterHavenName = computed(() => {
-  if (currentNightStatus.value?.havenLocation?.name) {
-    return currentNightStatus.value.havenLocation.name
+const handleImageError = (e: Event) => {
+  const target = e.target as HTMLImageElement;
+  if (target) target.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'600\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%231a0b12\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23c9a84c\' font-family=\'serif\' font-size=\'48\' dominant-baseline=\'middle\' text-anchor=\'middle\'%3E%E2%98%A5%3C/text%3E%3C/svg%3E';
+}
+
+const currentLocationName = computed(() => {
+  if (currentNightStatus.value?.currentLocation?.name) {
+    return currentNightStatus.value.currentLocation.name
   }
   if (character.value?.Haven?.DefinitionLocation?.name) {
     return character.value.Haven.DefinitionLocation.name
   }
-  return character.value?.chronicle || 'Belenzinho'
+  return 'Belenzinho'
 })
 
 const onNightStatusUpdated = async (status: any) => {
   currentNightStatus.value = status
   await fetchActiveMission()
+  await fetchRecentActivities()
 }
 
-// Missions AFK
-const activeMission = ref<any>(null)
-const isAwakening = ref(false)
+const formatActivityDate = (dateStr: string) => {
+  if (!dateStr) return 'Hoje'
+  try {
+    const d = new Date(dateStr)
+    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' • ' + d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+  } catch {
+    return 'Hoje'
+  }
+}
 
 const awakenCharacter = async () => {
   if (!character.value) return;
@@ -343,6 +430,7 @@ const fetchCharacter = async () => {
     const res = await api.get(`/api/character-vampires/${id}`)
     character.value = res.data
     await fetchActiveMission()
+    await fetchRecentActivities()
   } catch (error) {
     console.error('Erro ao buscar personagem:', error)
   } finally {
@@ -360,14 +448,25 @@ const fetchActiveMission = async () => {
   }
 }
 
+const fetchRecentActivities = async () => {
+  if (!characterId.value) return
+  try {
+    const res = await api.get(`/api/character-vampires/${characterId.value}/activities`)
+    recentActivities.value = res.data || []
+  } catch (e) {
+    console.error('Erro ao buscar atividades recentes:', e)
+  }
+}
+
 onMounted(() => {
   fetchCharacter()
 })
 </script>
+
 <style scoped>
-/* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #090b10; }
 ::-webkit-scrollbar-thumb { background: #1c2230; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #dc2626; }
 </style>
+
