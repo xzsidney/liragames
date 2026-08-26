@@ -307,9 +307,18 @@
           <!-- BOTÕES DE AÇÃO PRINCIPAIS -->
           <div class="pt-4 border-t border-white/10 flex flex-col sm:flex-row gap-4">
             
-            <!-- BOTÃO COLETAR RECOMPENSAS (QUANDO PRONTO) -->
+            <!-- SE ESTIVER SOB AMEAÇA SOLAR: BOTÃO DE ABRIGO EM DESTAQUE -->
             <button 
-              v-if="isReady" 
+              v-if="isSunHazardActive" 
+              @click="triggerEmergencyShelter" 
+              class="flex-1 py-4 px-6 rounded-lg bg-red-600 hover:bg-red-500 text-white font-serif font-bold text-sm uppercase tracking-widest transition-all shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-pulse flex items-center justify-center gap-2"
+            >
+              <span>🛡️ Buscar Abrigo Imediato (Salvar do Sol)</span>
+            </button>
+
+            <!-- BOTÃO COLETAR RECOMPENSAS (QUANDO PRONTO E FORA DE PERIGO SOLAR) -->
+            <button 
+              v-else-if="isReady" 
               @click="resolveMission" 
               :disabled="isResolving"
               class="flex-1 py-4 px-6 rounded-lg bg-gold hover:bg-gold-light text-black font-serif font-bold text-sm uppercase tracking-widest transition-all shadow-[0_0_25px_rgba(212,175,55,0.5)] animate-bounce disabled:opacity-50 flex items-center justify-center gap-2"
@@ -459,6 +468,7 @@ const now = ref(Date.now())
 let tickerInterval: any = null
 
 const isReady = computed(() => {
+  if (isSunHazardActive.value) return false // Sob o sol, a missão está paralisada e NUNCA fica pronta para coleta!
   if (!activeMission.value?.expiresAt) return false
   return now.value >= new Date(activeMission.value.expiresAt).getTime()
 })
