@@ -377,19 +377,6 @@
             </div>
             
           </div>
-          
-          <!-- Sprite Direito (Jogador / Protagonista) -->
-          <div 
-            class="w-1/4 max-w-[360px] flex justify-end items-end transition-all duration-700 transform pointer-events-none" 
-            :class="{'opacity-100 translate-x-0': currentNode.rightCharacterImageUrl, 'opacity-0 translate-x-12': !currentNode.rightCharacterImageUrl}"
-          >
-            <img 
-              v-if="currentNode.rightCharacterImageUrl" 
-              :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" 
-              class="max-h-[50vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_30px_rgba(0,0,0,0.9)]" 
-              alt="Protagonista"
-            />
-          </div>
 
         </div>
       </div>
