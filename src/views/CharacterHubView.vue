@@ -443,6 +443,27 @@
           </div>
         </div>
 
+        <!-- ETAPAS DO MODELO DE MISSÃO (FALLBACK) -->
+        <div v-else-if="selectedActivity.mission?.Actions?.length" class="space-y-3">
+          <h3 class="text-xs font-serif uppercase tracking-wider text-gold font-bold flex items-center gap-2">
+            <span>🎲</span> Protocolos Operacionais
+          </h3>
+          <div class="space-y-2">
+            <div 
+              v-for="act in selectedActivity.mission.Actions" 
+              :key="act.id"
+              class="bg-black/60 border border-white/10 rounded-xl p-3 text-xs space-y-1"
+            >
+              <div class="font-serif font-bold text-stone-200 flex items-center gap-2">
+                <span class="text-gold">⚔️</span> {{ act.title }}
+              </div>
+              <p v-if="act.description" class="text-[11px] text-stone-400 font-light">
+                {{ act.description }}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- MUDANÇAS & ESPÓLIOS FINAIS -->
         <div v-if="selectedActivity.resultData?.report?.finalChanges?.length" class="space-y-2">
           <h3 class="text-xs font-serif uppercase tracking-wider text-gold font-bold flex items-center gap-2">
@@ -453,6 +474,27 @@
               <span>{{ change }}</span>
             </li>
           </ul>
+        </div>
+
+        <!-- RECOMPENSAS DIRETAS (FALLBACK) -->
+        <div v-else-if="selectedActivity.resultData?.rewards || selectedActivity.mission?.rewards || selectedActivity.mission?.rewardExp || selectedActivity.mission?.rewardMoney" class="space-y-2">
+          <h3 class="text-xs font-serif uppercase tracking-wider text-gold font-bold flex items-center gap-2">
+            <span>🏆</span> Ganhos e Recompensas
+          </h3>
+          <div class="flex flex-wrap gap-2 text-xs font-mono">
+            <span v-if="selectedActivity.resultData?.rewards?.exp || selectedActivity.mission?.rewards?.exp || selectedActivity.mission?.rewardExp" class="bg-amber-950/60 border border-amber-800 text-gold px-3 py-1 rounded-lg">
+              ✨ +{{ selectedActivity.resultData?.rewards?.exp || selectedActivity.mission?.rewards?.exp || selectedActivity.mission?.rewardExp }} XP
+            </span>
+            <span v-if="selectedActivity.resultData?.rewards?.money || selectedActivity.mission?.rewards?.money || selectedActivity.mission?.rewardMoney" class="bg-green-950/60 border border-green-800 text-green-300 px-3 py-1 rounded-lg">
+              💵 +R$ {{ (selectedActivity.resultData?.rewards?.money || selectedActivity.mission?.rewards?.money || selectedActivity.mission?.rewardMoney).toLocaleString('pt-BR') }}
+            </span>
+            <span v-if="selectedActivity.resultData?.rewards?.hunger || selectedActivity.mission?.rewards?.hunger" class="bg-red-950/60 border border-red-800 text-red-300 px-3 py-1 rounded-lg">
+              🩸 Fome Saciada ({{ selectedActivity.resultData?.rewards?.hunger || selectedActivity.mission?.rewards?.hunger }})
+            </span>
+            <span v-if="selectedActivity.resultData?.rewards?.equipmentDropName || selectedActivity.mission?.rewards?.equipmentDropName" class="bg-purple-950/60 border border-purple-800 text-purple-300 px-3 py-1 rounded-lg">
+              🗡️ {{ selectedActivity.resultData?.rewards?.equipmentDropName || selectedActivity.mission?.rewards?.equipmentDropName }}
+            </span>
+          </div>
         </div>
 
         <button 
