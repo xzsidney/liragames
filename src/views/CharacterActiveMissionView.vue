@@ -526,7 +526,11 @@ const now = ref(Date.now())
 let tickerInterval: any = null
 
 const isReady = computed(() => {
-  if (isSunHazardActive.value) return false // Sob o sol, a missão está paralisada e NUNCA fica pronta para coleta!
+  if (isSunHazardActive.value) return false // Sob o sol, a missão está paralisada
+  if (activeMission.value?.readyToResolve) return true
+  if (activeMission.value?.currentReport?.isCompleted) return true
+  const steps = activeMission.value?.currentReport?.steps
+  if (steps && steps.length > 0 && steps.every((s: any) => s.status === 'COMPLETED')) return true
   if (!activeMission.value?.expiresAt) return false
   return now.value >= new Date(activeMission.value.expiresAt).getTime()
 })
