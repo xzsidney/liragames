@@ -32,61 +32,65 @@
     <!-- ========================================== -->
     <!-- 2. HUD DO VAMPIRO (MODO CENA ATIVA)        -->
     <!-- ========================================== -->
-    <header v-if="character && activeAdventure && currentNode" class="absolute top-0 left-0 w-full z-40 p-4 flex justify-between items-start pointer-events-none bg-gradient-to-b from-black/90 via-black/40 to-transparent">
-      <!-- Perfil & Status Vitais V5 -->
-      <div class="flex items-center gap-3 pointer-events-auto bg-black/70 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-2xl">
-        <div class="w-11 h-11 rounded-full border-2 border-vamp-c2 bg-zinc-900 overflow-hidden relative shadow-[0_0_15px_rgba(192,57,43,0.5)]">
-          <img 
-            :src="character.avatarUrl ? (character.avatarUrl.startsWith('http') ? character.avatarUrl : API_BASE_URL + character.avatarUrl) : ''" 
-            class="w-full h-full object-cover" 
-            alt="Avatar"
-          />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <div class="flex items-center gap-2">
-            <span class="font-serif font-bold text-xs text-parchment uppercase tracking-wider">{{ character.name }}</span>
-            <span class="text-[9px] px-1.5 py-0.2 bg-red-950/80 text-red-300 border border-red-800/40 rounded font-mono uppercase">
-              {{ character.Clan?.name || 'Caitiff' }}
-            </span>
+    <header v-if="character && activeAdventure && currentNode" class="absolute top-0 left-0 w-full z-40 p-4 pointer-events-none bg-gradient-to-b from-black/95 via-black/60 to-transparent">
+      <div class="max-w-5xl mx-auto flex justify-between items-center w-full">
+        
+        <!-- Perfil & Status Vitais V5 -->
+        <div class="flex items-center gap-3 pointer-events-auto bg-black/80 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10 shadow-2xl">
+          <div class="w-10 h-10 rounded-full border-2 border-vamp-c2 bg-zinc-900 overflow-hidden relative shadow-[0_0_12px_rgba(192,57,43,0.5)]">
+            <img 
+              :src="character.avatarUrl ? (character.avatarUrl.startsWith('http') ? character.avatarUrl : API_BASE_URL + character.avatarUrl) : ''" 
+              class="w-full h-full object-cover" 
+              alt="Avatar"
+            />
           </div>
 
-          <!-- Medidor de Fome (Gotas de Sangue) -->
-          <div class="flex items-center gap-2">
-            <span class="text-[9px] font-mono text-stone-400 uppercase">Fome:</span>
-            <div class="flex gap-1">
-              <div 
-                v-for="i in 5" 
-                :key="'hunger-' + i" 
-                class="w-3 h-3 rounded-full border transition-all duration-300 flex items-center justify-center text-[7px]"
-                :class="i <= (character.hunger || 1) 
-                  ? 'bg-gradient-to-br from-red-600 to-red-950 border-red-400 text-white shadow-[0_0_8px_rgba(239,68,68,0.8)]' 
-                  : 'bg-black/60 border-red-950 text-transparent'"
-              >
-                💧
+          <div class="flex flex-col gap-0.5">
+            <div class="flex items-center gap-2">
+              <span class="font-serif font-bold text-xs text-parchment uppercase tracking-wider">{{ character.name }}</span>
+              <span class="text-[9px] px-1.5 py-0.2 bg-red-950/80 text-red-300 border border-red-800/40 rounded font-mono uppercase">
+                {{ character.Clan?.name || 'Caitiff' }}
+              </span>
+            </div>
+
+            <!-- Medidor de Fome (Gotas de Sangue) -->
+            <div class="flex items-center gap-2">
+              <span class="text-[9px] font-mono text-stone-400 uppercase">Fome:</span>
+              <div class="flex gap-1">
+                <div 
+                  v-for="i in 5" 
+                  :key="'hunger-' + i" 
+                  class="w-3 h-3 rounded-full border transition-all duration-300 flex items-center justify-center text-[7px]"
+                  :class="i <= (character.hunger || 1) 
+                    ? 'bg-gradient-to-br from-red-600 to-red-950 border-red-400 text-white shadow-[0_0_8px_rgba(239,68,68,0.8)]' 
+                    : 'bg-black/60 border-red-950 text-transparent'"
+                >
+                  💧
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Controles de Navegação / Pausa -->
-      <div class="flex items-center gap-2 pointer-events-auto">
-        <button 
-          @click="confirmResetCurrentAdventure" 
-          title="Reiniciar esta Crônica"
-          class="px-3 py-1.5 rounded-lg bg-black/60 border border-white/10 hover:border-amber-500/50 text-stone-400 hover:text-amber-300 text-[10px] font-serif uppercase tracking-widest transition-all backdrop-blur-md flex items-center gap-1.5 cursor-pointer"
-        >
-          <span>↺</span> REINICIAR CENA
-        </button>
+        <!-- Controles de Navegação / Pausa -->
+        <div class="flex items-center gap-2 pointer-events-auto">
+          <button 
+            @click="confirmResetCurrentAdventure" 
+            title="Reiniciar esta Crônica"
+            class="px-3 py-1.5 rounded-lg bg-black/80 border border-white/10 hover:border-amber-500/50 text-stone-400 hover:text-amber-300 text-[10px] font-serif uppercase tracking-widest transition-all backdrop-blur-md flex items-center gap-1.5 cursor-pointer shadow-lg"
+          >
+            <span>↺</span> REINICIAR CENA
+          </button>
 
-        <button 
-          @click="handleBack" 
-          title="Voltar à Seleção de Crônicas"
-          class="w-9 h-9 rounded-full bg-black/60 border border-white/10 hover:border-vamp-c2 text-stone-300 hover:text-white flex items-center justify-center transition-all backdrop-blur-md shadow-lg cursor-pointer"
-        >
-          ✕
-        </button>
+          <button 
+            @click="handleBack" 
+            title="Voltar à Seleção de Crônicas"
+            class="w-9 h-9 rounded-full bg-black/80 border border-white/10 hover:border-vamp-c2 text-stone-300 hover:text-white flex items-center justify-center transition-all backdrop-blur-md shadow-lg cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
       </div>
     </header>
 
@@ -220,36 +224,79 @@
       ></div>
 
       <!-- Vinheta e Camada de Escurecimento Atmosférico -->
-      <div class="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/60 to-black/70 pointer-events-none mix-blend-multiply"></div>
+      <div class="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/60 to-black/80 pointer-events-none mix-blend-multiply"></div>
       <div class="absolute inset-0 z-0 bg-black/40 pointer-events-none"></div>
 
-      <!-- 5.2 Container Principal de Sprites e Caixa de Texto -->
+      <!-- 5.2 Container Principal Coeso e Centralizado (The Vampire Stage) -->
       <div class="relative z-20 w-full min-h-[50vh] flex flex-col justify-end pb-8 pointer-events-none">
         
-        <div class="w-full max-w-[1600px] mx-auto flex flex-row justify-between items-end px-4 gap-4 md:gap-8">
+        <div class="w-full max-w-5xl mx-auto flex flex-col justify-end items-center px-4 space-y-4">
           
-          <!-- Sprite Esquerdo (NPC / Interlocutor) -->
-          <div 
-            class="w-1/4 max-w-[360px] flex justify-start items-end transition-all duration-700 transform pointer-events-none" 
-            :class="{'opacity-100 translate-x-0': currentNode.leftCharacterImageUrl, 'opacity-0 -translate-x-12': !currentNode.leftCharacterImageUrl}"
-          >
-            <img 
-              v-if="currentNode.leftCharacterImageUrl" 
-              :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" 
-              class="max-h-[50vh] md:max-h-[75vh] w-auto object-contain object-bottom drop-shadow-[0_0_30px_rgba(0,0,0,0.9)]" 
-              alt="NPC"
-            />
+          <!-- Linha de Personagens em Destaque (Cards / Sprites Enquadrados com Sombra) -->
+          <div class="w-full flex justify-between items-end px-2 sm:px-6 pointer-events-none">
+            
+            <!-- Personagem Esquerdo (Interlocutor / NPC) -->
+            <div 
+              class="transition-all duration-700 transform flex flex-col items-center"
+              :class="{'opacity-100 translate-y-0': currentNode.leftCharacterImageUrl, 'opacity-0 translate-y-8 pointer-events-none': !currentNode.leftCharacterImageUrl}"
+            >
+              <div v-if="currentNode.leftCharacterImageUrl" class="relative group">
+                <!-- Moldura / Retrato Gótico com Efeito de Luz -->
+                <div class="w-32 h-44 sm:w-40 sm:h-56 rounded-2xl overflow-hidden border-2 border-red-950/80 bg-zinc-950/90 shadow-[0_10px_30px_rgba(0,0,0,0.9)] backdrop-blur-md relative flex items-center justify-center">
+                  <img 
+                    :src="resolveImageUrl(currentNode.leftCharacterImageUrl)" 
+                    class="w-full h-full object-cover object-top filter brightness-90 contrast-105" 
+                    alt="Interlocutor"
+                  />
+                  <!-- Vinheta interna para escurecer as bordas do retrato -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30 pointer-events-none"></div>
+                </div>
+                <!-- Badge de Nome do NPC sob a moldura -->
+                <div class="mt-2 px-3 py-0.5 rounded-full bg-black/80 border border-white/10 text-[10px] font-serif text-parchment-dim uppercase tracking-wider text-center shadow-md">
+                  {{ currentNode.speakerName || 'Interlocutor' }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Personagem Direito (Jogador / Protagonista) -->
+            <div 
+              class="transition-all duration-700 transform flex flex-col items-center"
+              :class="{'opacity-100 translate-y-0': currentNode.rightCharacterImageUrl, 'opacity-0 translate-y-8 pointer-events-none': !currentNode.rightCharacterImageUrl}"
+            >
+              <div v-if="currentNode.rightCharacterImageUrl" class="relative group">
+                <!-- Moldura / Retrato Gótico do Jogador -->
+                <div class="w-32 h-44 sm:w-40 sm:h-56 rounded-2xl overflow-hidden border-2 border-amber-950/80 bg-zinc-950/90 shadow-[0_10px_30px_rgba(0,0,0,0.9)] backdrop-blur-md relative flex items-center justify-center">
+                  <img 
+                    :src="resolveImageUrl(currentNode.rightCharacterImageUrl)" 
+                    class="w-full h-full object-cover object-top filter brightness-90 contrast-105" 
+                    alt="Protagonista"
+                  />
+                  <!-- Vinheta interna -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30 pointer-events-none"></div>
+                </div>
+                <!-- Badge de Nome do Jogador -->
+                <div class="mt-2 px-3 py-0.5 rounded-full bg-black/80 border border-gold/30 text-[10px] font-serif text-gold uppercase tracking-wider text-center shadow-md">
+                  {{ character.name }}
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- Caixa de Narrativa Central -->
-          <div class="flex-1 pointer-events-auto max-w-4xl space-y-6 pt-6 pb-6 px-4 md:px-10 bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.9)] transition-all">
+          <div class="w-full pointer-events-auto space-y-6 pt-6 pb-6 px-6 md:px-10 bg-black/85 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.95)] transition-all">
             
             <!-- Orador & Texto Narrativo -->
             <div class="space-y-4">
-              <div v-if="currentNode.speakerName" class="flex items-center gap-2 border-b border-white/10 pb-2">
-                <span class="text-xs text-vamp-c2">⚜</span>
-                <span class="font-serif text-base md:text-lg uppercase tracking-[0.2em] text-gold font-bold drop-shadow-md">
-                  {{ currentNode.speakerName }}
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-vamp-c2">⚜</span>
+                  <span class="font-serif text-base md:text-lg uppercase tracking-[0.2em] text-gold font-bold drop-shadow-md">
+                    {{ currentNode.speakerName || 'O Narrador' }}
+                  </span>
+                </div>
+                <span class="text-[10px] font-mono uppercase tracking-widest text-stone-500">
+                  Noite de Nocturna
                 </span>
               </div>
               
