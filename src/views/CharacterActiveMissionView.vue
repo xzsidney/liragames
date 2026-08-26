@@ -525,6 +525,30 @@ const finalReport = ref<any>(null)
 const now = ref(Date.now())
 let tickerInterval: any = null
 
+// 1. Horário & Ciclo Solar
+const isDaytime = computed(() => {
+  const currentMinutes = nightStatus.value?.nightMinutesSpent || 0
+  return currentMinutes >= 600
+})
+
+const isSunHazardActive = computed(() => {
+  return isDaytime.value || !!nightStatus.value?.isSunHazardActive
+})
+
+const liveNightTime = computed(() => {
+  const minsSpent = nightStatus.value?.nightMinutesSpent || 0
+  const totalMin = 1200 + minsSpent // 20:00 = 1200 min
+  const h = Math.floor((totalMin % 1440) / 60)
+  const m = totalMin % 60
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+})
+
+const hoursRemaining = computed(() => {
+  const minsSpent = nightStatus.value?.nightMinutesSpent || 0
+  return Math.max(0, 10 - Math.floor(minsSpent / 60))
+})
+
+// 2. Status de Conclusão da Missão
 const isReady = computed(() => {
   if (isSunHazardActive.value) return false // Sob o sol, a missão está paralisada
   if (activeMission.value?.readyToResolve) return true
@@ -577,28 +601,6 @@ const missionCategoryLabel = computed(() => {
   if (cat === 'HUNT') return '🩸 Caçada de Sangue'
   if (cat === 'RECON') return '🔍 Reconhecimento de Território'
   return '⚔️ Incursão Tática'
-})
-
-const isDaytime = computed(() => {
-  const currentMinutes = nightStatus.value?.nightMinutesSpent || 0
-  return currentMinutes >= 600
-})
-
-const isSunHazardActive = computed(() => {
-  return isDaytime.value || !!nightStatus.value?.isSunHazardActive
-})
-
-const liveNightTime = computed(() => {
-  const minsSpent = nightStatus.value?.nightMinutesSpent || 0
-  const totalMin = 1200 + minsSpent // 20:00 = 1200 min
-  const h = Math.floor((totalMin % 1440) / 60)
-  const m = totalMin % 60
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
-})
-
-const hoursRemaining = computed(() => {
-  const minsSpent = nightStatus.value?.nightMinutesSpent || 0
-  return Math.max(0, 10 - Math.floor(minsSpent / 60))
 })
 
 // FASE DO CLIMA E HORÁRIO DINÂMICO
