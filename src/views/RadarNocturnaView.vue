@@ -234,16 +234,83 @@
           </div>
 
           <!-- SEÇÃO DE MISSÕES E CAÇADAS NESTE LOCAL -->
-          <div class="border-t border-[rgba(0,150,255,0.2)] pt-4 space-y-3">
+          <div class="border-t border-[rgba(0,150,255,0.2)] pt-4 space-y-3.5">
             <div class="flex items-center justify-between">
               <h3 class="font-serif text-xs text-gold uppercase tracking-widest font-bold flex items-center gap-1.5">
                 <span>🩸</span> Incursões & Caçadas no Bairro
               </h3>
-              <span class="text-[10px] text-gray-400 font-mono">{{ sidebarNode.missions?.length || 0 }} ativas</span>
+              <span class="text-[10px] text-gray-400 font-mono">
+                {{ filteredAndSortedMissions.length }} de {{ sidebarNode.missions?.length || 0 }}
+              </span>
             </div>
 
-            <div v-if="sidebarNode.missions && sidebarNode.missions.length > 0" class="space-y-3">
-              <div v-for="m in sidebarNode.missions" :key="m.id" class="p-3.5 rounded-lg border border-white/10 bg-black/60 hover:border-gold/40 transition-all space-y-2">
+            <!-- BARRA DE BUSCA E FILTROS -->
+            <div v-if="sidebarNode.missions && sidebarNode.missions.length > 0" class="space-y-2">
+              
+              <!-- CAMPO DE BUSCA -->
+              <div class="relative">
+                <input 
+                  v-model="searchMissionQuery"
+                  type="text" 
+                  placeholder="🔍 Buscar por nome ou palavra-chave..."
+                  class="w-full bg-black/60 border border-white/15 focus:border-cyan-400 rounded px-3 py-1.5 text-xs text-parchment placeholder-stone-500 font-sans outline-none transition-all pr-7"
+                />
+                <button 
+                  v-if="searchMissionQuery" 
+                  @click="searchMissionQuery = ''" 
+                  class="absolute right-2 top-1.5 text-stone-400 hover:text-white text-xs font-bold"
+                  title="Limpar busca"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <!-- CONTROLES: CATEGORIA & ORDENAÇÃO -->
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+                <!-- PILLS DE CATEGORIA -->
+                <div class="flex items-center gap-1 text-[10px] font-mono">
+                  <button 
+                    @click="selectedCategory = 'ALL'"
+                    class="px-2 py-1 rounded transition-all"
+                    :class="selectedCategory === 'ALL' ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/60 font-bold' : 'bg-black/40 text-stone-400 border border-white/10 hover:text-white'"
+                  >
+                    Todas
+                  </button>
+                  <button 
+                    @click="selectedCategory = 'HUNT'"
+                    class="px-2 py-1 rounded transition-all"
+                    :class="selectedCategory === 'HUNT' ? 'bg-red-950 text-red-300 border border-red-500/60 font-bold' : 'bg-black/40 text-stone-400 border border-white/10 hover:text-white'"
+                  >
+                    🩸 Caçadas
+                  </button>
+                  <button 
+                    @click="selectedCategory = 'OPERATION'"
+                    class="px-2 py-1 rounded transition-all"
+                    :class="selectedCategory === 'OPERATION' ? 'bg-blue-950 text-blue-300 border border-blue-500/60 font-bold' : 'bg-black/40 text-stone-400 border border-white/10 hover:text-white'"
+                  >
+                    ⚔️ Operações
+                  </button>
+                </div>
+
+                <!-- SELECT DE ORDENAÇÃO -->
+                <select 
+                  v-model="sortBy"
+                  class="bg-black/80 border border-white/15 focus:border-cyan-400 rounded px-2 py-1 text-[10px] font-mono text-stone-300 outline-none cursor-pointer"
+                >
+                  <option value="DEFAULT">📋 Padrão (Canônica)</option>
+                  <option value="DURATION_ASC">⏱️ Mais Rápida (1 min)</option>
+                  <option value="DURATION_DESC">⏱️ Mais Longa (30 min)</option>
+                  <option value="DIFF_ASC">🎯 Mais Fácil (Dif. Baixa)</option>
+                  <option value="DIFF_DESC">💀 Mais Difícil (Dif. Alta)</option>
+                  <option value="NAME_ASC">🔤 Nome (A &rarr; Z)</option>
+                </select>
+              </div>
+
+            </div>
+
+            <!-- LISTA DE MISSÕES FILTRADAS -->
+            <div v-if="filteredAndSortedMissions.length > 0" class="space-y-3">
+              <div v-for="m in filteredAndSortedMissions" :key="m.id" class="p-3.5 rounded-lg border border-white/10 bg-black/60 hover:border-gold/40 transition-all space-y-2">
                 <div class="flex justify-between items-start">
                   <h4 class="font-serif text-sm text-parchment font-bold">{{ m.title }}</h4>
                   <span class="text-[9px] px-1.5 py-0.5 rounded uppercase font-mono" :class="m.category === 'HUNT' ? 'bg-red-950 text-red-400 border border-red-800/40' : 'bg-blue-950 text-cyan-400 border border-cyan-800/40'">
@@ -263,6 +330,9 @@
                   {{ activeMission ? 'Vampiro Ocupado em Missão' : (currentNightStatus?.isDaytime ? '☀️ Operação Bloqueada (Dia)' : 'Despachar Personagem') }}
                 </button>
               </div>
+            </div>
+            <div v-else-if="sidebarNode.missions && sidebarNode.missions.length > 0" class="text-center py-4 text-xs text-gray-500 font-serif italic border border-white/5 rounded-lg bg-black/20">
+              Nenhuma missão encontrada com os filtros selecionados.
             </div>
             <div v-else class="text-center py-4 text-xs text-gray-500 font-serif italic border border-white/5 rounded-lg bg-black/20">
               Nenhuma operação ativa registrada neste domínio no momento.
@@ -284,7 +354,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import api from '../services/api'
 import NightClockWidget from '../components/NightClockWidget.vue'
@@ -305,6 +375,49 @@ const onNightStatusUpdated = (status: any) => {
 const mapNodes = ref<any[]>([])
 const sidebarNode = ref<any>(null)
 const activeMission = ref<any>(null)
+
+// ESTADOS REATIVOS DE BUSCA, FILTRO E ORDENAÇÃO DE MISSÕES
+const searchMissionQuery = ref('')
+const selectedCategory = ref('ALL') // 'ALL' | 'HUNT' | 'OPERATION'
+const sortBy = ref('DEFAULT') // 'DEFAULT' | 'DURATION_ASC' | 'DURATION_DESC' | 'DIFF_ASC' | 'DIFF_DESC' | 'NAME_ASC'
+
+const filteredAndSortedMissions = computed(() => {
+  const missions = sidebarNode.value?.missions || []
+  if (!missions.length) return []
+
+  let list = [...missions]
+
+  // 1. Filtro por Categoria
+  if (selectedCategory.value === 'HUNT') {
+    list = list.filter((m: any) => m.category === 'HUNT')
+  } else if (selectedCategory.value === 'OPERATION') {
+    list = list.filter((m: any) => m.category !== 'HUNT')
+  }
+
+  // 2. Filtro por Busca de Texto (Título e Descrição)
+  if (searchMissionQuery.value.trim()) {
+    const q = searchMissionQuery.value.toLowerCase().trim()
+    list = list.filter((m: any) => 
+      (m.title && m.title.toLowerCase().includes(q)) ||
+      (m.description && m.description.toLowerCase().includes(q))
+    )
+  }
+
+  // 3. Ordenação Dinâmica
+  if (sortBy.value === 'DURATION_ASC') {
+    list.sort((a: any, b: any) => (a.durationMinutes || 0) - (b.durationMinutes || 0))
+  } else if (sortBy.value === 'DURATION_DESC') {
+    list.sort((a: any, b: any) => (b.durationMinutes || 0) - (a.durationMinutes || 0))
+  } else if (sortBy.value === 'DIFF_ASC') {
+    list.sort((a: any, b: any) => (a.baseDifficulty || 0) - (b.baseDifficulty || 0))
+  } else if (sortBy.value === 'DIFF_DESC') {
+    list.sort((a: any, b: any) => (b.baseDifficulty || 0) - (a.baseDifficulty || 0))
+  } else if (sortBy.value === 'NAME_ASC') {
+    list.sort((a: any, b: any) => (a.title || '').localeCompare(b.title || ''))
+  }
+
+  return list
+})
 
 const returnToHaven = () => {
   router.push(`/personagem/hub?id=${characterId.value}`)
