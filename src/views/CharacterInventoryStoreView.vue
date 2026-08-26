@@ -33,23 +33,23 @@
     <!-- MAIN CONTENT -->
     <main v-else class="relative z-10 max-w-[1200px] mx-auto px-4 py-8 space-y-8">
       
-      <!-- HEADER & AS 3 ABAS -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-white/10">
+      <!-- HEADER -->
+      <div class="space-y-6 pb-6 border-b border-white/10">
         <div>
-          <h1 class="demiplane-title text-3xl md:text-4xl text-white">
+          <h1 class="demiplane-title text-3xl md:text-5xl text-white">
             Mercado Subterrâneo & Arsenal
           </h1>
-          <h2 class="demiplane-text text-vamp-c2 mt-1 text-xs sm:text-sm">
+          <h2 class="demiplane-text text-vamp-c2 mt-1.5 text-xs sm:text-sm">
             Armas pesadas, blindagens táticas e contratação de especialistas em Nocturna.
           </h2>
         </div>
 
-        <!-- AS 3 ABAS -->
-        <div class="flex flex-wrap bg-black/80 border border-white/10 p-1 rounded-xl gap-1">
+        <!-- AS 3 ABAS NA MESMA LINHA ABAIXO DO NOME -->
+        <div class="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1">
           <button 
             @click="activeTab = 'inventario'"
-            class="px-4 py-2 rounded-lg text-xs font-serif tracking-wider transition-all duration-300 flex items-center gap-2"
-            :class="activeTab === 'inventario' ? 'bg-blood-red text-white shadow-lg' : 'text-stone-400 hover:text-white'"
+            class="px-5 py-2.5 rounded-xl text-xs font-serif tracking-wider transition-all duration-300 flex items-center gap-2 shrink-0 border"
+            :class="activeTab === 'inventario' ? 'bg-blood-red border-blood-red text-white shadow-[0_0_15px_rgba(185,28,28,0.4)]' : 'bg-black/60 border-white/10 text-stone-400 hover:text-white hover:border-white/20'"
           >
             <span>⚔️ Meu Inventário</span>
             <span class="text-[10px] bg-black/50 px-2 py-0.5 rounded-full font-mono">{{ inventoryItems.length }}</span>
@@ -57,8 +57,8 @@
 
           <button 
             @click="activeTab = 'loja'"
-            class="px-4 py-2 rounded-lg text-xs font-serif tracking-wider transition-all duration-300 flex items-center gap-2"
-            :class="activeTab === 'loja' ? 'bg-gold text-black font-semibold shadow-lg' : 'text-stone-400 hover:text-white'"
+            class="px-5 py-2.5 rounded-xl text-xs font-serif tracking-wider transition-all duration-300 flex items-center gap-2 shrink-0 border"
+            :class="activeTab === 'loja' ? 'bg-gold border-gold text-black font-bold shadow-[0_0_15px_rgba(212,175,55,0.3)]' : 'bg-black/60 border-white/10 text-stone-400 hover:text-white hover:border-white/20'"
           >
             <span>🏪 Mercado Negro</span>
             <span class="text-[10px] bg-black/50 px-2 py-0.5 rounded-full font-mono">{{ storeCatalog.length }}</span>
@@ -66,8 +66,8 @@
 
           <button 
             @click="activeTab = 'lacaios'"
-            class="px-4 py-2 rounded-lg text-xs font-serif tracking-wider transition-all duration-300 flex items-center gap-2"
-            :class="activeTab === 'lacaios' ? 'bg-cyan-600 text-black font-semibold shadow-lg' : 'text-stone-400 hover:text-white'"
+            class="px-5 py-2.5 rounded-xl text-xs font-serif tracking-wider transition-all duration-300 flex items-center gap-2 shrink-0 border"
+            :class="activeTab === 'lacaios' ? 'bg-cyan-600 border-cyan-500 text-black font-bold shadow-[0_0_15px_rgba(6,182,212,0.3)]' : 'bg-black/60 border-white/10 text-stone-400 hover:text-white hover:border-white/20'"
           >
             <span>👥 Lacaios & Contatos</span>
             <span class="text-[10px] bg-black/50 px-2 py-0.5 rounded-full font-mono">4</span>
