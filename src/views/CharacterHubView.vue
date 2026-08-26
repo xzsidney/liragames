@@ -207,27 +207,32 @@
                 <div 
                   v-for="act in recentActivities" 
                   :key="act.id"
-                  class="bg-black/50 border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-300 space-y-2"
+                  @click="openActivityReport(act)"
+                  class="bg-black/50 border border-white/10 hover:border-gold/50 rounded-xl p-4 transition-all duration-300 space-y-2 cursor-pointer group hover:bg-black/70 hover:shadow-[0_0_15px_rgba(212,175,55,0.15)]"
                 >
                   <div class="flex justify-between items-start">
                     <div>
                       <div class="flex items-center gap-2">
-                        <span class="text-xs">{{ act.activityType === 'IDLE_MISSION' ? '⚔️' : '📖' }}</span>
-                        <h5 class="font-serif text-xs font-bold text-parchment">
+                        <span class="text-xs group-hover:scale-110 transition-transform">{{ act.activityType === 'IDLE_MISSION' ? '⚔️' : '📖' }}</span>
+                        <h5 class="font-serif text-xs font-bold text-parchment group-hover:text-gold transition-colors">
                           {{ act.mission?.title || act.resultData?.title || 'Operação Tática' }}
                         </h5>
                       </div>
-                      <div class="text-[10px] font-mono text-stone-400 mt-0.5">
-                        {{ formatActivityDate(act.createdAt) }}
+                      <div class="text-[10px] font-mono text-stone-400 mt-0.5 flex items-center gap-2">
+                        <span>{{ formatActivityDate(act.createdAt) }}</span>
+                        <span v-if="act.mission?.Location?.name" class="text-stone-500">• 📍 {{ act.mission.Location.name }}</span>
                       </div>
                     </div>
 
-                    <span 
-                      class="text-[9px] font-mono uppercase px-2 py-0.5 rounded border font-bold"
-                      :class="act.resultData?.success !== false ? 'bg-green-950/60 border-green-700/50 text-green-400' : 'bg-red-950/60 border-red-700/50 text-red-400'"
-                    >
-                      {{ act.resultData?.success !== false ? '✔ Concluída' : '☠ Abortada' }}
-                    </span>
+                    <div class="flex items-center gap-2">
+                      <span 
+                        class="text-[9px] font-mono uppercase px-2 py-0.5 rounded border font-bold"
+                        :class="act.resultData?.success !== false ? 'bg-green-950/60 border-green-700/50 text-green-400' : 'bg-red-950/60 border-red-700/50 text-red-400'"
+                      >
+                        {{ act.resultData?.success !== false ? '✔ Concluída' : '☠ Abortada' }}
+                      </span>
+                      <span class="text-[10px] text-stone-500 group-hover:text-gold transition-colors font-mono">🔍 Ver</span>
+                    </div>
                   </div>
 
                   <!-- RECOMPENSAS GANHAS -->
@@ -365,6 +370,101 @@
 
     </main>
 
+    <!-- MODAL DE RELATÓRIO DETALHADO DA ATIVIDADE (DEBRIEFING TÁTICO) -->
+    <div v-if="selectedActivity" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="max-w-xl w-full bg-[#0a0507] border-2 border-red-900/80 rounded-2xl p-6 sm:p-7 shadow-[0_0_50px_rgba(153,27,27,0.4)] space-y-6 text-stone-200 relative max-h-[90vh] overflow-y-auto font-sans">
+        
+        <button @click="selectedActivity = null" class="absolute top-4 right-4 text-stone-400 hover:text-white text-xl transition-all">✕</button>
+
+        <!-- CABEÇALHO DO RELATÓRIO -->
+        <div class="border-b border-white/10 pb-4 space-y-1">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-gold">
+              {{ selectedActivity.activityType === 'IDLE_MISSION' ? '⚔️ Relatório de Incursão Tática' : '📖 Crônica Narrativa Solo' }}
+            </span>
+            <span 
+              class="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded border font-bold"
+              :class="selectedActivity.resultData?.success !== false ? 'bg-green-950 text-green-400 border-green-700' : 'bg-red-950 text-red-400 border-red-700'"
+            >
+              {{ selectedActivity.resultData?.success !== false ? '✔ Missão Bem-Sucedida' : '☠ Incursão Abortada / Falha' }}
+            </span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-serif font-bold text-parchment">
+            {{ selectedActivity.mission?.title || selectedActivity.resultData?.title || 'Operação de Campo' }}
+          </h2>
+          <div class="text-xs text-stone-400 font-mono flex items-center gap-3 pt-1">
+            <span>📅 {{ formatActivityDate(selectedActivity.createdAt) }}</span>
+            <span v-if="selectedActivity.mission?.Location?.name">• 📍 {{ selectedActivity.mission.Location.name }}</span>
+          </div>
+        </div>
+
+        <!-- DESCRIÇÃO / CONTEXTO -->
+        <div v-if="selectedActivity.mission?.description" class="text-xs text-stone-300 font-light leading-relaxed bg-black/50 p-3.5 rounded-xl border border-white/5">
+          {{ selectedActivity.mission.description }}
+        </div>
+
+        <!-- ETAPAS RESOLVIDAS E DADOS (SE HOUVER REPORT DETALHADO) -->
+        <div v-if="selectedActivity.resultData?.report?.steps?.length" class="space-y-3">
+          <h3 class="text-xs font-serif uppercase tracking-wider text-gold font-bold flex items-center gap-2">
+            <span>🎲</span> Testes & Desdobramentos da Noite
+          </h3>
+
+          <div class="space-y-2.5">
+            <div 
+              v-for="step in selectedActivity.resultData.report.steps" 
+              :key="step.stepId || step.order"
+              class="bg-black/60 border border-white/10 rounded-xl p-3.5 space-y-1.5"
+            >
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-serif font-bold text-stone-200 flex items-center gap-1.5">
+                  <span class="w-5 h-5 rounded-full bg-black border border-white/20 flex items-center justify-center text-[10px]">
+                    {{ step.order }}
+                  </span>
+                  {{ step.actionName }}
+                </span>
+                <span 
+                  class="text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold"
+                  :class="step.passed ? 'bg-green-950 text-green-400 border border-green-800' : 'bg-red-950 text-red-400 border border-red-800'"
+                >
+                  {{ step.passed ? '✔ Sucesso' : '✖ Falha' }}
+                </span>
+              </div>
+              <p v-if="step.narrative" class="text-[11px] text-stone-300 font-light leading-relaxed pl-6">
+                {{ step.narrative }}
+              </p>
+              <div v-if="step.rolls" class="text-[10px] font-mono text-stone-400 pl-6 flex items-center gap-2">
+                <span>Dados: [{{ Array.isArray(step.rolls) ? step.rolls.join(', ') : step.rolls }}]</span>
+                <span>&rarr;</span>
+                <span :class="step.passed ? 'text-green-400 font-bold' : 'text-red-400 font-bold'">
+                  {{ step.successes }} {{ step.successes === 1 ? 'sucesso' : 'sucessos' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MUDANÇAS & ESPÓLIOS FINAIS -->
+        <div v-if="selectedActivity.resultData?.report?.finalChanges?.length" class="space-y-2">
+          <h3 class="text-xs font-serif uppercase tracking-wider text-gold font-bold flex items-center gap-2">
+            <span>🏆</span> Espólios & Consequências da Incursão
+          </h3>
+          <ul class="space-y-1.5 text-xs font-mono text-stone-300 bg-black/60 p-3.5 rounded-xl border border-white/5">
+            <li v-for="(change, idx) in selectedActivity.resultData.report.finalChanges" :key="idx" class="flex items-center gap-2">
+              <span>{{ change }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <button 
+          @click="selectedActivity = null"
+          class="w-full py-3 rounded-xl bg-gold hover:bg-gold-light text-black font-serif font-bold text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+        >
+          Fechar Relatório
+        </button>
+
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -385,7 +485,12 @@ const nightClockRef = ref<any>(null)
 const currentNightStatus = ref<any>(null)
 const activeMission = ref<any>(null)
 const recentActivities = ref<any[]>([])
+const selectedActivity = ref<any>(null)
 const isAwakening = ref(false)
+
+const openActivityReport = (act: any) => {
+  selectedActivity.value = act
+}
 
 const handleImageError = (e: Event) => {
   const target = e.target as HTMLImageElement;
