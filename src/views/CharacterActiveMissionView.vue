@@ -412,36 +412,89 @@
       </div>
     </div>
 
-    <!-- MODAL DE EMERGÊNCIA SOLAR -->
-    <div v-if="showEmergencyModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-      <div class="max-w-md w-full bg-[#0d0404] border-2 border-red-600 rounded-xl p-6 shadow-[0_0_60px_rgba(255,0,0,0.6)] space-y-5 text-stone-200 relative">
+    <!-- MODAL DE EMERGÊNCIA SOLAR COM AS 3 OPÇÕES BALANCEADAS -->
+    <div v-if="showEmergencyModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="max-w-lg w-full bg-[#0d0404] border-2 border-red-600 rounded-xl p-6 sm:p-7 shadow-[0_0_60px_rgba(255,0,0,0.6)] space-y-5 text-stone-200 relative max-h-[92vh] overflow-y-auto">
         <button @click="showEmergencyModal = false" class="absolute top-4 right-4 text-stone-500 hover:text-white text-xl">✕</button>
+        
         <div class="text-center space-y-2">
           <div class="text-4xl animate-bounce">☀️</div>
-          <h2 class="text-xl font-serif text-red-500 font-bold uppercase tracking-widest">O Sol Raiou!</h2>
+          <h2 class="text-xl font-serif text-red-500 font-bold uppercase tracking-widest">O Sol Raiou em Nocturna!</h2>
           <p class="text-xs text-stone-300 font-sans leading-relaxed">
-            Selecione uma ação de emergência para proteger sua carne morta da queimação do dia:
+            Seus tecidos mortos estão em risco iminente de combustão espontânea. Escolha sua estratégia de sobrevivência:
           </p>
         </div>
-        <div class="space-y-2">
-          <button 
-            @click="takeShelter('GO_HOME')" 
-            class="w-full text-left p-3 rounded-lg border border-red-500/40 hover:border-red-500 bg-red-950/30 hover:bg-red-950/70 transition-all font-serif text-xs text-red-300 group"
-          >
-            🏠 Retornar às Pressas ao Refúgio
-          </button>
+
+        <div class="space-y-3">
+          
+          <!-- OPÇÃO 1: HOTEL / MOTEL (SEGURO COM DINHEIRO) -->
           <button 
             @click="takeShelter('BUY_MOTEL')" 
-            class="w-full text-left p-3 rounded-lg border border-amber-500/30 hover:border-amber-500 bg-stone-950/80 hover:bg-amber-950/40 transition-all font-serif text-xs text-amber-300"
+            class="w-full text-left p-4 rounded-xl border border-amber-500/50 hover:border-amber-400 bg-amber-950/20 hover:bg-amber-950/50 transition-all space-y-2 group shadow-[0_0_15px_rgba(245,158,11,0.15)]"
           >
-            🏨 Alugar Motel com Blackout (R$ 400)
+            <div class="flex items-center justify-between">
+              <div class="font-serif font-bold text-sm text-amber-300 group-hover:text-amber-200 flex items-center gap-2">
+                <span>🏨</span> Alugar Quarto com Blackout (Hotel / Motel)
+              </div>
+              <span class="text-[10px] font-mono uppercase bg-amber-950 px-2 py-0.5 rounded text-amber-400 border border-amber-700/50 font-bold">
+                1 a 5 Estrelas
+              </span>
+            </div>
+            <p class="text-[11px] text-stone-400 font-light leading-relaxed">
+              Gaste seus recursos financeiros (R$) para dormir o dia em quarto lacrado com cortinas grossas.
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono pt-1">
+              <span class="px-2 py-0.5 rounded bg-amber-950/60 border border-amber-800 text-amber-300">💵 R$ 150 a R$ 4.000</span>
+              <span class="px-2 py-0.5 rounded bg-blue-950/60 border border-blue-800 text-blue-300">🧠 +1 a +10 Força de Vontade</span>
+              <span class="px-2 py-0.5 rounded bg-red-950/60 border border-red-800 text-red-300 font-bold">🩸 Opção de Sangue O-</span>
+            </div>
           </button>
+
+          <!-- OPÇÃO 2: ESGOTO / SUBTERRÂNEO (GRÁTIS COM RISCO / TESTE) -->
           <button 
             @click="takeShelter('BREACH_SEWER')" 
-            class="w-full text-left p-3 rounded-lg border border-emerald-500/30 hover:border-emerald-500 bg-stone-950/80 hover:bg-emerald-950/40 transition-all font-serif text-xs text-emerald-300"
+            class="w-full text-left p-4 rounded-xl border border-emerald-500/50 hover:border-emerald-400 bg-emerald-950/20 hover:bg-emerald-950/50 transition-all space-y-2 group shadow-[0_0_15px_rgba(16,185,129,0.15)]"
           >
-            🕳️ Forçar Bueiro / Esgoto (Força + Ladroagem)
+            <div class="flex items-center justify-between">
+              <div class="font-serif font-bold text-sm text-emerald-300 group-hover:text-emerald-200 flex items-center gap-2">
+                <span>🕳️</span> Galerias Subterrâneas (Esgotos Nosferatu)
+              </div>
+              <span class="text-[10px] font-mono uppercase bg-emerald-950 px-2 py-0.5 rounded text-emerald-400 border border-emerald-700/50 font-bold">
+                Grátis • R$ 0
+              </span>
+            </div>
+            <p class="text-[11px] text-stone-400 font-light leading-relaxed">
+              Desça para as tubulações escuras sob a cidade. Gratuito contra o sol, com acesso a caçada de ratos.
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono pt-1">
+              <span class="px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800 text-emerald-300">🛡️ 100% Protegido do Sol</span>
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-stone-300">🐀 Caçada de Ratos (Fome 5 &rarr; 4)</span>
+            </div>
           </button>
+
+          <!-- OPÇÃO 3: FUGA DESESPERADA AO REFÚGIO (ÚLTIMO RECURSO - PENALIDADE TRIPLA) -->
+          <button 
+            @click="takeShelter('GO_HOME')" 
+            class="w-full text-left p-4 rounded-xl border border-red-600/70 hover:border-red-500 bg-red-950/30 hover:bg-red-950/60 transition-all space-y-2 group shadow-[0_0_15px_rgba(220,38,38,0.2)]"
+          >
+            <div class="flex items-center justify-between">
+              <div class="font-serif font-bold text-sm text-red-400 group-hover:text-red-300 flex items-center gap-2">
+                <span>🏠</span> Fuga Desesperada ao Refúgio
+              </div>
+              <span class="text-[10px] font-mono uppercase bg-red-950 px-2 py-0.5 rounded text-red-400 border border-red-700 font-bold">
+                ⚠️ Penalidades Severas
+              </span>
+            </div>
+            <p class="text-[11px] text-stone-400 font-light leading-relaxed">
+              Você corre pelas ruas sob o sol da manhã. Chega ao refúgio, mas sofre queimaduras, desgaste de sangue e terror psicológico.
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono pt-1">
+              <span class="px-2 py-0.5 rounded bg-red-950 border border-red-700 text-red-300 font-bold">☀️ +1 Dano Agravado Solar</span>
+              <span class="px-2 py-0.5 rounded bg-red-950 border border-red-700 text-red-300 font-bold">🩸 +1 Fome (Gasto no Pânico)</span>
+              <span class="px-2 py-0.5 rounded bg-red-950 border border-red-700 text-red-300 font-bold">🧠 -1 Força de Vontade (Rötschreck)</span>
+            </div>
+          </button>
+
         </div>
       </div>
     </div>

@@ -90,58 +90,78 @@
           </p>
         </div>
 
-        <!-- OPÇÕES DE SOBREVIVÊNCIA SOLAR -->
-        <div class="space-y-2.5 font-sans">
-          <!-- Opção 1: Fuga ao Refúgio -->
-          <button 
-            @click="takeShelter('GO_HOME')" 
-            :disabled="isProcessing"
-            class="w-full text-left p-3.5 rounded-lg border border-red-500/40 hover:border-red-500 bg-red-950/30 hover:bg-red-950/70 transition-all flex items-center justify-between group"
-          >
-            <div>
-              <div class="font-bold text-xs text-red-300 group-hover:text-white uppercase font-serif">🏠 Correr para o Refúgio Seguro</div>
-              <div class="text-[10px] text-stone-400">Retorno em alta velocidade até seu refúgio pessoal.</div>
-            </div>
-            <span class="text-xs font-mono text-red-400 font-bold">&rarr;</span>
-          </button>
-
-          <!-- Opção 2: Alugar Motel -->
+        <!-- OPÇÕES DE SOBREVIVÊNCIA SOLAR BALANCEADAS -->
+        <div class="space-y-3 font-sans text-left">
+          
+          <!-- OPÇÃO 1: HOTEL / MOTEL (SEGURO COM DINHEIRO) -->
           <button 
             @click="takeShelter('BUY_MOTEL')" 
             :disabled="isProcessing"
-            class="w-full text-left p-3.5 rounded-lg border border-amber-500/30 hover:border-amber-500 bg-stone-950/80 hover:bg-amber-950/40 transition-all flex items-center justify-between group"
+            class="w-full text-left p-4 rounded-xl border border-amber-500/50 hover:border-amber-400 bg-amber-950/20 hover:bg-amber-950/50 transition-all space-y-2 group shadow-[0_0_15px_rgba(245,158,11,0.15)]"
           >
-            <div>
-              <div class="font-bold text-xs text-amber-300 group-hover:text-white uppercase font-serif">🏨 Motel com Blackout (R$ 400)</div>
-              <div class="text-[10px] text-stone-400">Paga diária comercial de emergência. Abrigo imediato no bairro.</div>
+            <div class="flex items-center justify-between">
+              <div class="font-serif font-bold text-sm text-amber-300 group-hover:text-amber-200 flex items-center gap-2">
+                <span>🏨</span> Alugar Quarto com Blackout (Hotel / Motel)
+              </div>
+              <span class="text-[10px] font-mono uppercase bg-amber-950 px-2 py-0.5 rounded text-amber-400 border border-amber-700/50 font-bold">
+                1 a 5 Estrelas
+              </span>
             </div>
-            <span class="text-xs font-mono text-amber-400 font-bold">&rarr;</span>
+            <p class="text-[11px] text-stone-400 font-light leading-relaxed">
+              Gaste seus recursos financeiros (R$) para dormir o dia em quarto lacrado com cortinas grossas.
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono pt-1">
+              <span class="px-2 py-0.5 rounded bg-amber-950/60 border border-amber-800 text-amber-300">💵 R$ 150 a R$ 4.000</span>
+              <span class="px-2 py-0.5 rounded bg-blue-950/60 border border-blue-800 text-blue-300">🧠 +1 a +10 Força de Vontade</span>
+              <span class="px-2 py-0.5 rounded bg-red-950/60 border border-red-800 text-red-300 font-bold">🩸 Opção de Sangue O-</span>
+            </div>
           </button>
 
-          <!-- Opção 3: Arrombar Bueiro / Esgoto -->
+          <!-- OPÇÃO 2: ESGOTO / SUBTERRÂNEO (GRÁTIS COM RISCO / TESTE) -->
           <button 
             @click="takeShelter('BREACH_SEWER')" 
             :disabled="isProcessing"
-            class="w-full text-left p-3.5 rounded-lg border border-emerald-500/30 hover:border-emerald-500 bg-stone-950/80 hover:bg-emerald-950/40 transition-all flex items-center justify-between group"
+            class="w-full text-left p-4 rounded-xl border border-emerald-500/50 hover:border-emerald-400 bg-emerald-950/20 hover:bg-emerald-950/50 transition-all space-y-2 group shadow-[0_0_15px_rgba(16,185,129,0.15)]"
           >
-            <div>
-              <div class="font-bold text-xs text-emerald-300 group-hover:text-white uppercase font-serif">🕳️ Forçar Bueiro / Esgoto</div>
-              <div class="text-[10px] text-stone-400">Infiltração subterrânea nos túneis do Nosferatu (Força + Ladroagem).</div>
+            <div class="flex items-center justify-between">
+              <div class="font-serif font-bold text-sm text-emerald-300 group-hover:text-emerald-200 flex items-center gap-2">
+                <span>🕳️</span> Galerias Subterrâneas (Esgotos Nosferatu)
+              </div>
+              <span class="text-[10px] font-mono uppercase bg-emerald-950 px-2 py-0.5 rounded text-emerald-400 border border-emerald-700/50 font-bold">
+                Grátis • R$ 0
+              </span>
             </div>
-            <span class="text-xs font-mono text-emerald-400 font-bold">&rarr;</span>
+            <p class="text-[11px] text-stone-400 font-light leading-relaxed">
+              Desça para as tubulações escuras sob a cidade. Gratuito contra o sol, com acesso a caçada de ratos.
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono pt-1">
+              <span class="px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800 text-emerald-300">🛡️ 100% Protegido do Sol</span>
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-stone-300">🐀 Caçada de Ratos (Fome 5 &rarr; 4)</span>
+            </div>
           </button>
 
-          <!-- Opção 4: Enfrentar a Luz do Dia (Dificuldade 10) -->
+          <!-- OPÇÃO 3: FUGA DESESPERADA AO REFÚGIO (ÚLTIMO RECURSO - PENALIDADE TRIPLA) -->
           <button 
-            @click="faceTheSunlight" 
+            @click="takeShelter('GO_HOME')" 
             :disabled="isProcessing"
-            class="w-full text-left p-3.5 rounded-lg border border-stone-700 hover:border-red-400 bg-stone-900/60 hover:bg-stone-800 transition-all flex items-center justify-between group"
+            class="w-full text-left p-4 rounded-xl border border-red-600/70 hover:border-red-500 bg-red-950/30 hover:bg-red-950/60 transition-all space-y-2 group shadow-[0_0_15px_rgba(220,38,38,0.2)]"
           >
-            <div>
-              <div class="font-bold text-xs text-stone-300 group-hover:text-red-300 uppercase font-serif">⚔️ Enfrentar a Luz do Dia (Dificuldade 10)</div>
-              <div class="text-[10px] text-stone-400">Permanece na rua sob letargia solar. Testes em Dif. 10 e dano contínuo.</div>
+            <div class="flex items-center justify-between">
+              <div class="font-serif font-bold text-sm text-red-400 group-hover:text-red-300 flex items-center gap-2">
+                <span>🏠</span> Fuga Desesperada ao Refúgio
+              </div>
+              <span class="text-[10px] font-mono uppercase bg-red-950 px-2 py-0.5 rounded text-red-400 border border-red-700 font-bold">
+                ⚠️ Penalidades Severas
+              </span>
             </div>
-            <span class="text-xs font-mono text-stone-400 font-bold">&rarr;</span>
+            <p class="text-[11px] text-stone-400 font-light leading-relaxed">
+              Você corre pelas ruas sob o sol da manhã. Chega ao refúgio, mas sofre queimaduras, desgaste de sangue e terror psicológico.
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono pt-1">
+              <span class="px-2 py-0.5 rounded bg-red-950 border border-red-700 text-red-300 font-bold">☀️ +1 Dano Agravado Solar</span>
+              <span class="px-2 py-0.5 rounded bg-red-950 border border-red-700 text-red-300 font-bold">🩸 +1 Fome (Gasto no Pânico)</span>
+              <span class="px-2 py-0.5 rounded bg-red-950 border border-red-700 text-red-300 font-bold">🧠 -1 Força de Vontade (Rötschreck)</span>
+            </div>
           </button>
         </div>
 
@@ -304,15 +324,6 @@ const takeShelter = async (type: string) => {
   } finally {
     isProcessing.value = false
   }
-}
-
-const faceTheSunlight = () => {
-  modalDismissed.value = true
-  showEmergencyModal.value = false
-  notifyError(
-    '☀️ Operando Sob a Luz do Dia',
-    'A luz solar reduz drasticamente seus reflexos. Todas as ações agora operam em Dificuldade 10!'
-  )
 }
 
 const dismissEmergencyModal = () => {
