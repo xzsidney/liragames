@@ -228,7 +228,7 @@
       <div class="absolute inset-0 z-0 bg-black/40 pointer-events-none"></div>
 
       <!-- 5.2 Container Principal Coeso e Centralizado (The Vampire Stage) -->
-      <div class="relative z-20 w-full min-h-[50vh] flex flex-col justify-end pb-8 pointer-events-none">
+      <div class="relative z-20 w-full min-h-[50vh] max-h-screen overflow-y-auto custom-vamp-scrollbar flex flex-col justify-end pt-20 pb-8 pointer-events-none">
         
         <div class="w-full max-w-5xl mx-auto flex flex-col justify-end items-center px-4 space-y-4">
           
@@ -284,11 +284,11 @@
           </div>
 
           <!-- Caixa de Narrativa Central -->
-          <div class="w-full pointer-events-auto space-y-6 pt-6 pb-6 px-6 md:px-10 bg-black/85 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.95)] transition-all">
+          <div class="w-full pointer-events-auto max-h-[75vh] flex flex-col space-y-4 pt-5 pb-6 px-6 md:px-10 bg-black/85 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.95)] transition-all">
             
-            <!-- Orador & Texto Narrativo -->
-            <div class="space-y-4">
-              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <!-- Orador & Texto Narrativo com Rolagem -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
                 <div class="flex items-center gap-2">
                   <span class="text-xs text-vamp-c2">⚜</span>
                   <span class="font-serif text-base md:text-lg uppercase tracking-[0.2em] text-gold font-bold drop-shadow-md">
@@ -300,8 +300,9 @@
                 </span>
               </div>
               
+              <!-- Texto com Barra de Rolagem Suave -->
               <div 
-                class="text-base md:text-lg font-serif leading-relaxed text-parchment whitespace-pre-line drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] font-light"
+                class="max-h-[180px] sm:max-h-[240px] overflow-y-auto custom-vamp-scrollbar pr-3 text-base md:text-lg font-serif leading-relaxed text-parchment whitespace-pre-line drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] font-light"
                 :class="{'animate-fade-in': animateText}"
               >
                 {{ currentNode.narrativeText }}
@@ -311,7 +312,7 @@
             <!-- ========================================== -->
             <!-- 5.3 PAINEL DE DESFECHO / FINAL DE CRÔNICA  -->
             <!-- ========================================== -->
-            <div v-if="currentNode.isEnding" class="pt-4 border-t border-white/10 text-center space-y-6 animate-fade-in">
+            <div v-if="currentNode.isEnding" class="pt-3 border-t border-white/10 text-center space-y-4 animate-fade-in">
               <div class="bg-red-950/40 border border-red-800/40 p-4 rounded-xl max-w-md mx-auto space-y-2">
                 <div class="text-xs font-serif uppercase tracking-widest text-gold font-bold flex items-center justify-center gap-2">
                   <span>🏆</span> Desfecho da Crônica Alcançado
@@ -339,41 +340,44 @@
             <!-- ========================================== -->
             <!-- 5.4 LISTA DE ESCOLHAS & TESTES V5          -->
             <!-- ========================================== -->
-            <div v-else class="flex flex-col gap-3 w-full pt-2 animate-fade-in">
-              <div class="text-[10px] font-mono uppercase tracking-widest text-stone-400 pb-1 flex items-center gap-2">
+            <div v-else class="flex flex-col gap-2.5 w-full pt-1 animate-fade-in">
+              <div class="text-[10px] font-mono uppercase tracking-widest text-stone-400 pb-0.5 flex items-center gap-2">
                 <span>⚔️</span> Suas Opções de Ação:
               </div>
 
-              <button 
-                v-for="choice in currentNode.choices" 
-                :key="choice.id" 
-                @click="makeChoice(choice)"
-                :disabled="processingChoice"
-                class="w-full text-left p-4 rounded-xl border transition-all duration-300 relative group overflow-hidden cursor-pointer"
-                :class="[
-                  choice.customStyle === 'DISCIPLINE' || choice.customStyle === 'RED' 
-                    ? 'bg-red-950/30 border-red-800/60 hover:bg-red-900/40 hover:border-red-500 shadow-[0_0_15px_rgba(192,57,43,0.15)]' 
-                    : 'bg-zinc-950/60 border-white/10 hover:bg-white/5 hover:border-gold/60 shadow-md'
-                ]"
-              >
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 relative z-10">
-                  <div class="flex items-center gap-3">
-                    <span class="text-xs group-hover:scale-125 transition-transform">
-                      {{ choice.customStyle === 'DISCIPLINE' ? '🩸' : (choice.attributeReq ? '🎲' : '💬') }}
-                    </span>
-                    <span class="font-serif text-sm md:text-base text-parchment group-hover:text-white font-medium">
-                      {{ choice.choiceText }}
-                    </span>
-                  </div>
+              <!-- Lista de Escolhas com Scroll se necessário -->
+              <div class="max-h-[220px] sm:max-h-[260px] overflow-y-auto custom-vamp-scrollbar pr-1.5 flex flex-col gap-2.5">
+                <button 
+                  v-for="choice in currentNode.choices" 
+                  :key="choice.id" 
+                  @click="makeChoice(choice)"
+                  :disabled="processingChoice"
+                  class="w-full text-left p-3.5 sm:p-4 rounded-xl border transition-all duration-300 relative group overflow-hidden cursor-pointer"
+                  :class="[
+                    choice.customStyle === 'DISCIPLINE' || choice.customStyle === 'RED' 
+                      ? 'bg-red-950/30 border-red-800/60 hover:bg-red-900/40 hover:border-red-500 shadow-[0_0_15px_rgba(192,57,43,0.15)]' 
+                      : 'bg-zinc-950/60 border-white/10 hover:bg-white/5 hover:border-gold/60 shadow-md'
+                  ]"
+                >
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 relative z-10">
+                    <div class="flex items-center gap-3">
+                      <span class="text-xs group-hover:scale-125 transition-transform">
+                        {{ choice.customStyle === 'DISCIPLINE' ? '🩸' : (choice.attributeReq ? '🎲' : '💬') }}
+                      </span>
+                      <span class="font-serif text-sm md:text-base text-parchment group-hover:text-white font-medium">
+                        {{ choice.choiceText }}
+                      </span>
+                    </div>
 
-                  <!-- Tag de Requisito de Teste V5 -->
-                  <div v-if="choice.attributeReq || choice.skillReq" class="shrink-0 flex items-center gap-1 text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-black/60 border border-white/10 group-hover:border-gold/40 text-stone-300">
-                    <span class="text-amber-400 font-bold">Teste:</span>
-                    <span>{{ choice.attributeReq }}<span v-if="choice.skillReq"> + {{ choice.skillReq }}</span></span>
-                    <span class="text-red-400 font-bold ml-1">(Dif: {{ choice.difficulty || 1 }})</span>
+                    <!-- Tag de Requisito de Teste V5 -->
+                    <div v-if="choice.attributeReq || choice.skillReq" class="shrink-0 flex items-center gap-1 text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-black/60 border border-white/10 group-hover:border-gold/40 text-stone-300">
+                      <span class="text-amber-400 font-bold">Teste:</span>
+                      <span>{{ choice.attributeReq }}<span v-if="choice.skillReq"> + {{ choice.skillReq }}</span></span>
+                      <span class="text-red-400 font-bold ml-1">(Dif: {{ choice.difficulty || 1 }})</span>
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              </div>
             </div>
             
           </div>
@@ -708,6 +712,34 @@ onMounted(() => {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollbar Temática Gótica / Vampiro */
+.custom-vamp-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-vamp-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 9999px;
+}
+
+.custom-vamp-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(192, 57, 43, 0.5);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.custom-vamp-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(220, 38, 38, 0.85);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+
+/* Suporte a Firefox */
+.custom-vamp-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(192, 57, 43, 0.6) rgba(0, 0, 0, 0.4);
 }
 </style>
 
