@@ -606,8 +606,8 @@ const lastDamageTaken = ref<number>(15);
 const battleState = ref<'LOBBY' | 'BATTLE'>('LOBBY');
 const showInfirmaryModal = ref<boolean>(false);
 
-const heroSpriteState = ref<'idle' | 'walk' | 'attack' | 'hit'>('idle');
-const monsterSpriteState = ref<'idle' | 'walk' | 'attack' | 'hit'>('idle');
+const heroSpriteState = ref<'idle' | 'walk' | 'walkBack' | 'attack' | 'attackLight' | 'attackHeavy' | 'special' | 'hit' | 'win'>('idle');
+const monsterSpriteState = ref<'idle' | 'walk' | 'walkBack' | 'attack' | 'attackLight' | 'attackHeavy' | 'special' | 'hit' | 'win'>('idle');
 
 const heroFighterSprite = computed<string>(() => {
   if (activeCharacter.value?.avatarUrl?.startsWith('sprite:')) {
@@ -703,6 +703,9 @@ function moveHero(direction: 'LEFT' | 'RIGHT') {
     showInfirmaryModal.value = true;
     return;
   }
+
+  heroSpriteState.value = direction === 'LEFT' ? 'walkBack' : 'walk';
+  setTimeout(() => { heroSpriteState.value = 'idle'; }, 600);
 
   // 1. Atualiza otimisticamente a posição local imediatamente
   if (direction === 'LEFT' && heroGridPos.value > 0) {
@@ -874,7 +877,7 @@ function executeTurnAction(actionType: 'ATTACK' | 'DEFEND') {
   }
 
   if (actionType === 'ATTACK') {
-    heroSpriteState.value = 'attack';
+    heroSpriteState.value = 'attackHeavy';
     setTimeout(() => {
       heroSpriteState.value = 'idle';
       monsterHit.value = true;
@@ -883,7 +886,7 @@ function executeTurnAction(actionType: 'ATTACK' | 'DEFEND') {
         monsterHit.value = false;
         monsterSpriteState.value = 'idle';
       }, 600);
-    }, 400);
+    }, 450);
   }
 
   sendFamilyBattleAction(
@@ -903,7 +906,7 @@ function executeTurnSkill(skill: any) {
     return;
   }
 
-  heroSpriteState.value = 'attack';
+  heroSpriteState.value = 'special';
   setTimeout(() => {
     heroSpriteState.value = 'idle';
     monsterHit.value = true;
@@ -912,7 +915,7 @@ function executeTurnSkill(skill: any) {
       monsterHit.value = false;
       monsterSpriteState.value = 'idle';
     }, 600);
-  }, 400);
+  }, 550);
 
   sendFamilyBattleAction(
     battle.value.id,
@@ -963,7 +966,7 @@ onMounted(() => {
     if (data.lastAction) {
       const act = data.lastAction;
       if (act.includes('contra-atacou') || act.includes('golpeou') || act.includes('foi atingido')) {
-        monsterSpriteState.value = 'attack';
+        monsterSpriteState.value = 'attackHeavy';
         setTimeout(() => {
           monsterSpriteState.value = 'idle';
           heroTookHit.value = true;
@@ -992,6 +995,7 @@ onMounted(() => {
 
   socket.on('family:battle_victory', (data: any) => {
     battle.value = data.battle;
+    heroSpriteState.value = 'win';
     confetti({
       particleCount: 150,
       spread: 100,

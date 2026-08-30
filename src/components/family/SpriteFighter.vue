@@ -13,16 +13,20 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { Application, Assets, AnimatedSprite, Texture } from 'pixi.js';
+import mugenRegistry from '../../data/mugenRegistry.json';
+
+export type FighterState = 'idle' | 'walk' | 'walkBack' | 'attack' | 'attackLight' | 'attackHeavy' | 'special' | 'hit' | 'win';
 
 const props = withDefaults(
   defineProps<{
     character: string;
-    state: 'idle' | 'walk' | 'attack' | 'hit';
+    state: FighterState;
     flip?: boolean;
     scale?: number;
   }>(),
   {
     character: 'capamerica',
+    state: 'idle',
     flip: false,
     scale: 1.35,
   }
@@ -36,63 +40,22 @@ const loadedTexturesCache: Record<string, Texture> = {};
 const canvasWidth = computed(() => (props.character === 'colossus' ? 180 : 150) * (props.scale || 1.35));
 const canvasHeight = computed(() => (props.character === 'colossus' ? 200 : 170) * (props.scale || 1.35));
 
-// Mapeamento de sequências de frames extraídos do MUGEN
-const animations: Record<string, Record<string, string[]>> = {
-  capamerica: {
-    // Postura Stance / Idle oficial (0-0 até 0-11)
-    idle: [
-      '0-0.png', '0-1.png', '0-2.png', '0-3.png', '0-4.png', '0-5.png',
-      '0-6.png', '0-7.png', '0-8.png', '0-9.png', '0-10.png', '0-11.png'
-    ],
-    walk: [
-      '0-0.png', '0-1.png', '0-2.png', '0-3.png', '0-4.png', '0-5.png'
-    ],
-    attack: [
-      '0-6.png', '0-7.png', '0-8.png', '0-9.png', '0-10.png', '0-11.png'
-    ],
-    hit: [
-      '0-4.png', '0-5.png'
-    ]
-  },
-  colossus: {
-    idle: [
-      '0-0.png', '0-1.png', '0-2.png', '0-3.png', '0-4.png', '0-5.png',
-      '0-6.png', '0-7.png', '0-8.png', '0-9.png', '0-10.png', '0-11.png',
-      '0-12.png', '0-13.png', '0-14.png', '0-15.png'
-    ],
-    walk: [
-      '20-0.png', '20-1.png', '20-2.png', '20-3.png', '20-4.png', '20-5.png',
-      '20-6.png', '20-7.png', '20-8.png', '20-9.png', '20-10.png'
-    ],
-    attack: [
-      '200-0.png', '200-1.png', '200-2.png', '200-3.png', '200-4.png', '200-5.png',
-      '200-6.png', '200-7.png'
-    ],
-    hit: [
-      '5000-0.png', '5000-1.png', '5000-2.png', '5000-3.png'
-    ]
-  },
-  kenshin: {
-    idle: [
-      '0-0.png', '0-1.png', '0-2.png', '0-3.png', '0-4.png'
-    ],
-    walk: [
-      '20-0.png', '20-1.png', '20-2.png', '20-3.png', '20-4.png', '20-5.png'
-    ],
-    attack: [
-      '200-0.png', '200-1.png', '210-0.png', '210-1.png', '210-2.png', '210-3.png',
-      '220-0.png', '220-1.png', '220-2.png'
-    ],
-    hit: [
-      '5000-0.png', '5000-10.png', '5000-20.png', '5000-21.png'
-    ]
-  },
-};
-
 const activeFrames = computed<string[]>(() => {
   const charKey = props.character.toLowerCase();
-  const charAnims = animations[charKey] || animations.capamerica;
-  return charAnims[props.state] || charAnims.idle;
+  const charData = (mugenRegistry as any)[charKey];
+  
+  if (charData) {
+    if (props.state === 'idle') return charData.idle || ['0-0.png'];
+    if (props.state === 'walk') return charData.walk || charData.idle;
+    if (props.state === 'walkBack') return charData.walkBack || charData.walk || charData.idle;
+    if (props.state === 'attack' || props.state === 'attackLight') return charData.attackLight || charData.idle;
+    if (props.state === 'attackHeavy') return charData.attackHeavy || charData.attackLight || charData.idle;
+    if (props.state === 'special') return charData.special || charData.attackHeavy || charData.idle;
+    if (props.state === 'hit') return charData.hit || ['5000-0.png'];
+    if (props.state === 'win') return charData.win || charData.idle;
+  }
+  
+  return ['0-0.png'];
 });
 
 async function loadTexture(url: string): Promise<Texture> {
@@ -116,8 +79,7 @@ async function renderPixiAnimation() {
   if (!frames || frames.length === 0) return;
 
   const charKey = props.character.toLowerCase();
-  const validCharFolder = animations[charKey] ? charKey : 'capamerica';
-  const urls = frames.map(filename => `/sprites/${validCharFolder}/${filename}`);
+  const urls = frames.map(filename => `/sprites/${charKey}/${filename}`);
 
   const textures: Texture[] = [];
   for (const url of urls) {
@@ -134,7 +96,16 @@ async function renderPixiAnimation() {
   }
 
   const anim = new AnimatedSprite(textures);
-  anim.animationSpeed = props.state === 'attack' ? 0.22 : 0.12; // Velocidade do Pixi AnimatedSprite
+  
+  // Ajuste de velocidade do Pixi AnimatedSprite conforme o tipo de golpe
+  if (props.state === 'attack' || props.state === 'attackLight' || props.state === 'attackHeavy') {
+    anim.animationSpeed = 0.20;
+  } else if (props.state === 'special') {
+    anim.animationSpeed = 0.24;
+  } else {
+    anim.animationSpeed = 0.12;
+  }
+  
   anim.anchor.set(0.5, 1.0); // Ponto de ancoragem na base/pés
 
   // Posição no centro inferior do Canvas Pixi

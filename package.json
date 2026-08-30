@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build:sprites": "npx tsx scripts/generateMugenRegistry.ts",
+    "build": "npm run build:sprites && vue-tsc -b && vite build",
     "postinstall": "npm run build",
     "start": "node server.js",
     "preview": "vite preview"
