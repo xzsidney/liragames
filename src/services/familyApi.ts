@@ -9,9 +9,34 @@ function getHeaders() {
 }
 
 export const familyApi = {
-  // Membros e Personagem
+  // Membros e Personagens
   async getMembers() {
     const res = await fetch(`${API_URL}/api/family/members`, { credentials: 'omit' });
+    return res.json();
+  },
+
+  async getMyCharacters() {
+    const res = await fetch(`${API_URL}/api/family/my-characters`, { headers: getHeaders(), credentials: 'omit' });
+    return res.json();
+  },
+
+  async claimCharacter(characterId: string) {
+    const res = await fetch(`${API_URL}/api/family/claim-character`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ characterId }),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
+  async createCharacter(data: { name: string; characterClass: string; title: string; avatarUrl?: string; isParent?: boolean }) {
+    const res = await fetch(`${API_URL}/api/family/create-character`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+      credentials: 'omit',
+    });
     return res.json();
   },
 

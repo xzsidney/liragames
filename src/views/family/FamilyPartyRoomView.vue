@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans selection:bg-amber-500 selection:text-slate-950 relative overflow-hidden">
+    
     <!-- Modal de Convite de Batalha Recebido em Tempo Real -->
     <transition name="slide-down">
       <div 
@@ -86,18 +87,32 @@
         </div>
       </div>
 
-      <!-- Seletor de Perfil Ativo (Facilita jogar e testar com qualquer membro) -->
-      <div class="bg-slate-900 border border-slate-800 p-2 rounded-xl flex items-center space-x-3">
-        <label class="text-xs text-slate-400 font-medium pl-1">Jogando como:</label>
-        <select 
-          v-model="selectedCharacterId" 
-          @change="changeActiveCharacter"
-          class="bg-slate-800 text-amber-300 font-bold text-sm px-3 py-1.5 rounded-lg border border-amber-500/30 focus:outline-none focus:border-amber-400 cursor-pointer"
+      <!-- Seletor de Perfil Ativo (Filtrado estritamente para o Usuário Logado) -->
+      <div class="flex items-center space-x-2">
+        <div v-if="myCharacters.length > 1" class="bg-slate-900 border border-slate-800 p-2 rounded-xl flex items-center space-x-3">
+          <label class="text-xs text-slate-400 font-medium pl-1">Seu Herói:</label>
+          <select 
+            v-model="selectedCharacterId" 
+            @change="changeActiveCharacter"
+            class="bg-slate-800 text-amber-300 font-bold text-sm px-3 py-1.5 rounded-lg border border-amber-500/30 focus:outline-none focus:border-amber-400 cursor-pointer"
+          >
+            <option v-for="m in myCharacters" :key="m.id" :value="m.id">
+              {{ m.name }} ({{ m.characterClass }}) - Nv. {{ m.level }}
+            </option>
+          </select>
+        </div>
+
+        <div v-else-if="myCharacters.length === 1 && activeCharacter" class="bg-slate-900 border border-amber-500/40 px-3 py-2 rounded-xl flex items-center space-x-2">
+          <span class="text-xs text-slate-400">Jogando como:</span>
+          <span class="text-xs font-black text-amber-300">{{ activeCharacter.name }} ({{ activeCharacter.characterClass }})</span>
+        </div>
+
+        <button
+          @click="showClaimModal = true"
+          class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs px-3 py-2 rounded-xl font-bold transition-all"
         >
-          <option v-for="m in members" :key="m.id" :value="m.id">
-            {{ m.name }} ({{ m.characterClass }}) - Nv. {{ m.level }}
-          </option>
-        </select>
+          ⚙️ Heróis
+        </button>
       </div>
     </header>
 
@@ -111,7 +126,7 @@
           v-for="btn in reactionButtons" 
           :key="btn.emoji"
           @click="sendReaction(btn.emoji, btn.text)"
-          class="bg-slate-800 hover:bg-amber-500/20 hover:border-amber-500 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all active:scale-95"
+          class="bg-slate-800 hover:bg-amber-500/20 hover:border-amber-500 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all active:scale-95 cursor-pointer"
         >
           <span class="text-base">{{ btn.emoji }}</span>
           <span>{{ btn.label }}</span>
@@ -138,64 +153,64 @@
           <!-- Info & Barras -->
           <div class="flex-1 text-center md:text-left space-y-2">
             <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
-              <h2 class="text-2xl md:text-3xl font-black text-slate-100">{{ activeCharacter.name }}</h2>
-              <span class="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                {{ activeCharacter.characterClass }} • {{ activeCharacter.title }}
+              <h2 class="text-2xl font-black text-slate-100">{{ activeCharacter.name }}</h2>
+              <span class="text-xs font-bold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                {{ activeCharacter.characterClass }} • {{ activeCharacter.title || 'Guardião' }}
               </span>
-              <span v-if="activeCharacter.isParent" class="bg-purple-500/20 text-purple-300 border border-purple-500/40 text-xs font-bold px-3 py-1 rounded-full">
+              <span v-if="activeCharacter.isParent" class="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
                 👑 Mestre Parental
               </span>
             </div>
 
-            <!-- Barras de Vida, Mana e XP -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+            <!-- Barras de Recursos -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <!-- HP -->
-              <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
-                <div class="flex justify-between text-xs font-bold mb-1">
-                  <span class="text-rose-400">❤️ Vida (HP)</span>
-                  <span class="text-slate-300">{{ activeCharacter.hpCurrent }} / {{ activeCharacter.hpMax }}</span>
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs font-bold">
+                  <span class="text-rose-400 flex items-center space-x-1"><span>❤️</span><span>Vida (HP)</span></span>
+                  <span>{{ activeCharacter.hpCurrent }} / {{ activeCharacter.hpMax }}</span>
                 </div>
-                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
-                  <div class="bg-rose-500 h-full rounded-full transition-all duration-500" :style="{ width: `${(activeCharacter.hpCurrent / activeCharacter.hpMax) * 100}%` }"></div>
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div class="bg-rose-500 h-full rounded-full transition-all duration-300" :style="{ width: `${(activeCharacter.hpCurrent / activeCharacter.hpMax) * 100}%` }"></div>
                 </div>
               </div>
 
               <!-- MP -->
-              <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
-                <div class="flex justify-between text-xs font-bold mb-1">
-                  <span class="text-sky-400">💧 Mana (MP)</span>
-                  <span class="text-slate-300">{{ activeCharacter.mpCurrent }} / {{ activeCharacter.mpMax }}</span>
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs font-bold">
+                  <span class="text-sky-400 flex items-center space-x-1"><span>💧</span><span>Mana (MP)</span></span>
+                  <span>{{ activeCharacter.mpCurrent }} / {{ activeCharacter.mpMax }}</span>
                 </div>
-                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
-                  <div class="bg-sky-500 h-full rounded-full transition-all duration-500" :style="{ width: `${(activeCharacter.mpCurrent / activeCharacter.mpMax) * 100}%` }"></div>
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div class="bg-sky-500 h-full rounded-full transition-all duration-300" :style="{ width: `${(activeCharacter.mpCurrent / activeCharacter.mpMax) * 100}%` }"></div>
                 </div>
               </div>
 
-              <!-- XP & Gold -->
-              <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
-                <div class="flex justify-between text-xs font-bold mb-1">
-                  <span class="text-amber-400">⭐ Experiência (XP)</span>
-                  <span class="text-yellow-400 font-extrabold flex items-center space-x-1">
-                    <span>🪙</span>
-                    <span>{{ activeCharacter.gold }} Ouro</span>
-                  </span>
+              <!-- XP -->
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs font-bold">
+                  <span class="text-amber-400 flex items-center space-x-1"><span>⭐</span><span>Experiência (XP)</span></span>
+                  <span class="text-amber-300">🪙 {{ activeCharacter.gold }} Ouro</span>
                 </div>
-                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
-                  <div class="bg-amber-400 h-full rounded-full transition-all duration-500" :style="{ width: `${(activeCharacter.currentXp / activeCharacter.nextLevelXp) * 100}%` }"></div>
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div class="bg-gradient-to-r from-amber-500 to-yellow-400 h-full rounded-full transition-all duration-300" :style="{ width: `${Math.min(100, (activeCharacter.currentXp / activeCharacter.nextLevelXp) * 100)}%` }"></div>
                 </div>
               </div>
             </div>
 
-            <!-- Equipamentos equipados -->
-            <div class="flex flex-wrap gap-2 text-xs pt-1">
-              <span class="bg-slate-800/80 text-slate-300 px-3 py-1 rounded-lg border border-slate-700">
-                🗡️ Arma: <strong class="text-amber-300">{{ activeCharacter.equippedWeapon }}</strong>
+            <!-- Equipamentos Mini -->
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2 text-[11px] text-slate-300">
+              <span class="bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800 flex items-center space-x-1">
+                <span>🗡️ Arma:</span>
+                <strong class="text-amber-300">{{ activeCharacter.equippedWeapon || 'Espada de Treino' }}</strong>
               </span>
-              <span class="bg-slate-800/80 text-slate-300 px-3 py-1 rounded-lg border border-slate-700">
-                🛡️ Armadura: <strong class="text-amber-300">{{ activeCharacter.equippedArmor }}</strong>
+              <span class="bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800 flex items-center space-x-1">
+                <span>🛡️ Armadura:</span>
+                <strong class="text-amber-300">{{ activeCharacter.equippedArmor || 'Colete de Couro' }}</strong>
               </span>
-              <span v-if="activeCharacter.equippedPet" class="bg-slate-800/80 text-slate-300 px-3 py-1 rounded-lg border border-slate-700">
-                🐾 Mascote: <strong class="text-amber-300">{{ activeCharacter.equippedPet }}</strong>
+              <span v-if="activeCharacter.equippedPet" class="bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800 flex items-center space-x-1">
+                <span>🐾 Mascote:</span>
+                <strong class="text-amber-300">{{ activeCharacter.equippedPet }}</strong>
               </span>
             </div>
           </div>
@@ -203,104 +218,109 @@
       </div>
     </section>
 
-    <!-- Os 4 Portais de Ação do Jogo -->
+    <!-- Card de Ação Rápida para Quem Não Tem Personagem Vinculado -->
+    <section v-else class="max-w-6xl mx-auto my-6 bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-8 text-center space-y-4 shadow-2xl">
+      <span class="text-5xl">🏰</span>
+      <h2 class="text-2xl font-black text-amber-300">Bem-vindo ao Salão da Família Lira!</h2>
+      <p class="text-sm text-slate-300 max-w-md mx-auto">
+        Você ainda não vinculou seu herói a esta conta. Escolha um dos personagens da família ou crie o seu agora mesmo para começar!
+      </p>
+      <button
+        @click="showClaimModal = true"
+        class="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black px-6 py-3 rounded-2xl shadow-xl shadow-amber-500/20 hover:scale-105 transition-all"
+      >
+        ✨ Vincular ou Criar Meu Herói
+      </button>
+    </section>
+
+    <!-- Módulos / Hub de Navegação -->
     <section class="max-w-6xl mx-auto my-8">
-      <h3 class="text-lg font-bold text-slate-300 mb-4 flex items-center space-x-2">
+      <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-4 flex items-center space-x-2">
         <span>🧭 Escolha seu Caminho:</span>
       </h3>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- 1. Missões da Vida Real -->
-        <router-link
-          to="/familia/tarefas"
-          class="group bg-gradient-to-b from-slate-900 to-slate-950 hover:from-slate-850 hover:to-amber-950/40 border border-slate-800 hover:border-amber-500/60 p-6 rounded-3xl transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/10 flex flex-col justify-between"
-        >
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- 1. Tarefas da Casa -->
+        <router-link to="/familia/tarefas" class="group bg-slate-900 border border-slate-800 hover:border-amber-500/50 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-amber-500/10 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
               📋
             </div>
-            <h4 class="text-lg font-black text-slate-100 group-hover:text-amber-300 transition-colors">Missões Diárias</h4>
+            <h4 class="text-base font-bold text-slate-100 group-hover:text-amber-300 transition-colors">Missões Diárias</h4>
             <p class="text-xs text-slate-400 mt-1">Lave a louça, arrume a cama e faça a lição para ganhar XP e Ouro real!</p>
           </div>
-          <div class="mt-6 flex items-center justify-between text-xs font-bold text-amber-400">
+          <div class="mt-4 flex items-center text-xs font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
             <span>Ver Tarefas da Casa</span>
-            <span class="group-hover:translate-x-1 transition-transform">➔</span>
+            <span class="ml-1">➔</span>
           </div>
         </router-link>
 
         <!-- 2. Arena de Batalha -->
-        <router-link
-          to="/familia/batalha"
-          class="group bg-gradient-to-b from-slate-900 to-slate-950 hover:from-slate-850 hover:to-rose-950/40 border border-slate-800 hover:border-rose-500/60 p-6 rounded-3xl transition-all duration-300 hover:shadow-xl hover:shadow-rose-500/10 flex flex-col justify-between"
-        >
+        <router-link to="/familia/batalha" class="group bg-slate-900 border border-slate-800 hover:border-rose-500/50 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-rose-500/10 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
               ⚔️
             </div>
-            <h4 class="text-lg font-black text-slate-100 group-hover:text-rose-300 transition-colors">Arena de Batalha</h4>
-            <p class="text-xs text-slate-400 mt-1">Lute em turnos ao vivo contra o Golem da Bagunça junto com sua família!</p>
+            <h4 class="text-base font-bold text-slate-100 group-hover:text-rose-300 transition-colors">Arena de Batalha</h4>
+            <p class="text-xs text-slate-400 mt-1">Lute em turnos ao vivo contra o Golem da Bagunça solo ou com sua família!</p>
           </div>
-          <div class="mt-6 flex items-center justify-between text-xs font-bold text-rose-400">
+          <div class="mt-4 flex items-center text-xs font-bold text-rose-400 group-hover:translate-x-1 transition-transform">
             <span>Entrar na Batalha</span>
-            <span class="group-hover:translate-x-1 transition-transform">➔</span>
+            <span class="ml-1">➔</span>
           </div>
         </router-link>
 
-        <!-- 3. Loja e Baú dos Desejos -->
-        <router-link
-          to="/familia/loja"
-          class="group bg-gradient-to-b from-slate-900 to-slate-950 hover:from-slate-850 hover:to-yellow-950/40 border border-slate-800 hover:border-yellow-500/60 p-6 rounded-3xl transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/10 flex flex-col justify-between"
-        >
+        <!-- 3. Loja e Recompensas Reais -->
+        <router-link to="/familia/loja" class="group bg-slate-900 border border-slate-800 hover:border-sky-500/50 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-sky-500/10 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-2xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
               🛍️
             </div>
-            <h4 class="text-lg font-black text-slate-100 group-hover:text-yellow-300 transition-colors">Loja & Recompensas</h4>
+            <h4 class="text-base font-bold text-slate-100 group-hover:text-sky-300 transition-colors">Loja & Recompensas</h4>
             <p class="text-xs text-slate-400 mt-1">Compre armas, mascotes ou troque seu ouro por 1h de videogame e pizza!</p>
           </div>
-          <div class="mt-6 flex items-center justify-between text-xs font-bold text-yellow-400">
+          <div class="mt-4 flex items-center text-xs font-bold text-sky-400 group-hover:translate-x-1 transition-transform">
             <span>Abrir Mercado</span>
-            <span class="group-hover:translate-x-1 transition-transform">➔</span>
+            <span class="ml-1">➔</span>
           </div>
         </router-link>
 
         <!-- 4. Painel dos Pais (Mestre) -->
-        <router-link
-          to="/familia/mestre"
-          class="group bg-gradient-to-b from-slate-900 to-slate-950 hover:from-slate-850 hover:to-purple-950/40 border border-slate-800 hover:border-purple-500/60 p-6 rounded-3xl transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10 flex flex-col justify-between"
-        >
+        <router-link to="/familia/mestre" class="group bg-slate-900 border border-slate-800 hover:border-purple-500/50 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-purple-500/10 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
               👑
             </div>
-            <h4 class="text-lg font-black text-slate-100 group-hover:text-purple-300 transition-colors">Painel dos Pais</h4>
+            <h4 class="text-base font-bold text-slate-100 group-hover:text-purple-300 transition-colors">Painel dos Pais</h4>
             <p class="text-xs text-slate-400 mt-1">Aprove as tarefas concluídas pelos filhos com 1 clique e entregue o ouro!</p>
           </div>
-          <div class="mt-6 flex items-center justify-between text-xs font-bold text-purple-400">
+          <div class="mt-4 flex items-center text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
             <span>Acessar Painel Mestre</span>
-            <span class="group-hover:translate-x-1 transition-transform">➔</span>
+            <span class="ml-1">➔</span>
           </div>
         </router-link>
+
       </div>
     </section>
 
-    <!-- Galeria dos 7 Heróis Reunidos (Salão da Família) -->
+    <!-- Lista de Todos os Heróis da Família no Salão (Para Inspecionar e Conectar) -->
     <section class="max-w-6xl mx-auto my-8">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-slate-300 flex items-center space-x-2">
-          <span>👥 Os 7 Heróis da Família Lira no Salão:</span>
+        <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 flex items-center space-x-2">
+          <span>👥 Heróis da Família Lira no Salão:</span>
         </h3>
-        <span class="text-xs text-slate-400">Clique em qualquer herói para inspecionar</span>
+        <span class="text-xs text-slate-500">Clique em qualquer herói para inspecionar</span>
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
         <div
           v-for="member in members"
           :key="member.id"
-          @click="selectCharacter(member.id)"
+          @click="inspectMember(member)"
           :class="[
             'bg-slate-900 border rounded-2xl p-3 text-center cursor-pointer transition-all duration-200 hover:-translate-y-1',
-            member.id === selectedCharacterId ? 'border-amber-400 shadow-lg shadow-amber-500/20 bg-slate-850 ring-2 ring-amber-500/30' : 'border-slate-800 hover:border-slate-700'
+            member.id === activeCharacter?.id ? 'border-amber-400 shadow-lg shadow-amber-500/20 bg-slate-850 ring-2 ring-amber-500/30' : 'border-slate-800 hover:border-slate-700'
           ]"
         >
           <div class="relative w-16 h-16 mx-auto mb-2">
@@ -321,6 +341,120 @@
         </div>
       </div>
     </section>
+
+    <!-- Modal de Inspeção de Outro Herói -->
+    <div v-if="inspectingCharacter" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 p-6 rounded-3xl max-w-sm w-full space-y-4 text-center shadow-2xl relative">
+        <button @click="inspectingCharacter = null" class="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
+        
+        <div class="w-20 h-20 mx-auto rounded-2xl overflow-hidden border-2 border-amber-400 shadow">
+          <img :src="inspectingCharacter.avatarUrl" class="w-full h-full object-cover" />
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-black text-amber-300">{{ inspectingCharacter.name }}</h3>
+          <p class="text-xs text-slate-400">{{ inspectingCharacter.characterClass }} • {{ inspectingCharacter.title }}</p>
+          <p class="text-xs font-bold text-amber-400 mt-1">Nível {{ inspectingCharacter.level }} • 🪙 {{ inspectingCharacter.gold }} Ouro</p>
+        </div>
+
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-left space-y-1">
+          <p><strong class="text-rose-400">❤️ Vida:</strong> {{ inspectingCharacter.hpCurrent }}/{{ inspectingCharacter.hpMax }}</p>
+          <p><strong class="text-sky-400">💧 Mana:</strong> {{ inspectingCharacter.mpCurrent }}/{{ inspectingCharacter.mpMax }}</p>
+          <p><strong class="text-slate-300">🗡️ Arma:</strong> {{ inspectingCharacter.equippedWeapon }}</p>
+          <p><strong class="text-slate-300">🛡️ Armadura:</strong> {{ inspectingCharacter.equippedArmor }}</p>
+        </div>
+
+        <button
+          @click="inspectingCharacter = null"
+          class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2.5 rounded-xl"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal de Vincular / Criar Herói da Família -->
+    <div v-if="showClaimModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 border-2 border-amber-500/40 p-6 md:p-8 rounded-3xl max-w-xl w-full space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <button @click="showClaimModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
+
+        <div class="text-center">
+          <span class="text-4xl">👑</span>
+          <h3 class="text-xl font-black text-amber-300 mt-2">Vincular Herói à sua Conta</h3>
+          <p class="text-xs text-slate-400">Escolha um dos personagens da família para ser seu herói ativo!</p>
+        </div>
+
+        <!-- Opção 1: Escolher Personagem Existente -->
+        <div class="space-y-3">
+          <h4 class="text-xs font-extrabold uppercase text-slate-400">1. Heróis Disponíveis na Família:</h4>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div
+              v-for="m in members"
+              :key="m.id"
+              class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800"
+            >
+              <div class="flex items-center space-x-2">
+                <img :src="m.avatarUrl" class="w-10 h-10 rounded-lg object-cover border border-slate-700" />
+                <div>
+                  <p class="text-xs font-bold text-slate-200">{{ m.name }}</p>
+                  <p class="text-[10px] text-amber-400">{{ m.characterClass }} • Nv. {{ m.level }}</p>
+                </div>
+              </div>
+
+              <button
+                @click="claimHero(m.id)"
+                class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-2.5 py-1.5 rounded-lg shadow active:scale-95"
+              >
+                Assumir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opção 2: Criar Novo Herói -->
+        <div class="pt-4 border-t border-slate-800 space-y-3">
+          <h4 class="text-xs font-extrabold uppercase text-slate-400">2. Ou Crie um Novo Herói Exclusivo:</h4>
+          
+          <div class="space-y-2">
+            <input
+              v-model="newHeroForm.name"
+              placeholder="Nome do seu Herói (ex: Lucas Lira)"
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+            />
+            
+            <div class="grid grid-cols-2 gap-2">
+              <select
+                v-model="newHeroForm.characterClass"
+                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-amber-300 font-bold focus:outline-none focus:border-amber-400"
+              >
+                <option value="GUERREIRO">⚔️ Guerreiro</option>
+                <option value="MAGO">🔥 Mago</option>
+                <option value="PALADINO">🛡️ Paladino</option>
+                <option value="CURANDEIRA">✨ Curandeira</option>
+                <option value="ARQUEIRO">🏹 Arqueiro</option>
+                <option value="LADINO">🗡️ Ladino</option>
+                <option value="INVOCADORA">🐾 Invocadora</option>
+              </select>
+
+              <input
+                v-model="newHeroForm.title"
+                placeholder="Título (ex: O Destemido)"
+                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+              />
+            </div>
+
+            <button
+              @click="createNewHero"
+              class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs py-3 rounded-xl shadow active:scale-95 mt-2"
+            >
+              ✨ Criar Meu Herói e Entrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -340,7 +474,16 @@ import {
 
 const router = useRouter();
 const members = ref<any[]>([]);
+const myCharacters = ref<any[]>([]);
 const selectedCharacterId = ref<string>('');
+const inspectingCharacter = ref<any | null>(null);
+const showClaimModal = ref<boolean>(false);
+
+const newHeroForm = ref({
+  name: '',
+  characterClass: 'GUERREIRO',
+  title: 'Aventureiro da Família',
+});
 
 function acceptInviteAndGo() {
   if (activeCharacter.value) {
@@ -350,7 +493,10 @@ function acceptInviteAndGo() {
 }
 
 const activeCharacter = computed(() => {
-  return members.value.find(m => m.id === selectedCharacterId.value) || members.value[0];
+  if (myCharacters.value.length > 0) {
+    return myCharacters.value.find(m => m.id === selectedCharacterId.value) || myCharacters.value[0];
+  }
+  return members.value.find(m => m.id === selectedCharacterId.value) || null;
 });
 
 const reactionButtons = [
@@ -372,6 +518,14 @@ function sendReaction(emoji: string, text: string) {
   }
 }
 
+function inspectMember(member: any) {
+  if (myCharacters.value.some(m => m.id === member.id)) {
+    selectCharacter(member.id);
+  } else {
+    inspectingCharacter.value = member;
+  }
+}
+
 function selectCharacter(id: string) {
   selectedCharacterId.value = id;
   localStorage.setItem('lira_active_family_char_id', id);
@@ -384,26 +538,67 @@ function changeActiveCharacter() {
   selectCharacter(selectedCharacterId.value);
 }
 
-onMounted(async () => {
+async function claimHero(characterId: string) {
   try {
-    const res = await familyApi.getMembers();
-    if (res.success && res.members.length > 0) {
-      members.value = res.members;
-      
-      const savedId = localStorage.getItem('lira_active_family_char_id');
-      if (savedId && members.value.some(m => m.id === savedId)) {
-        selectedCharacterId.value = savedId;
-      } else {
-        selectedCharacterId.value = members.value[0].id;
-      }
+    const res = await familyApi.claimCharacter(characterId);
+    if (res.success) {
+      alert(`🎉 ${res.message}`);
+      showClaimModal.value = false;
+      await loadData();
+    } else {
+      alert(res.error || 'Erro ao vincular herói.');
+    }
+  } catch (err) {
+    console.error('Erro ao vincular herói:', err);
+  }
+}
 
-      if (activeCharacter.value) {
-        joinFamilyRoom(activeCharacter.value.id, activeCharacter.value.name);
+async function createNewHero() {
+  if (!newHeroForm.value.name) {
+    alert('Por favor, informe o nome do seu herói.');
+    return;
+  }
+  try {
+    const res = await familyApi.createCharacter(newHeroForm.value);
+    if (res.success) {
+      alert('🎉 Personagem criado com sucesso!');
+      showClaimModal.value = false;
+      await loadData();
+    }
+  } catch (err) {
+    console.error('Erro ao criar herói:', err);
+  }
+}
+
+async function loadData() {
+  try {
+    // 1. Carrega todos os membros para visualização do clã
+    const membersRes = await familyApi.getMembers();
+    if (membersRes.success && membersRes.members) {
+      members.value = membersRes.members;
+    }
+
+    // 2. Carrega apenas os personagens pertencentes ao usuário logado
+    const myRes = await familyApi.getMyCharacters();
+    if (myRes.success && myRes.characters) {
+      myCharacters.value = myRes.characters;
+      
+      if (myCharacters.value.length > 0) {
+        selectedCharacterId.value = myCharacters.value[0].id;
+        localStorage.setItem('lira_active_family_char_id', selectedCharacterId.value);
       }
     }
+
+    if (activeCharacter.value) {
+      joinFamilyRoom(activeCharacter.value.id, activeCharacter.value.name);
+    }
   } catch (error) {
-    console.error('Erro ao carregar membros da família:', error);
+    console.error('Erro ao carregar dados do Salão da Família:', error);
   }
+}
+
+onMounted(() => {
+  loadData();
 });
 </script>
 
