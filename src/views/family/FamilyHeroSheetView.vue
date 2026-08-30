@@ -72,19 +72,28 @@
             
             <!-- Card do Personagem -->
             <div class="bg-gradient-to-b from-[#2a0611] to-[#0a1533] border-2 border-amber-500/40 rounded-3xl p-6 shadow-2xl relative overflow-hidden text-center">
-              <!-- Avatar com Botão de Troca / Upload -->
-              <div class="relative w-32 h-32 mx-auto mb-4 group cursor-pointer" @click="triggerAvatarUpload" title="Clique para trocar a foto do Herói">
-                <div class="w-full h-full rounded-3xl overflow-hidden border-4 border-amber-400 shadow-xl shadow-amber-500/20 bg-slate-900">
-                  <img :src="getDisplayImageUrl(hero.avatarUrl)" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+              <!-- Avatar com Botão de Troca / Escolha de Lutador -->
+              <div class="relative w-32 h-32 mx-auto mb-3 group cursor-pointer" @click="showAvatarModal = true" title="Clique para escolher seu Lutador do MUGEN ou foto personalizada">
+                <div class="w-full h-full rounded-3xl overflow-hidden border-4 border-amber-400 shadow-xl shadow-amber-500/20 bg-slate-900 flex items-center justify-center">
+                  <img :src="getDisplayImageUrl(hero.avatarUrl)" class="w-full h-full object-contain group-hover:scale-105 transition-transform" />
                 </div>
                 <div class="absolute inset-0 bg-black/60 rounded-3xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-xs font-black text-amber-300 transition-opacity">
-                  <span class="text-lg">📷</span>
-                  <span>Trocar Foto</span>
+                  <span class="text-lg">🎮</span>
+                  <span>Escolher Lutador</span>
                 </div>
                 <div v-if="uploadingAvatar" class="absolute inset-0 bg-black/80 rounded-3xl flex items-center justify-center">
                   <div class="animate-spin w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full"></div>
                 </div>
               </div>
+
+              <!-- Botão Destacado de Escolha de Lutador / Avatar -->
+              <button
+                @click="showAvatarModal = true"
+                class="text-[11px] font-black bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 px-3 py-1 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer mb-2"
+              >
+                🎮 Escolher Lutador / Foto
+              </button>
+
               <input type="file" ref="avatarFileInput" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handleAvatarFileChange" />
 
               <h2 class="text-2xl font-black text-slate-100">{{ hero.name }}</h2>
@@ -466,6 +475,88 @@
         </div>
       </div>
 
+      <!-- Modal de Escolha de Lutador MUGEN / Avatar -->
+      <div v-if="showAvatarModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-gradient-to-b from-[#22040e] to-[#060e24] border-2 border-amber-400/80 rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-5">
+          <div class="flex items-center justify-between border-b border-rose-900/60 pb-3">
+            <h3 class="text-lg font-black text-amber-300 flex items-center space-x-2">
+              <span>🎮 Escolha seu Lutador de Batalha (MUGEN 2D)</span>
+            </h3>
+            <button @click="showAvatarModal = false" class="text-slate-400 hover:text-white font-black text-sm">✕</button>
+          </div>
+
+          <!-- Opções de Sprites MUGEN -->
+          <div>
+            <p class="text-xs font-bold text-slate-300 mb-3">
+              Selecione o lutador com animações originais de fliperama para lutar na Arena:
+            </p>
+            <div class="grid grid-cols-3 gap-3">
+              
+              <!-- Capitão América -->
+              <div
+                @click="selectMugenFighter('capamerica')"
+                :class="[
+                  'p-3 rounded-2xl border flex flex-col items-center justify-center text-center cursor-pointer transition-all hover:scale-105',
+                  hero?.avatarUrl === 'sprite:capamerica' ? 'bg-amber-500/20 border-amber-400 shadow-lg shadow-amber-500/20' : 'bg-slate-950/80 border-slate-800 hover:border-slate-600'
+                ]"
+              >
+                <div class="w-16 h-16 rounded-xl overflow-hidden mb-2 bg-slate-900 border border-slate-700 flex items-center justify-center">
+                  <img src="/sprites/capamerica/0-0.png" class="h-full object-contain" style="image-rendering: pixelated;" />
+                </div>
+                <span class="text-xs font-black text-slate-100">Capitão América</span>
+                <span class="text-[9px] text-amber-300 font-bold">MUGEN Arcade</span>
+              </div>
+
+              <!-- Kenshin Himura -->
+              <div
+                @click="selectMugenFighter('kenshin')"
+                :class="[
+                  'p-3 rounded-2xl border flex flex-col items-center justify-center text-center cursor-pointer transition-all hover:scale-105',
+                  hero?.avatarUrl === 'sprite:kenshin' ? 'bg-amber-500/20 border-amber-400 shadow-lg shadow-amber-500/20' : 'bg-slate-950/80 border-slate-800 hover:border-slate-600'
+                ]"
+              >
+                <div class="w-16 h-16 rounded-xl overflow-hidden mb-2 bg-slate-900 border border-slate-700 flex items-center justify-center">
+                  <img src="/sprites/kenshin/ken000.png" class="h-full object-contain" style="image-rendering: pixelated;" />
+                </div>
+                <span class="text-xs font-black text-slate-100">Kenshin Himura</span>
+                <span class="text-[9px] text-amber-300 font-bold">MUGEN Arcade</span>
+              </div>
+
+              <!-- Colossus -->
+              <div
+                @click="selectMugenFighter('colossus')"
+                :class="[
+                  'p-3 rounded-2xl border flex flex-col items-center justify-center text-center cursor-pointer transition-all hover:scale-105',
+                  hero?.avatarUrl === 'sprite:colossus' ? 'bg-amber-500/20 border-amber-400 shadow-lg shadow-amber-500/20' : 'bg-slate-950/80 border-slate-800 hover:border-slate-600'
+                ]"
+              >
+                <div class="w-16 h-16 rounded-xl overflow-hidden mb-2 bg-slate-900 border border-slate-700 flex items-center justify-center">
+                  <img src="/sprites/colossus/col045.png" class="h-full object-contain" style="image-rendering: pixelated;" />
+                </div>
+                <span class="text-xs font-black text-slate-100">Colossus</span>
+                <span class="text-[9px] text-amber-300 font-bold">MUGEN Arcade</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Opção de Foto Personalizada -->
+          <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-200">Ou envie uma foto personalizada:</p>
+              <p class="text-[10px] text-slate-400">JPG, PNG ou WEBP do seu computador</p>
+            </div>
+            <button
+              @click="triggerAvatarUpload"
+              class="bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow transition-all cursor-pointer"
+            >
+              📷 Enviar Foto
+            </button>
+          </div>
+
+        </div>
+      </div>
+
     </main>
   </div>
 </template>
@@ -479,6 +570,7 @@ const hero = ref<any | null>(null);
 const avatarFileInput = ref<HTMLInputElement | null>(null);
 const uploadingAvatar = ref<boolean>(false);
 const showClassModal = ref<boolean>(false);
+const showAvatarModal = ref<boolean>(false);
 
 const skillTree = ref<any[]>([]);
 const unlockedSkillIds = ref<string[]>([]);
@@ -640,6 +732,23 @@ async function handleAvatarFileChange(event: Event) {
     } finally {
       uploadingAvatar.value = false;
     }
+  }
+}
+
+async function selectMugenFighter(spriteKey: string) {
+  if (!hero.value) return;
+  try {
+    const avatarValue = `sprite:${spriteKey}`;
+    const res = await familyApi.updateCharacterAvatar(hero.value.id, avatarValue);
+    if (res.success) {
+      hero.value.avatarUrl = avatarValue;
+      showAvatarModal.value = false;
+      alert(`🎉 Lutador ${spriteKey.toUpperCase()} selecionado com sucesso para a Arena de Batalha!`);
+    } else {
+      alert(res.error || 'Erro ao selecionar lutador.');
+    }
+  } catch (err) {
+    console.error('Erro ao selecionar lutador MUGEN:', err);
   }
 }
 

@@ -16,12 +16,13 @@ import { Application, Assets, AnimatedSprite, Texture } from 'pixi.js';
 
 const props = withDefaults(
   defineProps<{
-    character: 'colossus' | 'kenshin';
+    character: string;
     state: 'idle' | 'walk' | 'attack' | 'hit';
     flip?: boolean;
     scale?: number;
   }>(),
   {
+    character: 'capamerica',
     flip: false,
     scale: 1.35,
   }
@@ -36,31 +37,40 @@ const canvasWidth = computed(() => (props.character === 'colossus' ? 180 : 150) 
 const canvasHeight = computed(() => (props.character === 'colossus' ? 200 : 170) * (props.scale || 1.35));
 
 // Mapeamento de sequências de frames extraídos do MUGEN
-const animations: Record<string, Record<string, number[]>> = {
+const animations: Record<string, Record<string, string[]>> = {
+  capamerica: {
+    // Postura Stance / Idle oficial (0-0 até 0-11)
+    idle: [
+      '0-0.png', '0-1.png', '0-2.png', '0-3.png', '0-4.png', '0-5.png',
+      '0-6.png', '0-7.png', '0-8.png', '0-9.png', '0-10.png', '0-11.png'
+    ],
+    walk: [
+      '0-0.png', '0-1.png', '0-2.png', '0-3.png', '0-4.png', '0-5.png'
+    ],
+    attack: [
+      '0-6.png', '0-7.png', '0-8.png', '0-9.png', '0-10.png', '0-11.png'
+    ],
+    hit: [
+      '0-4.png', '0-5.png'
+    ]
+  },
   colossus: {
-    // Postura Stance / Idle
-    idle: [45, 46, 47, 48, 49, 50, 51, 52, 53, 54],
-    // Caminhada Pesada
-    walk: [20, 21, 22, 23, 24, 25],
-    // Soco de Titânio / Golpe
-    attack: [200, 201, 202, 203, 204, 205, 206, 207, 208],
-    // Impacto / Dano
-    hit: [340, 341, 342, 343],
+    idle: [45, 46, 47, 48, 49, 50, 51, 52, 53, 54].map(f => `col${String(f).padStart(3, '0')}.png`),
+    walk: [20, 21, 22, 23, 24, 25].map(f => `col${String(f).padStart(3, '0')}.png`),
+    attack: [200, 201, 202, 203, 204, 205, 206, 207, 208].map(f => `col${String(f).padStart(3, '0')}.png`),
+    hit: [340, 341, 342, 343].map(f => `col${String(f).padStart(3, '0')}.png`),
   },
   kenshin: {
-    // Postura com Katana
-    idle: [0, 1, 2, 3, 4, 5],
-    // Avanço / Corrida
-    walk: [20, 21, 22, 23, 24, 25],
-    // Corte de Espada
-    attack: [40, 41, 42, 43, 44, 45, 46, 47, 48],
-    // Impacto / Dano
-    hit: [100, 101, 102, 103],
+    idle: [0, 1, 2, 3, 4, 5].map(f => `ken${String(f).padStart(3, '0')}.png`),
+    walk: [20, 21, 22, 23, 24, 25].map(f => `ken${String(f).padStart(3, '0')}.png`),
+    attack: [40, 41, 42, 43, 44, 45, 46, 47, 48].map(f => `ken${String(f).padStart(3, '0')}.png`),
+    hit: [100, 101, 102, 103].map(f => `ken${String(f).padStart(3, '0')}.png`),
   },
 };
 
-const activeFrames = computed<number[]>(() => {
-  const charAnims = animations[props.character] || animations.colossus;
+const activeFrames = computed<string[]>(() => {
+  const charKey = props.character.toLowerCase();
+  const charAnims = animations[charKey] || animations.capamerica;
   return charAnims[props.state] || charAnims.idle;
 });
 
@@ -84,8 +94,9 @@ async function renderPixiAnimation() {
   const frames = activeFrames.value;
   if (!frames || frames.length === 0) return;
 
-  const prefix = props.character === 'colossus' ? 'col' : 'ken';
-  const urls = frames.map(f => `/sprites/${props.character}/${prefix}${String(f).padStart(3, '0')}.png`);
+  const charKey = props.character.toLowerCase();
+  const validCharFolder = animations[charKey] ? charKey : 'capamerica';
+  const urls = frames.map(filename => `/sprites/${validCharFolder}/${filename}`);
 
   const textures: Texture[] = [];
   for (const url of urls) {

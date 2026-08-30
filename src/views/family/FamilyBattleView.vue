@@ -297,7 +297,7 @@
               </span>
 
               <SpriteFighter
-                character="kenshin"
+                :character="heroFighterSprite"
                 :state="heroSpriteState"
                 :flip="false"
                 :scale="1.35"
@@ -599,6 +599,13 @@ const showInfirmaryModal = ref<boolean>(false);
 
 const heroSpriteState = ref<'idle' | 'walk' | 'attack' | 'hit'>('idle');
 const monsterSpriteState = ref<'idle' | 'walk' | 'attack' | 'hit'>('idle');
+
+const heroFighterSprite = computed<string>(() => {
+  if (activeCharacter.value?.avatarUrl?.startsWith('sprite:')) {
+    return activeCharacter.value.avatarUrl.replace('sprite:', '');
+  }
+  return 'capamerica';
+});
 
 const infirmarySecondsLeft = ref<number>(0);
 let timerInterval: any = null;
