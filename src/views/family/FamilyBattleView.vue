@@ -450,6 +450,57 @@
       </div>
     </div>
 
+    <!-- Modal da Enfermaria do Reino (Aparece se o herói for nocauteado ou estiver com 0 HP) -->
+    <div v-if="showInfirmaryModal || (isHeroInInfirmary && battleState === 'BATTLE')" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="bg-gradient-to-b from-[#25040e] via-[#15071e] to-[#080d24] border-2 border-rose-500 p-8 rounded-3xl max-w-lg w-full text-center shadow-2xl space-y-5">
+        <div class="text-6xl animate-bounce">🚑</div>
+        <div>
+          <span class="text-xs font-black uppercase tracking-wider text-rose-400 bg-rose-950/80 px-3 py-1 rounded-full border border-rose-700/60">
+            Nocaute em Combate (0 HP)
+          </span>
+          <h2 class="text-2xl md:text-3xl font-black text-rose-200 mt-2">Internado na Enfermaria Real!</h2>
+          <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+            Seu herói <strong>{{ activeCharacter?.name }}</strong> foi nocauteado pelo monstro e foi levado para a <strong>Enfermaria do Reino</strong> para repousar por <strong>1 hora</strong> do tempo real!
+          </p>
+        </div>
+
+        <!-- Cronômetro da Enfermaria -->
+        <div class="bg-slate-950/90 p-4 rounded-2xl border border-rose-800/60 text-center space-y-1">
+          <p class="text-[11px] font-bold text-slate-400 uppercase">Tempo Restante de Repouso:</p>
+          <p class="text-2xl md:text-3xl font-mono font-black text-amber-300 tracking-widest">
+            ⏳ {{ formattedInfirmaryTime }}
+          </p>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <!-- Botão de Alta Médica -->
+          <button
+            v-if="infirmarySecondsLeft <= 0"
+            @click="recoverFromInfirmary"
+            class="w-full bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all active:scale-95 cursor-pointer"
+          >
+            ✨ Receber Alta da Enfermaria (Restaurar 100% HP)
+          </button>
+
+          <div class="flex items-center space-x-3">
+            <router-link
+              to="/familia/ficha"
+              class="flex-1 bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 text-white font-black text-xs py-3 px-4 rounded-xl text-center shadow transition-all active:scale-95"
+            >
+              🛡️ Ver Ficha do Herói
+            </router-link>
+
+            <router-link
+              to="/familia/sala"
+              class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs py-3 px-4 rounded-xl text-center transition-all active:scale-95"
+            >
+              🏰 Ir para o Salão
+            </router-link>
+          </div>
+        </div>
+      </div>
+    </div>
+
     </div>
   </div>
 </template>
@@ -478,6 +529,10 @@ const activeCharacter = ref<any>(null);
 const equippedSkills = ref<any[]>([]);
 const monsterHit = ref<boolean>(false);
 const battleState = ref<'LOBBY' | 'BATTLE'>('LOBBY');
+const showInfirmaryModal = ref<boolean>(false);
+
+const infirmarySecondsLeft = ref<number>(0);
+let timerInterval: any = null;
 
 const isHeroInInfirmary = computed(() => {
   if (!activeCharacter.value) return false;
@@ -487,6 +542,40 @@ const isHeroInInfirmary = computed(() => {
   }
   return false;
 });
+
+const formattedInfirmaryTime = computed(() => {
+  if (infirmarySecondsLeft.value <= 0) return '00:00 (Pronto para Alta!)';
+  const m = Math.floor(infirmarySecondsLeft.value / 60);
+  const s = infirmarySecondsLeft.value % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+});
+
+function updateInfirmaryCountdown() {
+  if (activeCharacter.value && activeCharacter.value.inInfirmaryUntil) {
+    const diff = Math.floor((new Date(activeCharacter.value.inInfirmaryUntil).getTime() - Date.now()) / 1000);
+    infirmarySecondsLeft.value = Math.max(0, diff);
+  } else {
+    infirmarySecondsLeft.value = 0;
+  }
+}
+
+async function recoverFromInfirmary() {
+  if (!activeCharacter.value) return;
+  try {
+    const res = await familyApi.recoverFromInfirmary(activeCharacter.value.id, true);
+    if (res.success) {
+      alert(`🎉 ${res.message}`);
+      activeCharacter.value = res.character;
+      showInfirmaryModal.value = false;
+      infirmarySecondsLeft.value = 0;
+      await loadData();
+    } else {
+      alert(res.error || 'Erro ao receber alta.');
+    }
+  } catch (err) {
+    console.error('Erro ao receber alta da enfermaria:', err);
+  }
+}
 
 const monsterInfo = {
   name: 'O Golem da Bagunça',
@@ -575,17 +664,29 @@ function formatLog(log: string) {
 
 function inviteOnlineMembers() {
   if (!activeCharacter.value) return;
+  if (isHeroInInfirmary.value) {
+    showInfirmaryModal.value = true;
+    return;
+  }
   sendPartyInvite(activeCharacter.value.name, activeCharacter.value.id, monsterInfo.name);
   alert('📢 Convite de batalha enviado para todos os membros online na casa!');
 }
 
 function acceptInvite() {
   if (!activeCharacter.value) return;
+  if (isHeroInInfirmary.value) {
+    showInfirmaryModal.value = true;
+    return;
+  }
   acceptPartyInvite(activeCharacter.value);
 }
 
 function startSoloBattle() {
   if (!activeCharacter.value) return;
+  if (isHeroInInfirmary.value) {
+    showInfirmaryModal.value = true;
+    return;
+  }
   const soloParty = [{
     characterId: activeCharacter.value.id,
     name: activeCharacter.value.name,
@@ -597,6 +698,10 @@ function startSoloBattle() {
 }
 
 function startPartyBattleGroup() {
+  if (isHeroInInfirmary.value) {
+    showInfirmaryModal.value = true;
+    return;
+  }
   startPartyBattle(activePartyLobby.value, false);
 }
 
@@ -617,6 +722,7 @@ async function loadData() {
     }
 
     if (activeCharacter.value) {
+      updateInfirmaryCountdown();
       joinFamilyRoom(activeCharacter.value.id, activeCharacter.value.name);
       createPartyLobby(activeCharacter.value);
 
@@ -633,6 +739,10 @@ async function loadData() {
 
 function executeAction(actionType: 'ATTACK' | 'SKILL' | 'DEFEND' | 'HEAL') {
   if (!battle.value || !activeCharacter.value) return;
+  if (isHeroInInfirmary.value) {
+    showInfirmaryModal.value = true;
+    return;
+  }
 
   monsterHit.value = true;
   setTimeout(() => { monsterHit.value = false; }, 600);
@@ -642,6 +752,10 @@ function executeAction(actionType: 'ATTACK' | 'SKILL' | 'DEFEND' | 'HEAL') {
 
 function executeSkillAction(skill: any) {
   if (!battle.value || !activeCharacter.value) return;
+  if (isHeroInInfirmary.value) {
+    showInfirmaryModal.value = true;
+    return;
+  }
 
   monsterHit.value = true;
   setTimeout(() => { monsterHit.value = false; }, 600);
@@ -651,12 +765,28 @@ function executeSkillAction(skill: any) {
 
 onMounted(() => {
   loadData();
+  timerInterval = setInterval(updateInfirmaryCountdown, 1000);
 
   const socket = getFamilySocket();
+
+  socket.on('family:hero_knocked_out', (data: any) => {
+    if (activeCharacter.value && data.characterId === activeCharacter.value.id) {
+      activeCharacter.value.hpCurrent = 0;
+      activeCharacter.value.inInfirmaryUntil = data.inInfirmaryUntil;
+      showInfirmaryModal.value = true;
+      updateInfirmaryCountdown();
+    }
+  });
 
   socket.on('family:battle_party_started', (data: any) => {
     battle.value = data.battle;
     battleState.value = 'BATTLE';
+    if (data.characters) {
+      members.value = data.characters;
+      if (activeCharacter.value) {
+        activeCharacter.value = members.value.find((m: any) => m.id === activeCharacter.value.id) || activeCharacter.value;
+      }
+    }
   });
 
   socket.on('family:battle_updated', (data: any) => {
@@ -664,6 +794,16 @@ onMounted(() => {
     battleState.value = 'BATTLE';
     monsterHit.value = true;
     setTimeout(() => { monsterHit.value = false; }, 500);
+
+    if (data.characters) {
+      members.value = data.characters;
+      if (activeCharacter.value) {
+        activeCharacter.value = members.value.find((m: any) => m.id === activeCharacter.value.id) || activeCharacter.value;
+        if (activeCharacter.value.hpCurrent <= 0) {
+          showInfirmaryModal.value = true;
+        }
+      }
+    }
   });
 
   socket.on('family:battle_victory', (data: any) => {
@@ -678,7 +818,9 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  if (timerInterval) clearInterval(timerInterval);
   const socket = getFamilySocket();
+  socket.off('family:hero_knocked_out');
   socket.off('family:battle_party_started');
   socket.off('family:battle_updated');
   socket.off('family:battle_victory');
