@@ -19,6 +19,11 @@ import CharacterActiveMissionView from '../views/CharacterActiveMissionView.vue'
 import CharacterHotelShelterView from '../views/CharacterHotelShelterView.vue'
 import CharacterSewerShelterView from '../views/CharacterSewerShelterView.vue'
 import CharacterHavenView from '../views/CharacterHavenView.vue'
+import FamilyPartyRoomView from '../views/family/FamilyPartyRoomView.vue'
+import FamilyTasksView from '../views/family/FamilyTasksView.vue'
+import FamilyBattleView from '../views/family/FamilyBattleView.vue'
+import FamilyShopView from '../views/family/FamilyShopView.vue'
+import FamilyMasterView from '../views/family/FamilyMasterView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -138,6 +143,36 @@ const routes: Array<RouteRecordRaw> = [
     name: 'character-visual-novel',
     component: CharacterVisualNovelView,
     meta: { requiresAuth: true }
+  },
+  // JOGO DA FAMÍLIA LIRA (MULTIPLAYER REAL-TIME)
+  {
+    path: '/familia',
+    redirect: '/familia/sala'
+  },
+  {
+    path: '/familia/sala',
+    name: 'family-party-room',
+    component: FamilyPartyRoomView
+  },
+  {
+    path: '/familia/tarefas',
+    name: 'family-tasks',
+    component: FamilyTasksView
+  },
+  {
+    path: '/familia/batalha',
+    name: 'family-battle',
+    component: FamilyBattleView
+  },
+  {
+    path: '/familia/loja',
+    name: 'family-shop',
+    component: FamilyShopView
+  },
+  {
+    path: '/familia/mestre',
+    name: 'family-master',
+    component: FamilyMasterView
   }
 ]
 
@@ -162,7 +197,9 @@ router.beforeEach((to) => {
   if (to.meta.requiresAuth && !token) {
     return { name: 'login' }
   } else if (to.name === 'login' && token) {
-    if (user && user.role === 'MESTRE') {
+    if (user && user.role === 'LIRA') {
+      return { name: 'family-party-room' }
+    } else if (user && user.role === 'MESTRE') {
       return { name: 'gm-dashboard' }
     } else {
       return { name: 'dashboard' }
@@ -178,3 +215,4 @@ router.beforeEach((to) => {
 })
 
 export default router
+
