@@ -93,7 +93,13 @@ export function startPartyBattle(partyMembers: any[], isSolo: boolean = false) {
   s.emit('family:start_party_battle', { partyMembers, isSolo });
 }
 
-export function sendFamilyBattleAction(battleId: string, characterId: string, actionType: 'ATTACK' | 'SKILL' | 'DEFEND' | 'HEAL', skillName?: string) {
+export function sendFamilyBattleAction(
+  battleId: string, 
+  characterId: string, 
+  actionType: 'ATTACK' | 'SKILL' | 'DEFEND' | 'HEAL', 
+  skillName?: string,
+  skillId?: string
+) {
   const s = getFamilySocket();
-  s.emit('family:execute_battle_action', { battleId, characterId, actionType, skillName });
+  s.emit('family:execute_battle_action', { battleId, characterId, actionType, skillName, skillId });
 }

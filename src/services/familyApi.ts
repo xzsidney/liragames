@@ -91,6 +91,54 @@ export const familyApi = {
     return res.json();
   },
 
+  async changeClass(characterId: string, characterClass: string) {
+    const res = await fetch(`${API_URL}/api/family/character/change-class`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ characterId, characterClass }),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
+  async recoverFromInfirmary(characterId: string, force?: boolean) {
+    const res = await fetch(`${API_URL}/api/family/character/recover-infirmary`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ characterId, force }),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
+  async getSkillTree(characterId: string) {
+    const res = await fetch(`${API_URL}/api/family/skills/tree?characterId=${characterId}`, {
+      headers: getHeaders(),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
+  async buySkill(characterId: string, skillId: string) {
+    const res = await fetch(`${API_URL}/api/family/skills/buy`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ characterId, skillId }),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
+  async equipSkill(characterId: string, skillId: string, equip: boolean) {
+    const res = await fetch(`${API_URL}/api/family/skills/equip`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ characterId, skillId, equip }),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
   // Tarefas da Casa
   async getTasks(characterId?: string) {
     const query = characterId ? `?characterId=${characterId}` : '';

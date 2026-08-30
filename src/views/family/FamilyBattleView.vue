@@ -275,48 +275,87 @@
 
         <!-- Painel de Comandos de Batalha -->
         <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-4">
-          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Escolha sua Ação no Combate:</h4>
+          <!-- Alerta se o Herói estiver na Enfermaria -->
+          <div v-if="isHeroInInfirmary" class="bg-rose-950/80 border border-rose-600/80 rounded-2xl p-4 text-center space-y-2">
+            <p class="text-xs md:text-sm font-black text-rose-300">
+              🚑 Seu herói está na Enfermaria (0 HP) e não pode lutar no momento!
+            </p>
+            <router-link to="/familia/ficha" class="inline-block text-xs font-black text-amber-300 underline hover:text-amber-200">
+              Ir para a Ficha receber alta ou aguardar recuperação ➔
+            </router-link>
+          </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <!-- Ataque Básico -->
-            <button
-              :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
-              @click="executeAction('ATTACK')"
-              class="bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-rose-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
-            >
-              <span class="text-2xl">🗡️</span>
-              <span>Ataque Físico</span>
-            </button>
+          <div v-else>
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+                Ações de Combate (Classe: <span class="text-amber-300">{{ activeCharacter?.characterClass }}</span>):
+              </h4>
+              <span class="text-[11px] text-sky-400 font-bold">
+                💧 Mana: {{ activeCharacter?.mpCurrent }}/{{ activeCharacter?.mpMax }} MP
+              </span>
+            </div>
 
-            <!-- Magia / Poder Especial -->
-            <button
-              :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
-              @click="executeAction('SKILL')"
-              class="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-amber-500/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
-            >
-              <span class="text-2xl">🔥</span>
-              <span>Magia Especial</span>
-            </button>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <!-- Ataque Físico Básico -->
+              <button
+                :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
+                @click="executeAction('ATTACK')"
+                class="bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3.5 px-3 rounded-2xl shadow-lg shadow-rose-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
+              >
+                <span class="text-2xl">⚔️</span>
+                <span>Ataque Básico</span>
+                <span class="text-[10px] text-rose-200">Custo: 0 MP</span>
+              </button>
 
-            <!-- Bênção de Cura -->
-            <button
-              :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
-              @click="executeAction('HEAL')"
-              class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-emerald-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
-            >
-              <span class="text-2xl">✨</span>
-              <span>Cura Coletiva</span>
-            </button>
+              <!-- Habilidades Equipadas da Build da Classe -->
+              <template v-if="equippedSkills.length > 0">
+                <button
+                  v-for="skill in equippedSkills"
+                  :key="skill.id"
+                  :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS' || (activeCharacter && activeCharacter.mpCurrent < skill.costMp)"
+                  @click="executeSkillAction(skill)"
+                  class="bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-xs md:text-sm py-3.5 px-3 rounded-2xl shadow-lg shadow-amber-500/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
+                >
+                  <span class="text-2xl">{{ skill.icon }}</span>
+                  <span class="truncate max-w-full">{{ skill.name }}</span>
+                  <span class="text-[10px] text-slate-900 font-bold">💧 {{ skill.costMp }} MP • Poder {{ skill.power }}</span>
+                </button>
+              </template>
 
-            <!-- Defender -->
-            <button
-              :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
-              @click="executeAction('DEFEND')"
-              class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-indigo-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
-            >
-              <span class="text-2xl">🛡️</span>
-              <span>Defender</span>
-            </button>
+              <!-- Fallback se não tiver nenhuma equipada ainda -->
+              <template v-else>
+                <button
+                  :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
+                  @click="executeAction('SKILL')"
+                  class="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-xs md:text-sm py-3.5 px-3 rounded-2xl shadow-lg shadow-amber-500/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
+                >
+                  <span class="text-2xl">🔥</span>
+                  <span>Poder Especial</span>
+                  <span class="text-[10px] text-slate-900">Custo: 10 MP</span>
+                </button>
+
+                <button
+                  :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
+                  @click="executeAction('HEAL')"
+                  class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3.5 px-3 rounded-2xl shadow-lg shadow-emerald-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
+                >
+                  <span class="text-2xl">✨</span>
+                  <span>Bênção de Luz</span>
+                  <span class="text-[10px] text-emerald-200">Cura Coletiva</span>
+                </button>
+              </template>
+
+              <!-- Defender -->
+              <button
+                :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
+                @click="executeAction('DEFEND')"
+                class="bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3.5 px-3 rounded-2xl shadow-lg shadow-indigo-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
+              >
+                <span class="text-2xl">🛡️</span>
+                <span>Postura de Defesa</span>
+                <span class="text-[10px] text-blue-200">Reduz Dano</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -436,8 +475,18 @@ import confetti from 'canvas-confetti';
 const battle = ref<any>(null);
 const members = ref<any[]>([]);
 const activeCharacter = ref<any>(null);
+const equippedSkills = ref<any[]>([]);
 const monsterHit = ref<boolean>(false);
 const battleState = ref<'LOBBY' | 'BATTLE'>('LOBBY');
+
+const isHeroInInfirmary = computed(() => {
+  if (!activeCharacter.value) return false;
+  if (activeCharacter.value.hpCurrent <= 0) return true;
+  if (activeCharacter.value.inInfirmaryUntil && new Date(activeCharacter.value.inInfirmaryUntil).getTime() > Date.now()) {
+    return true;
+  }
+  return false;
+});
 
 const monsterInfo = {
   name: 'O Golem da Bagunça',
@@ -504,7 +553,7 @@ const currentTurnHeroName = computed(() => {
 });
 
 const isMyTurn = computed(() => {
-  if (!activeCharacter.value) return false;
+  if (!activeCharacter.value || isHeroInInfirmary.value) return false;
   const turns = normalizedTurnOrder.value;
   if (turns.length === 0) return true;
   const heroId = currentTurnHeroId.value;
@@ -570,6 +619,12 @@ async function loadData() {
     if (activeCharacter.value) {
       joinFamilyRoom(activeCharacter.value.id, activeCharacter.value.name);
       createPartyLobby(activeCharacter.value);
+
+      // Carrega as habilidades equipadas da build de combate do herói
+      const treeRes = await familyApi.getSkillTree(activeCharacter.value.id);
+      if (treeRes.success) {
+        equippedSkills.value = treeRes.skills.filter((s: any) => treeRes.equippedSkillIds.includes(s.id));
+      }
     }
   } catch (error) {
     console.error('Erro ao carregar batalha:', error);
@@ -583,6 +638,15 @@ function executeAction(actionType: 'ATTACK' | 'SKILL' | 'DEFEND' | 'HEAL') {
   setTimeout(() => { monsterHit.value = false; }, 600);
 
   sendFamilyBattleAction(battle.value.id, activeCharacter.value.id, actionType);
+}
+
+function executeSkillAction(skill: any) {
+  if (!battle.value || !activeCharacter.value) return;
+
+  monsterHit.value = true;
+  setTimeout(() => { monsterHit.value = false; }, 600);
+
+  sendFamilyBattleAction(battle.value.id, activeCharacter.value.id, 'SKILL', skill.name, skill.id);
 }
 
 onMounted(() => {
