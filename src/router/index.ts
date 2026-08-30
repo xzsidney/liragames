@@ -29,6 +29,7 @@ import FamilyKingdomRadarView from '../views/family/FamilyKingdomRadarView.vue'
 import FamilyActiveMissionView from '../views/family/FamilyActiveMissionView.vue'
 import FamilyAdventuresView from '../views/family/FamilyAdventuresView.vue'
 import FamilyFeedView from '../views/family/FamilyFeedView.vue'
+import FamilyInfirmaryView from '../views/family/FamilyInfirmaryView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -213,6 +214,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/familia/mural',
     name: 'family-feed',
     component: FamilyFeedView,
+    meta: { requiresAuth: true, role: 'LIRA' }
+  },
+  {
+    path: '/familia/enfermaria',
+    name: 'family-infirmary',
+    component: FamilyInfirmaryView,
     meta: { requiresAuth: true, role: 'LIRA' }
   }
 ]

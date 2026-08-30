@@ -47,13 +47,22 @@
               </p>
             </div>
           </div>
-          <button
-            v-if="infirmarySecondsLeft <= 0"
-            @click="recoverFromInfirmary"
-            class="bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs md:text-sm px-6 py-3 rounded-2xl shadow-xl transition-all active:scale-95 cursor-pointer shrink-0"
-          >
-            ✨ Receber Alta da Enfermaria (100% HP)
-          </button>
+          <div class="flex items-center space-x-2 shrink-0">
+            <router-link
+              to="/familia/enfermaria"
+              class="bg-slate-950 hover:bg-slate-800 border border-amber-400/60 text-amber-300 font-black text-xs md:text-sm px-4 py-3 rounded-2xl shadow transition-all cursor-pointer"
+            >
+              🏥 Abrir Ala da Enfermaria
+            </router-link>
+
+            <button
+              v-if="infirmarySecondsLeft <= 0 || hero.isParent"
+              @click="recoverFromInfirmary"
+              class="bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs md:text-sm px-6 py-3 rounded-2xl shadow-xl transition-all active:scale-95 cursor-pointer"
+            >
+              ✨ Reviver (100% HP)
+            </button>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -145,6 +145,25 @@
       </div>
     </div>
 
+    <!-- Banner de Emergência: Herói na Enfermaria (0 HP) -->
+    <section v-if="activeCharacter && (activeCharacter.hpCurrent <= 0 || (activeCharacter.inInfirmaryUntil && new Date(activeCharacter.inInfirmaryUntil).getTime() > Date.now()))" class="max-w-6xl mx-auto my-4 bg-gradient-to-r from-rose-950 via-red-950 to-rose-900 border-2 border-rose-500 rounded-3xl p-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4 animate-pulse">
+      <div class="flex items-center space-x-3 text-left">
+        <span class="text-4xl">🚑</span>
+        <div>
+          <h3 class="text-base md:text-lg font-black text-rose-200">Herói Nocauteado (0 HP)!</h3>
+          <p class="text-xs text-rose-300">
+            Seu herói foi internado na Enfermaria Real e está em recuperação.
+          </p>
+        </div>
+      </div>
+      <router-link
+        to="/familia/enfermaria"
+        class="bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs md:text-sm px-6 py-2.5 rounded-2xl shadow-xl transition-all shrink-0 cursor-pointer"
+      >
+        🏥 Ir para a Enfermaria (Aguardar / Reviver 100% HP) ➔
+      </router-link>
+    </section>
+
     <!-- Herói Selecionado / Card de Destaque -->
     <section v-if="activeCharacter" class="max-w-6xl mx-auto my-6">
       <div class="bg-gradient-to-r from-slate-900 via-slate-900/90 to-amber-950/40 border-2 border-amber-500/40 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
@@ -368,6 +387,21 @@
           </div>
           <div class="mt-4 flex items-center text-xs font-bold text-yellow-400 group-hover:translate-x-1 transition-transform">
             <span>Ver Placar</span>
+            <span class="ml-1">➔</span>
+          </div>
+        </router-link>
+
+        <!-- 9. Enfermaria Real -->
+        <router-link to="/familia/enfermaria" class="group bg-gradient-to-b from-[#20050d] to-[#0a122e] border border-rose-900/60 hover:border-rose-400 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-rose-500/10 flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-rose-950 border border-rose-600/40 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+              🏥
+            </div>
+            <h4 class="text-base font-black text-slate-100 group-hover:text-rose-300 transition-colors">Enfermaria Real</h4>
+            <p class="text-xs text-slate-400 mt-1">Repouse ferimentos de combate e reviva seu herói com 100% de Vida!</p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-bold text-rose-400 group-hover:translate-x-1 transition-transform">
+            <span>Acessar Ala Médica</span>
             <span class="ml-1">➔</span>
           </div>
         </router-link>

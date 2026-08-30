@@ -83,6 +83,7 @@ const navItems = [
   { label: 'Loja', path: '/familia/loja', icon: '🛍️' },
   { label: 'Contos', path: '/familia/aventuras', icon: '📜' },
   { label: 'Mural', path: '/familia/mural', icon: '🏆' },
+  { label: 'Enfermaria', path: '/familia/enfermaria', icon: '🏥' },
 ];
 
 function logout() {
