@@ -368,53 +368,40 @@
               </span>
             </div>
 
-            <!-- FASE 1: AÇÃO DE MOVIMENTAÇÃO NO GRID -->
+            <!-- FASE 1: AÇÃO DE MOVIMENTAÇÃO NO GRID (IMEDIATA) -->
             <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300 flex items-center space-x-1">
-                  <span>1. Escolha a Movimentação Tática:</span>
+                  <span>1. Mova seu Herói no Grid:</span>
                 </span>
                 <span class="text-xs font-mono font-bold text-amber-400">Posição Atual: [{{ heroGridPos }}]</span>
               </div>
 
-              <div class="grid grid-cols-3 gap-2 md:gap-3">
-                <!-- Recuar -->
+              <div class="grid grid-cols-2 gap-3">
+                <!-- Recuar 1 Casa -->
                 <button
                   :disabled="!isMyTurn || heroGridPos <= 0"
-                  @click="selectedMove = 'LEFT'"
-                  :class="[
-                    'py-2.5 px-3 rounded-2xl border font-bold text-xs md:text-sm flex flex-col items-center justify-center transition-all cursor-pointer',
-                    selectedMove === 'LEFT' ? 'bg-blue-600 border-sky-300 text-white shadow-lg shadow-blue-500/30' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed'
-                  ]"
+                  @click="moveHero('LEFT')"
+                  class="py-3 px-4 rounded-2xl border border-sky-400 bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-blue-600/30 transition-all transform active:scale-95 cursor-pointer"
                 >
-                  <span class="text-base">◀ Recuar</span>
-                  <span class="text-[10px] text-slate-400">Casa [{{ Math.max(0, heroGridPos - 1) }}]</span>
+                  <span class="text-xl">◀</span>
+                  <div class="text-left">
+                    <p class="leading-tight">Recuar 1 Casa</p>
+                    <p class="text-[10px] text-sky-200 font-normal">Para casa [{{ Math.max(0, heroGridPos - 1) }}]</p>
+                  </div>
                 </button>
 
-                <!-- Manter Posição -->
-                <button
-                  :disabled="!isMyTurn"
-                  @click="selectedMove = 'STAY'"
-                  :class="[
-                    'py-2.5 px-3 rounded-2xl border font-bold text-xs md:text-sm flex flex-col items-center justify-center transition-all cursor-pointer',
-                    selectedMove === 'STAY' ? 'bg-amber-500 border-amber-300 text-slate-950 font-black shadow-lg shadow-amber-500/30' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed'
-                  ]"
-                >
-                  <span class="text-base">🛑 Manter</span>
-                  <span class="text-[10px] text-slate-400">Ficar no [{{ heroGridPos }}]</span>
-                </button>
-
-                <!-- Avançar -->
+                <!-- Avançar 1 Casa -->
                 <button
                   :disabled="!isMyTurn || heroGridPos + 1 >= monsterGridPos"
-                  @click="selectedMove = 'RIGHT'"
-                  :class="[
-                    'py-2.5 px-3 rounded-2xl border font-bold text-xs md:text-sm flex flex-col items-center justify-center transition-all cursor-pointer',
-                    selectedMove === 'RIGHT' ? 'bg-rose-600 border-rose-300 text-white shadow-lg shadow-rose-600/30' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed'
-                  ]"
+                  @click="moveHero('RIGHT')"
+                  class="py-3 px-4 rounded-2xl border border-rose-400 bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-rose-600/30 transition-all transform active:scale-95 cursor-pointer"
                 >
-                  <span class="text-base">Avançar ▶</span>
-                  <span class="text-[10px] text-slate-400">Casa [{{ Math.min(monsterGridPos - 1, heroGridPos + 1) }}]</span>
+                  <div class="text-right">
+                    <p class="leading-tight">Avançar 1 Casa</p>
+                    <p class="text-[10px] text-rose-200 font-normal">Para casa [{{ Math.min(monsterGridPos - 1, heroGridPos + 1) }}]</p>
+                  </div>
+                  <span class="text-xl">▶</span>
                 </button>
               </div>
             </div>
@@ -429,13 +416,13 @@
                 
                 <!-- Ataque Físico Básico -->
                 <button
-                  :disabled="!isMyTurn || (activeCharacter?.characterClass !== 'ARQUEIRO' && currentDistanceAfterMove > 1)"
+                  :disabled="!isMyTurn || (activeCharacter?.characterClass !== 'ARQUEIRO' && currentDistance > 1)"
                   @click="executeTurnAction('ATTACK')"
                   class="bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3 px-3 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-rose-500/40"
                 >
                   <span class="text-2xl">⚔️</span>
                   <span>Ataque Básico</span>
-                  <span v-if="activeCharacter?.characterClass !== 'ARQUEIRO' && currentDistanceAfterMove > 1" class="text-[9px] text-amber-300">Requer Lado a Lado</span>
+                  <span v-if="activeCharacter?.characterClass !== 'ARQUEIRO' && currentDistance > 1" class="text-[9px] text-amber-300">Requer Lado a Lado</span>
                   <span v-else class="text-[9px] text-rose-200">Golpe Físico</span>
                 </button>
 
@@ -600,7 +587,6 @@ const heroTookHit = ref<boolean>(false);
 const lastDamageTaken = ref<number>(15);
 const battleState = ref<'LOBBY' | 'BATTLE'>('LOBBY');
 const showInfirmaryModal = ref<boolean>(false);
-const selectedMove = ref<'LEFT' | 'RIGHT' | 'STAY'>('STAY');
 
 const infirmarySecondsLeft = ref<number>(0);
 let timerInterval: any = null;
@@ -671,16 +657,6 @@ const currentDistance = computed<number>(() => {
   return Math.abs(monsterGridPos.value - heroGridPos.value);
 });
 
-const currentDistanceAfterMove = computed<number>(() => {
-  let simulatedHeroPos = heroGridPos.value;
-  if (selectedMove.value === 'LEFT') {
-    simulatedHeroPos = Math.max(0, simulatedHeroPos - 1);
-  } else if (selectedMove.value === 'RIGHT') {
-    simulatedHeroPos = Math.min(monsterGridPos.value - 1, simulatedHeroPos + 1);
-  }
-  return Math.abs(monsterGridPos.value - simulatedHeroPos);
-});
-
 function isSkillOutOfRange(skill: any) {
   if (!skill) return false;
   const isRanged = skill.effectType?.includes('RANGED') || activeCharacter.value?.characterClass === 'ARQUEIRO';
@@ -690,7 +666,34 @@ function isSkillOutOfRange(skill: any) {
   if (isRanged || isHeal || isMagic || skill.effectType === 'SHIELD') {
     return false;
   }
-  return currentDistanceAfterMove.value > 1;
+  return currentDistance.value > 1;
+}
+
+function moveHero(direction: 'LEFT' | 'RIGHT') {
+  if (!isMyTurn.value || !battle.value || !activeCharacter.value) return;
+  if (isHeroInInfirmary.value) {
+    showInfirmaryModal.value = true;
+    return;
+  }
+
+  // 1. Atualiza otimisticamente a posição local imediatamente
+  if (direction === 'LEFT' && heroGridPos.value > 0) {
+    if (!battle.value.gridPositions) battle.value.gridPositions = {};
+    battle.value.gridPositions[activeCharacter.value.id] = heroGridPos.value - 1;
+  } else if (direction === 'RIGHT' && heroGridPos.value + 1 < monsterGridPos.value) {
+    if (!battle.value.gridPositions) battle.value.gridPositions = {};
+    battle.value.gridPositions[activeCharacter.value.id] = heroGridPos.value + 1;
+  }
+
+  // 2. Envia imediatamente para o backend persistir e sincronizar no socket
+  sendFamilyBattleAction(
+    battle.value.id,
+    activeCharacter.value.id,
+    'MOVE',
+    undefined,
+    undefined,
+    direction
+  );
 }
 
 function isMemberOnline(characterId: string) {
@@ -800,7 +803,6 @@ function startPartyBattleGroup() {
 
 function resetToLobby() {
   battleState.value = 'LOBBY';
-  selectedMove.value = 'STAY';
   if (activeCharacter.value) {
     createPartyLobby(activeCharacter.value);
   }
@@ -846,10 +848,8 @@ function executeTurnAction(actionType: 'ATTACK' | 'DEFEND') {
     actionType,
     undefined,
     undefined,
-    selectedMove.value
+    'STAY'
   );
-
-  selectedMove.value = 'STAY';
 }
 
 function executeTurnSkill(skill: any) {
@@ -868,10 +868,8 @@ function executeTurnSkill(skill: any) {
     'SKILL',
     skill.name,
     skill.id,
-    selectedMove.value
+    'STAY'
   );
-
-  selectedMove.value = 'STAY';
 }
 
 onMounted(() => {
