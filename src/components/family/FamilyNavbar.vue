@@ -45,7 +45,7 @@
           v-if="activeHero"
           class="flex items-center space-x-2 bg-gradient-to-r from-rose-950 to-blue-950 border border-amber-500/40 px-2.5 py-1.5 rounded-xl hover:border-amber-400 transition-all cursor-pointer"
         >
-          <img :src="activeHero.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500'" class="w-7 h-7 rounded-lg object-cover border border-amber-400" />
+          <img :src="getDisplayImageUrl(activeHero.avatarUrl)" class="w-7 h-7 rounded-lg object-cover border border-amber-400" />
           <div class="hidden md:block text-left">
             <p class="text-[11px] font-black text-amber-300 leading-none">{{ activeHero.name }}</p>
             <p class="text-[9px] text-sky-300 font-semibold">Nv. {{ activeHero.level }} • 🪙 {{ activeHero.gold }}</p>
@@ -68,7 +68,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { familyApi } from '../../services/familyApi';
+import { familyApi, getDisplayImageUrl } from '../../services/familyApi';
 
 const router = useRouter();
 const activeHero = ref<any | null>(null);

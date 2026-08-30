@@ -14,7 +14,7 @@
 
         <!-- Personagem Ativo -->
         <div v-if="activeCharacter" class="flex items-center space-x-3 bg-gradient-to-r from-rose-950 to-blue-950 border border-amber-500/40 px-4 py-2 rounded-2xl shadow-lg">
-          <img :src="activeCharacter.avatarUrl" class="w-10 h-10 rounded-xl object-cover border border-amber-400" />
+          <img :src="getDisplayImageUrl(activeCharacter.avatarUrl)" class="w-10 h-10 rounded-xl object-cover border border-amber-400" />
           <div>
             <p class="text-xs font-bold text-slate-200">{{ activeCharacter.name }}</p>
             <p class="text-[11px] text-amber-400 font-semibold">Nv. {{ activeCharacter.level }} • 🪙 {{ activeCharacter.gold }} Ouro</p>
@@ -103,7 +103,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import FamilyNavbar from '../../components/family/FamilyNavbar.vue';
-import { familyApi } from '../../services/familyApi';
+import { familyApi, getDisplayImageUrl } from '../../services/familyApi';
 import confetti from 'canvas-confetti';
 
 const tasks = ref<any[]>([]);

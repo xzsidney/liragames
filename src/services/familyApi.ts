@@ -1,4 +1,13 @@
-const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001' : window.location.origin);
+export const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://api.liragames.com.br');
+
+export function getDisplayImageUrl(url?: string | null): string {
+  if (!url) return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500';
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
+    return url;
+  }
+  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+  return `${API_URL}${cleanUrl}`;
+}
 
 function getHeaders() {
   const token = sessionStorage.getItem('lira_token') || localStorage.getItem('lira_token') || localStorage.getItem('token');

@@ -43,7 +43,7 @@
                     {{ idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}` }}
                   </span>
                   
-                  <img :src="member.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500'" class="w-10 h-10 rounded-xl object-cover border border-slate-700" />
+                  <img :src="getDisplayImageUrl(member.avatarUrl)" class="w-10 h-10 rounded-xl object-cover border border-slate-700" />
                   
                   <div>
                     <h5 class="text-xs font-bold text-slate-100">{{ member.name }}</h5>
@@ -106,7 +106,7 @@
                 class="bg-slate-950/80 p-3.5 rounded-2xl border border-blue-900/40 flex items-center justify-between text-xs"
               >
                 <div class="flex items-center space-x-3">
-                  <img :src="log.character?.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500'" class="w-9 h-9 rounded-xl object-cover border border-amber-500/30" />
+                  <img :src="getDisplayImageUrl(log.character?.avatarUrl)" class="w-9 h-9 rounded-xl object-cover border border-amber-500/30" />
                   <div>
                     <p class="text-slate-100 font-bold">
                       <strong class="text-amber-300">{{ log.character?.name }}</strong> completou a missão 
@@ -135,7 +135,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import FamilyNavbar from '../../components/family/FamilyNavbar.vue';
-import { familyApi } from '../../services/familyApi';
+import { familyApi, getDisplayImageUrl } from '../../services/familyApi';
 
 const leaderboard = ref<any[]>([]);
 const achievements = ref<any[]>([]);

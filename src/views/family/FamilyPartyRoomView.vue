@@ -154,7 +154,7 @@
           <!-- Avatar -->
           <div class="relative">
             <div class="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border-4 border-amber-400/80 shadow-xl shadow-amber-500/20 bg-slate-800">
-              <img :src="activeCharacter.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500'" :alt="activeCharacter.name" class="w-full h-full object-cover" />
+              <img :src="getDisplayImageUrl(activeCharacter.avatarUrl)" :alt="activeCharacter.name" class="w-full h-full object-cover" />
             </div>
             <span class="absolute -bottom-2 -right-2 bg-amber-500 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow">
               Nv. {{ activeCharacter.level }}

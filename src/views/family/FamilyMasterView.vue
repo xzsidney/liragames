@@ -169,7 +169,7 @@
           :key="m.id"
           class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center space-x-3"
         >
-          <img :src="m.avatarUrl" class="w-12 h-12 rounded-xl object-cover border border-slate-700" />
+          <img :src="getDisplayImageUrl(m.avatarUrl)" class="w-12 h-12 rounded-xl object-cover border border-slate-700" />
           <div class="flex-1">
             <h5 class="text-xs font-bold text-slate-200">{{ m.name }}</h5>
             <p class="text-[11px] text-amber-400 font-semibold">{{ m.characterClass }} • Nv. {{ m.level }}</p>
@@ -188,7 +188,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import FamilyNavbar from '../../components/family/FamilyNavbar.vue';
-import { familyApi } from '../../services/familyApi';
+import { familyApi, getDisplayImageUrl } from '../../services/familyApi';
 import confetti from 'canvas-confetti';
 
 const pendingLogs = ref<any[]>([]);

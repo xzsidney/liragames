@@ -344,7 +344,7 @@
               ]"
             >
               <div class="flex items-center space-x-2">
-                <img :src="m.avatarUrl" class="w-8 h-8 rounded-lg object-cover border border-slate-700" />
+                <img :src="getDisplayImageUrl(m.avatarUrl)" class="w-8 h-8 rounded-lg object-cover border border-slate-700" />
                 <div>
                   <p class="font-bold text-slate-200">{{ m.name }}</p>
                   <p class="text-[10px] text-amber-400">{{ m.characterClass }} • Nv. {{ m.level }}</p>
@@ -418,7 +418,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue';
 import FamilyNavbar from '../../components/family/FamilyNavbar.vue';
-import { familyApi } from '../../services/familyApi';
+import { familyApi, getDisplayImageUrl } from '../../services/familyApi';
 import { 
   getFamilySocket, 
   sendFamilyBattleAction, 
