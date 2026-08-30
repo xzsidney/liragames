@@ -386,20 +386,32 @@
           <p class="text-xs text-slate-400">Personalize seu personagem para entrar nas missões e batalhas!</p>
         </div>
 
-        <!-- Escolha do Avatar -->
+        <!-- Escolha do Avatar & Upload de Foto -->
         <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-300">Escolha a Imagem do Herói:</label>
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-300">Escolha a Foto ou Envie do Aparelho:</label>
+            <button
+              type="button"
+              @click="triggerAvatarUpload"
+              class="text-[11px] font-black text-amber-300 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 px-2.5 py-1 rounded-lg flex items-center space-x-1 cursor-pointer"
+            >
+              <span>📷</span>
+              <span>{{ uploadingAvatar ? 'Enviando...' : 'Enviar Foto Real' }}</span>
+            </button>
+            <input type="file" ref="avatarFileInput" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handleAvatarFileChange" />
+          </div>
+
           <div class="grid grid-cols-4 gap-2">
             <div
               v-for="ava in avatarOptions"
               :key="ava"
               @click="newHeroForm.avatarUrl = ava"
               :class="[
-                'w-16 h-16 mx-auto rounded-2xl overflow-hidden border-2 cursor-pointer transition-all hover:scale-105',
+                'w-16 h-16 mx-auto rounded-2xl overflow-hidden border-2 cursor-pointer transition-all hover:scale-105 relative',
                 newHeroForm.avatarUrl === ava ? 'border-amber-400 ring-2 ring-amber-500/50 shadow-lg' : 'border-slate-800 opacity-60 hover:opacity-100'
               ]"
             >
-              <img :src="ava" class="w-full h-full object-cover" />
+              <img :src="getDisplayImageUrl(ava)" class="w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -476,7 +488,11 @@ const myCharacters = ref<any[]>([]);
 const selectedCharacterId = ref<string>('');
 const showClaimModal = ref<boolean>(false);
 
-const avatarOptions = [
+const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001' : window.location.origin);
+const avatarFileInput = ref<HTMLInputElement | null>(null);
+const uploadingAvatar = ref<boolean>(false);
+
+const avatarOptions = ref<string[]>([
   'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500&auto=format&fit=crop&q=60',
   'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=500&auto=format&fit=crop&q=60',
   'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=500&auto=format&fit=crop&q=60',
@@ -485,14 +501,47 @@ const avatarOptions = [
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&auto=format&fit=crop&q=60',
   'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=500&auto=format&fit=crop&q=60',
   'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&auto=format&fit=crop&q=60',
-];
+]);
 
 const newHeroForm = ref({
   name: '',
   characterClass: 'GUERREIRO',
   title: 'Guardião da Casa',
-  avatarUrl: avatarOptions[0],
+  avatarUrl: avatarOptions.value[0],
 });
+
+function getDisplayImageUrl(url: string) {
+  if (!url) return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500';
+  if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:')) return url;
+  return `${API_BASE_URL}${url}`;
+}
+
+function triggerAvatarUpload() {
+  if (avatarFileInput.value) avatarFileInput.value.click();
+}
+
+async function handleAvatarFileChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files.length > 0) {
+    const file = target.files[0];
+    uploadingAvatar.value = true;
+    try {
+      const res = await familyApi.uploadAvatar(file);
+      if (res.url) {
+        const fullUrl = res.url;
+        avatarOptions.value.unshift(fullUrl);
+        newHeroForm.value.avatarUrl = fullUrl;
+      } else {
+        alert(res.error || 'Erro ao enviar foto.');
+      }
+    } catch (err) {
+      console.error('Erro no upload:', err);
+      alert('Erro ao enviar foto. Verifique o formato ou tamanho do arquivo.');
+    } finally {
+      uploadingAvatar.value = false;
+    }
+  }
+}
 
 function acceptInviteAndGo() {
   if (activeCharacter.value) {

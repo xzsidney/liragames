@@ -56,6 +56,32 @@ export const familyApi = {
     return res.json();
   },
 
+  async uploadAvatar(file: File) {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    formData.append('folder', 'family');
+    const token = sessionStorage.getItem('lira_token') || localStorage.getItem('lira_token') || localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/api/upload`, {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
+  async updateCharacterAvatar(characterId: string, avatarUrl: string) {
+    const res = await fetch(`${API_URL}/api/family/character/update-avatar`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ characterId, avatarUrl }),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
   // Tarefas da Casa
   async getTasks(characterId?: string) {
     const query = characterId ? `?characterId=${characterId}` : '';

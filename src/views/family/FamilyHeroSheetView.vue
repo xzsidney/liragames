@@ -38,9 +38,20 @@
           
           <!-- Card do Personagem -->
           <div class="bg-gradient-to-b from-[#2a0611] to-[#0a1533] border-2 border-amber-500/40 rounded-3xl p-6 shadow-2xl relative overflow-hidden text-center">
-            <div class="w-32 h-32 mx-auto rounded-3xl overflow-hidden border-4 border-amber-400 shadow-xl shadow-amber-500/20 mb-4 bg-slate-900">
-              <img :src="hero.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500'" class="w-full h-full object-cover" />
+            <!-- Avatar com Botão de Troca / Upload -->
+            <div class="relative w-32 h-32 mx-auto mb-4 group cursor-pointer" @click="triggerAvatarUpload" title="Clique para trocar a foto do Herói">
+              <div class="w-full h-full rounded-3xl overflow-hidden border-4 border-amber-400 shadow-xl shadow-amber-500/20 bg-slate-900">
+                <img :src="getDisplayImageUrl(hero.avatarUrl)" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+              </div>
+              <div class="absolute inset-0 bg-black/60 rounded-3xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-xs font-black text-amber-300 transition-opacity">
+                <span class="text-lg">📷</span>
+                <span>Trocar Foto</span>
+              </div>
+              <div v-if="uploadingAvatar" class="absolute inset-0 bg-black/80 rounded-3xl flex items-center justify-center">
+                <div class="animate-spin w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full"></div>
+              </div>
             </div>
+            <input type="file" ref="avatarFileInput" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handleAvatarFileChange" />
 
             <h2 class="text-2xl font-black text-slate-100">{{ hero.name }}</h2>
             <p class="text-xs font-bold uppercase tracking-wider text-amber-300 mt-0.5">
@@ -328,7 +339,45 @@ import { ref, onMounted } from 'vue';
 import FamilyNavbar from '../../components/family/FamilyNavbar.vue';
 import { familyApi } from '../../services/familyApi';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001' : window.location.origin);
 const hero = ref<any | null>(null);
+const avatarFileInput = ref<HTMLInputElement | null>(null);
+const uploadingAvatar = ref<boolean>(false);
+
+function getDisplayImageUrl(url: string) {
+  if (!url) return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500';
+  if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:')) return url;
+  return `${API_BASE_URL}${url}`;
+}
+
+function triggerAvatarUpload() {
+  if (avatarFileInput.value) avatarFileInput.value.click();
+}
+
+async function handleAvatarFileChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files.length > 0 && hero.value) {
+    const file = target.files[0];
+    uploadingAvatar.value = true;
+    try {
+      const uploadRes = await familyApi.uploadAvatar(file);
+      if (uploadRes.url) {
+        const updateRes = await familyApi.updateCharacterAvatar(hero.value.id, uploadRes.url);
+        if (updateRes.success) {
+          hero.value.avatarUrl = uploadRes.url;
+          alert('🎉 Foto do herói atualizada com sucesso!');
+        }
+      } else {
+        alert(uploadRes.error || 'Erro ao enviar foto.');
+      }
+    } catch (err) {
+      console.error('Erro no upload de foto:', err);
+      alert('Erro ao enviar foto. Verifique o formato ou tamanho do arquivo.');
+    } finally {
+      uploadingAvatar.value = false;
+    }
+  }
+}
 
 async function loadHero() {
   try {
