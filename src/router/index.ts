@@ -144,35 +144,41 @@ const routes: Array<RouteRecordRaw> = [
     component: CharacterVisualNovelView,
     meta: { requiresAuth: true }
   },
-  // JOGO DA FAMÍLIA LIRA (MULTIPLAYER REAL-TIME)
+  // JOGO DA FAMÍLIA LIRA (MULTIPLAYER REAL-TIME - EXCLUSIVO ROLE LIRA)
   {
     path: '/familia',
-    redirect: '/familia/sala'
+    redirect: '/familia/sala',
+    meta: { requiresAuth: true, role: 'LIRA' }
   },
   {
     path: '/familia/sala',
     name: 'family-party-room',
-    component: FamilyPartyRoomView
+    component: FamilyPartyRoomView,
+    meta: { requiresAuth: true, role: 'LIRA' }
   },
   {
     path: '/familia/tarefas',
     name: 'family-tasks',
-    component: FamilyTasksView
+    component: FamilyTasksView,
+    meta: { requiresAuth: true, role: 'LIRA' }
   },
   {
     path: '/familia/batalha',
     name: 'family-battle',
-    component: FamilyBattleView
+    component: FamilyBattleView,
+    meta: { requiresAuth: true, role: 'LIRA' }
   },
   {
     path: '/familia/loja',
     name: 'family-shop',
-    component: FamilyShopView
+    component: FamilyShopView,
+    meta: { requiresAuth: true, role: 'LIRA' }
   },
   {
     path: '/familia/mestre',
     name: 'family-master',
-    component: FamilyMasterView
+    component: FamilyMasterView,
+    meta: { requiresAuth: true, role: 'LIRA' }
   }
 ]
 
@@ -194,9 +200,27 @@ router.beforeEach((to) => {
     }
   }
   
+  // 1. Bloqueia rotas protegidas se não estiver logado
   if (to.meta.requiresAuth && !token) {
     return { name: 'login' }
-  } else if (to.name === 'login' && token) {
+  }
+
+  // 2. Bloqueia rotas exclusivas se a role não coincidir
+  if (to.meta.role) {
+    if (!token || !user) {
+      return { name: 'login' }
+    }
+    // Rota exclusiva da Família Lira: se não for LIRA, vai para login
+    if (to.meta.role === 'LIRA' && user.role !== 'LIRA') {
+      return { name: 'login' }
+    }
+    if (to.meta.role === 'MESTRE' && user.role !== 'MESTRE') {
+      return { name: 'dashboard' }
+    }
+  }
+
+  // 3. Se já estiver autenticado e tentar acessar login, envia para a sua respectiva tela
+  if (to.name === 'login' && token) {
     if (user && user.role === 'LIRA') {
       return { name: 'family-party-room' }
     } else if (user && user.role === 'MESTRE') {
@@ -204,13 +228,8 @@ router.beforeEach((to) => {
     } else {
       return { name: 'dashboard' }
     }
-  } else if (to.meta.role === 'MESTRE') {
-    if (user && user.role === 'MESTRE') {
-      return true
-    } else {
-      return { name: 'dashboard' }
-    }
   }
+
   return true
 })
 

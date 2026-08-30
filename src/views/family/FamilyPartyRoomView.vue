@@ -113,6 +113,15 @@
         >
           ⚙️ Heróis
         </button>
+
+        <button
+          @click="logout"
+          class="bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-300 hover:text-rose-100 text-xs px-3 py-2 rounded-xl font-bold transition-all flex items-center space-x-1 cursor-pointer"
+          title="Sair da Conta"
+        >
+          <span>🚪</span>
+          <span>Sair</span>
+        </button>
       </div>
     </header>
 
@@ -516,6 +525,15 @@ function sendReaction(emoji: string, text: string) {
   if (activeCharacter.value) {
     sendFamilyReaction(activeCharacter.value.id, activeCharacter.value.name, emoji, text);
   }
+}
+
+function logout() {
+  sessionStorage.removeItem('lira_token');
+  sessionStorage.removeItem('lira_user');
+  localStorage.removeItem('lira_token');
+  localStorage.removeItem('lira_user');
+  localStorage.removeItem('token');
+  router.push('/login');
 }
 
 function inspectMember(member: any) {
