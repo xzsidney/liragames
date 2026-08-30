@@ -382,84 +382,79 @@
       </div>
     </div>
 
-    <!-- Modal de Vincular / Criar Herói da Família -->
+    <!-- Modal de Criar Herói da Família -->
     <div v-if="showClaimModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div class="bg-slate-900 border-2 border-amber-500/40 p-6 md:p-8 rounded-3xl max-w-xl w-full space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-        <button @click="showClaimModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
+      <div class="bg-slate-900 border-2 border-amber-500/40 p-6 md:p-8 rounded-3xl max-w-lg w-full space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <button v-if="myCharacters.length > 0" @click="showClaimModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
 
         <div class="text-center">
-          <span class="text-4xl">👑</span>
-          <h3 class="text-xl font-black text-amber-300 mt-2">Vincular Herói à sua Conta</h3>
-          <p class="text-xs text-slate-400">Escolha um dos personagens da família para ser seu herói ativo!</p>
+          <span class="text-4xl">⚔️</span>
+          <h3 class="text-xl font-black text-amber-300 mt-2">Crie seu Herói da Família</h3>
+          <p class="text-xs text-slate-400">Personalize seu personagem para entrar nas missões e batalhas!</p>
         </div>
 
-        <!-- Opção 1: Escolher Personagem Existente -->
-        <div class="space-y-3">
-          <h4 class="text-xs font-extrabold uppercase text-slate-400">1. Heróis Disponíveis na Família:</h4>
-          
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <!-- Escolha do Avatar -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-300">Escolha a Imagem do Herói:</label>
+          <div class="grid grid-cols-4 gap-2">
             <div
-              v-for="m in members"
-              :key="m.id"
-              class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800"
+              v-for="ava in avatarOptions"
+              :key="ava"
+              @click="newHeroForm.avatarUrl = ava"
+              :class="[
+                'w-16 h-16 mx-auto rounded-2xl overflow-hidden border-2 cursor-pointer transition-all hover:scale-105',
+                newHeroForm.avatarUrl === ava ? 'border-amber-400 ring-2 ring-amber-500/50 shadow-lg' : 'border-slate-800 opacity-60 hover:opacity-100'
+              ]"
             >
-              <div class="flex items-center space-x-2">
-                <img :src="m.avatarUrl" class="w-10 h-10 rounded-lg object-cover border border-slate-700" />
-                <div>
-                  <p class="text-xs font-bold text-slate-200">{{ m.name }}</p>
-                  <p class="text-[10px] text-amber-400">{{ m.characterClass }} • Nv. {{ m.level }}</p>
-                </div>
-              </div>
-
-              <button
-                @click="claimHero(m.id)"
-                class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-2.5 py-1.5 rounded-lg shadow active:scale-95"
-              >
-                Assumir
-              </button>
+              <img :src="ava" class="w-full h-full object-cover" />
             </div>
           </div>
         </div>
 
-        <!-- Opção 2: Criar Novo Herói -->
-        <div class="pt-4 border-t border-slate-800 space-y-3">
-          <h4 class="text-xs font-extrabold uppercase text-slate-400">2. Ou Crie um Novo Herói Exclusivo:</h4>
-          
-          <div class="space-y-2">
+        <!-- Formulário de Criação -->
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Nome do seu Herói:</label>
             <input
               v-model="newHeroForm.name"
-              placeholder="Nome do seu Herói (ex: Lucas Lira)"
-              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+              placeholder="Ex: Paulo Lira, Lucas, Sofia..."
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
             />
-            
-            <div class="grid grid-cols-2 gap-2">
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="text-xs font-bold text-slate-300 block mb-1">Classe:</label>
               <select
                 v-model="newHeroForm.characterClass"
-                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-amber-300 font-bold focus:outline-none focus:border-amber-400"
+                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-amber-300 font-bold focus:outline-none focus:border-amber-400"
               >
-                <option value="GUERREIRO">⚔️ Guerreiro</option>
-                <option value="MAGO">🔥 Mago</option>
-                <option value="PALADINO">🛡️ Paladino</option>
-                <option value="CURANDEIRA">✨ Curandeira</option>
-                <option value="ARQUEIRO">🏹 Arqueiro</option>
-                <option value="LADINO">🗡️ Ladino</option>
-                <option value="INVOCADORA">🐾 Invocadora</option>
+                <option value="GUERREIRO">⚔️ Guerreiro (Dano)</option>
+                <option value="MAGO">🔥 Mago (Magia)</option>
+                <option value="PALADINO">🛡️ Paladino (Defesa)</option>
+                <option value="CURANDEIRA">✨ Curandeira (Cura)</option>
+                <option value="ARQUEIRO">🏹 Arqueiro (Velocidade)</option>
+                <option value="LADINO">🗡️ Ladino (Furtividade)</option>
+                <option value="INVOCADORA">🐾 Invocadora (Mascotes)</option>
               </select>
+            </div>
 
+            <div>
+              <label class="text-xs font-bold text-slate-300 block mb-1">Título de Honra:</label>
               <input
                 v-model="newHeroForm.title"
-                placeholder="Título (ex: O Destemido)"
+                placeholder="Ex: O Guardião da Casa"
                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
               />
             </div>
-
-            <button
-              @click="createNewHero"
-              class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs py-3 rounded-xl shadow active:scale-95 mt-2"
-            >
-              ✨ Criar Meu Herói e Entrar
-            </button>
           </div>
+
+          <button
+            @click="createNewHero"
+            class="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm py-3.5 rounded-2xl shadow-xl shadow-emerald-500/20 active:scale-95 transition-all mt-3 cursor-pointer"
+          >
+            ✨ Criar Meu Herói e Entrar no Salão
+          </button>
         </div>
       </div>
     </div>
@@ -488,10 +483,22 @@ const selectedCharacterId = ref<string>('');
 const inspectingCharacter = ref<any | null>(null);
 const showClaimModal = ref<boolean>(false);
 
+const avatarOptions = [
+  'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500&auto=format&fit=crop&q=60',
+  'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=500&auto=format&fit=crop&q=60',
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=500&auto=format&fit=crop&q=60',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=60',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&auto=format&fit=crop&q=60',
+  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=500&auto=format&fit=crop&q=60',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&auto=format&fit=crop&q=60',
+];
+
 const newHeroForm = ref({
   name: '',
   characterClass: 'GUERREIRO',
-  title: 'Aventureiro da Família',
+  title: 'Guardião da Casa',
+  avatarUrl: avatarOptions[0],
 });
 
 function acceptInviteAndGo() {
@@ -556,21 +563,6 @@ function changeActiveCharacter() {
   selectCharacter(selectedCharacterId.value);
 }
 
-async function claimHero(characterId: string) {
-  try {
-    const res = await familyApi.claimCharacter(characterId);
-    if (res.success) {
-      alert(`🎉 ${res.message}`);
-      showClaimModal.value = false;
-      await loadData();
-    } else {
-      alert(res.error || 'Erro ao vincular herói.');
-    }
-  } catch (err) {
-    console.error('Erro ao vincular herói:', err);
-  }
-}
-
 async function createNewHero() {
   if (!newHeroForm.value.name) {
     alert('Por favor, informe o nome do seu herói.');
@@ -579,9 +571,14 @@ async function createNewHero() {
   try {
     const res = await familyApi.createCharacter(newHeroForm.value);
     if (res.success) {
-      alert('🎉 Personagem criado com sucesso!');
+      alert(`🎉 Herói ${res.character.name} criado com sucesso!`);
       showClaimModal.value = false;
       await loadData();
+      if (res.character?.id) {
+        selectCharacter(res.character.id);
+      }
+    } else {
+      alert(res.error || 'Erro ao criar herói.');
     }
   } catch (err) {
     console.error('Erro ao criar herói:', err);
