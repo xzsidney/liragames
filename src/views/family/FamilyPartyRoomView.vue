@@ -1,12 +1,14 @@
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans selection:bg-amber-500 selection:text-slate-950 relative overflow-hidden">
+  <div class="min-h-screen bg-gradient-to-b from-[#180309] via-[#0d0a1a] to-[#040e24] text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950 relative overflow-hidden pb-12">
+    <FamilyNavbar />
     
-    <!-- Modal de Convite de Batalha Recebido em Tempo Real -->
-    <transition name="slide-down">
-      <div 
-        v-if="incomingBattleInvite && incomingBattleInvite.leaderId !== activeCharacter?.id"
-        class="fixed top-6 left-1/2 -translate-x-1/2 z-50 max-w-lg w-full px-4"
-      >
+    <div class="p-4 md:p-8">
+      <!-- Modal de Convite de Batalha Recebido em Tempo Real -->
+      <transition name="slide-down">
+        <div 
+          v-if="incomingBattleInvite && incomingBattleInvite.leaderId !== activeCharacter?.id"
+          class="fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-lg w-full px-4"
+        >
         <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 border-2 border-purple-400 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-bounce">
           <div class="flex items-center space-x-3">
             <span class="text-3xl">⚔️</span>
@@ -242,52 +244,97 @@
       </button>
     </section>
 
-    <!-- Módulos / Hub de Navegação -->
+    <!-- Módulos / Hub de Navegação Expandido -->
     <section class="max-w-6xl mx-auto my-8">
-      <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-4 flex items-center space-x-2">
-        <span>🧭 Escolha seu Caminho:</span>
+      <h3 class="text-sm font-extrabold uppercase tracking-wider text-amber-300 mb-4 flex items-center space-x-2">
+        <span>🧭 Caminhos do Reino Lira:</span>
       </h3>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <!-- 1. Tarefas da Casa -->
-        <router-link to="/familia/tarefas" class="group bg-slate-900 border border-slate-800 hover:border-amber-500/50 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-amber-500/10 flex flex-col justify-between">
+        <!-- 1. Ficha do Herói -->
+        <router-link to="/familia/ficha" class="group bg-gradient-to-b from-[#20050d] to-[#0a122e] border border-rose-900/60 hover:border-amber-400 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-amber-500/10 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
-              📋
+            <div class="w-12 h-12 rounded-2xl bg-rose-950 border border-rose-600/40 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+              🛡️
             </div>
-            <h4 class="text-base font-bold text-slate-100 group-hover:text-amber-300 transition-colors">Missões Diárias</h4>
-            <p class="text-xs text-slate-400 mt-1">Lave a louça, arrume a cama e faça a lição para ganhar XP e Ouro real!</p>
+            <h4 class="text-base font-black text-slate-100 group-hover:text-amber-300 transition-colors">Ficha do Herói</h4>
+            <p class="text-xs text-slate-400 mt-1">Evolua Força, Sabedoria e Laço Familiar com seu XP acumulado!</p>
           </div>
           <div class="mt-4 flex items-center text-xs font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
-            <span>Ver Tarefas da Casa</span>
+            <span>Acessar Ficha</span>
             <span class="ml-1">➔</span>
           </div>
         </router-link>
 
-        <!-- 2. Arena de Batalha -->
-        <router-link to="/familia/batalha" class="group bg-slate-900 border border-slate-800 hover:border-rose-500/50 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-rose-500/10 flex flex-col justify-between">
+        <!-- 2. Radar do Reino -->
+        <router-link to="/familia/radar" class="group bg-gradient-to-b from-[#20050d] to-[#0a122e] border border-blue-900/60 hover:border-amber-400 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-blue-500/10 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+            <div class="w-12 h-12 rounded-2xl bg-blue-950 border border-blue-600/40 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+              🧭
+            </div>
+            <h4 class="text-base font-black text-slate-100 group-hover:text-sky-300 transition-colors">Radar do Reino</h4>
+            <p class="text-xs text-slate-400 mt-1">Explore os cômodos da casa e os postos avançados da vizinhança!</p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-bold text-sky-400 group-hover:translate-x-1 transition-transform">
+            <span>Abrir Mapa</span>
+            <span class="ml-1">➔</span>
+          </div>
+        </router-link>
+
+        <!-- 3. Centro de Foco AFK -->
+        <router-link to="/familia/missao-ativa" class="group bg-gradient-to-b from-[#20050d] to-[#0a122e] border border-purple-900/60 hover:border-amber-400 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-purple-500/10 flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-purple-950 border border-purple-600/40 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+              ⏳
+            </div>
+            <h4 class="text-base font-black text-slate-100 group-hover:text-purple-300 transition-colors">Centro de Foco</h4>
+            <p class="text-xs text-slate-400 mt-1">Cronômetro de concentração para estudos e tarefas da vida real!</p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
+            <span>Iniciar Sessão</span>
+            <span class="ml-1">➔</span>
+          </div>
+        </router-link>
+
+        <!-- 4. Arena de Batalha -->
+        <router-link to="/familia/batalha" class="group bg-gradient-to-b from-[#20050d] to-[#0a122e] border border-rose-900/60 hover:border-amber-400 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-rose-500/10 flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-rose-950 border border-rose-600/40 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
               ⚔️
             </div>
-            <h4 class="text-base font-bold text-slate-100 group-hover:text-rose-300 transition-colors">Arena de Batalha</h4>
-            <p class="text-xs text-slate-400 mt-1">Lute em turnos ao vivo contra o Golem da Bagunça solo ou com sua família!</p>
+            <h4 class="text-base font-black text-slate-100 group-hover:text-rose-300 transition-colors">Arena de Batalha</h4>
+            <p class="text-xs text-slate-400 mt-1">Enfrente monstros em turnos ao vivo solo ou em grupo com a família!</p>
           </div>
           <div class="mt-4 flex items-center text-xs font-bold text-rose-400 group-hover:translate-x-1 transition-transform">
-            <span>Entrar na Batalha</span>
+            <span>Entrar na Arena</span>
             <span class="ml-1">➔</span>
           </div>
         </router-link>
 
-        <!-- 3. Loja e Recompensas Reais -->
-        <router-link to="/familia/loja" class="group bg-slate-900 border border-slate-800 hover:border-sky-500/50 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-sky-500/10 flex flex-col justify-between">
+        <!-- 5. Tarefas da Casa -->
+        <router-link to="/familia/tarefas" class="group bg-gradient-to-b from-[#20050d] to-[#0a122e] border border-amber-900/60 hover:border-amber-400 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-amber-500/10 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+            <div class="w-12 h-12 rounded-2xl bg-amber-950 border border-amber-600/40 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+              📋
+            </div>
+            <h4 class="text-base font-black text-slate-100 group-hover:text-amber-300 transition-colors">Missões Diárias</h4>
+            <p class="text-xs text-slate-400 mt-1">Lave a louça, arrume o quarto e estude para ganhar XP e Ouro real!</p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
+            <span>Ver Missões</span>
+            <span class="ml-1">➔</span>
+          </div>
+        </router-link>
+
+        <!-- 6. Loja e Vales Reais -->
+        <router-link to="/familia/loja" class="group bg-gradient-to-b from-[#20050d] to-[#0a122e] border border-blue-900/60 hover:border-amber-400 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-blue-500/10 flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-blue-950 border border-blue-600/40 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
               🛍️
             </div>
-            <h4 class="text-base font-bold text-slate-100 group-hover:text-sky-300 transition-colors">Loja & Recompensas</h4>
-            <p class="text-xs text-slate-400 mt-1">Compre armas, mascotes ou troque seu ouro por 1h de videogame e pizza!</p>
+            <h4 class="text-base font-black text-slate-100 group-hover:text-sky-300 transition-colors">Loja & Recompensas</h4>
+            <p class="text-xs text-slate-400 mt-1">Compre armas, mascotes e troque seu ouro por 1h de videogame ou pizza!</p>
           </div>
           <div class="mt-4 flex items-center text-xs font-bold text-sky-400 group-hover:translate-x-1 transition-transform">
             <span>Abrir Mercado</span>
@@ -295,17 +342,32 @@
           </div>
         </router-link>
 
-        <!-- 4. Painel dos Pais (Mestre) -->
-        <router-link to="/familia/mestre" class="group bg-slate-900 border border-slate-800 hover:border-purple-500/50 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-purple-500/10 flex flex-col justify-between">
+        <!-- 7. Contos e Livro-Jogo -->
+        <router-link to="/familia/aventuras" class="group bg-gradient-to-b from-[#20050d] to-[#0a122e] border border-emerald-900/60 hover:border-amber-400 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between">
           <div>
-            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
-              👑
+            <div class="w-12 h-12 rounded-2xl bg-emerald-950 border border-emerald-600/40 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+              📜
             </div>
-            <h4 class="text-base font-bold text-slate-100 group-hover:text-purple-300 transition-colors">Painel dos Pais</h4>
-            <p class="text-xs text-slate-400 mt-1">Aprove as tarefas concluídas pelos filhos com 1 clique e entregue o ouro!</p>
+            <h4 class="text-base font-black text-slate-100 group-hover:text-emerald-300 transition-colors">Contos Interativos</h4>
+            <p class="text-xs text-slate-400 mt-1">Histórias solo com escolhas e rolagens de dados de atributos!</p>
           </div>
-          <div class="mt-4 flex items-center text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
-            <span>Acessar Painel Mestre</span>
+          <div class="mt-4 flex items-center text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
+            <span>Ler Contos</span>
+            <span class="ml-1">➔</span>
+          </div>
+        </router-link>
+
+        <!-- 8. Mural do Clã & Placar -->
+        <router-link to="/familia/mural" class="group bg-gradient-to-b from-[#20050d] to-[#0a122e] border border-yellow-900/60 hover:border-amber-400 p-5 rounded-3xl transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-yellow-500/10 flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-yellow-950 border border-yellow-600/40 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+              🏆
+            </div>
+            <h4 class="text-base font-black text-slate-100 group-hover:text-amber-300 transition-colors">Mural de Honra</h4>
+            <p class="text-xs text-slate-400 mt-1">Ranking semanal da família, medalhas e feed de boas ações!</p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-bold text-yellow-400 group-hover:translate-x-1 transition-transform">
+            <span>Ver Placar</span>
             <span class="ml-1">➔</span>
           </div>
         </router-link>
@@ -390,12 +452,14 @@
       </div>
     </div>
 
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import FamilyNavbar from '../../components/family/FamilyNavbar.vue';
 import { familyApi } from '../../services/familyApi';
 import { 
   joinFamilyRoom, 

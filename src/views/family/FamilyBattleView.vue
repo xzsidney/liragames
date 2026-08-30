@@ -1,48 +1,47 @@
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans relative overflow-hidden">
-    
-    <!-- Modal / Toast de Convite de Batalha Recebido -->
-    <transition name="slide-down">
-      <div 
-        v-if="incomingBattleInvite && incomingBattleInvite.leaderId !== activeCharacter?.id"
-        class="fixed top-6 left-1/2 -translate-x-1/2 z-50 max-w-lg w-full px-4"
-      >
-        <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 border-2 border-purple-400 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-bounce">
-          <div class="flex items-center space-x-3">
-            <span class="text-3xl">⚔️</span>
-            <div>
-              <p class="text-xs font-extrabold uppercase tracking-wider text-purple-300">Convite de Batalha!</p>
-              <p class="text-sm font-bold text-slate-100">
-                <strong>{{ incomingBattleInvite.leaderName }}</strong> te chamou para enfrentar <em>{{ incomingBattleInvite.monsterName }}</em>!
-              </p>
+  <div class="min-h-screen bg-gradient-to-b from-[#180309] via-[#0d0a1a] to-[#040e24] text-slate-100 font-sans relative overflow-hidden pb-12">
+    <FamilyNavbar />
+
+    <div class="p-4 md:p-8">
+      <!-- Modal / Toast de Convite de Batalha Recebido -->
+      <transition name="slide-down">
+        <div 
+          v-if="incomingBattleInvite && incomingBattleInvite.leaderId !== activeCharacter?.id"
+          class="fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-lg w-full px-4"
+        >
+          <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 border-2 border-purple-400 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-bounce">
+            <div class="flex items-center space-x-3">
+              <span class="text-3xl">⚔️</span>
+              <div>
+                <p class="text-xs font-extrabold uppercase tracking-wider text-purple-300">Convite de Batalha!</p>
+                <p class="text-sm font-bold text-slate-100">
+                  <strong>{{ incomingBattleInvite.leaderName }}</strong> te chamou para enfrentar <em>{{ incomingBattleInvite.monsterName }}</em>!
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button
+                @click="acceptInvite"
+                class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition-all active:scale-95"
+              >
+                Aceitar!
+              </button>
+              <button
+                @click="incomingBattleInvite = null"
+                class="text-slate-400 hover:text-slate-200 text-xs px-2 py-1"
+              >
+                Recusar
+              </button>
             </div>
           </div>
-          <div class="flex items-center space-x-2">
-            <button
-              @click="acceptInvite"
-              class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition-all active:scale-95"
-            >
-              Aceitar!
-            </button>
-            <button
-              @click="incomingBattleInvite = null"
-              class="text-slate-400 hover:text-slate-200 text-xs px-2 py-1"
-            >
-              Recusar
-            </button>
-          </div>
         </div>
-      </div>
-    </transition>
+      </transition>
 
-    <!-- Header Principal -->
-    <div class="max-w-5xl mx-auto flex items-center justify-between pb-6 border-b border-slate-800">
-      <div class="flex items-center space-x-4">
-        <router-link to="/familia/sala" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors">
-          ➔
-        </router-link>
-        <div>
-          <h1 class="text-2xl md:text-3xl font-black text-rose-400 flex items-center space-x-2">
+      <!-- Header Principal -->
+      <div class="max-w-5xl mx-auto flex items-center justify-between pb-6 border-b border-rose-900/60">
+        <div class="flex items-center space-x-4">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-black text-rose-400 flex items-center space-x-2">
             <span>⚔️ Arena de Batalha da Família</span>
           </h1>
           <p class="text-xs md:text-sm text-slate-400">Jogue Solo ou convide os membros online para lutar em grupo!</p>
@@ -412,11 +411,13 @@
       </div>
     </div>
 
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue';
+import FamilyNavbar from '../../components/family/FamilyNavbar.vue';
 import { familyApi } from '../../services/familyApi';
 import { 
   getFamilySocket, 

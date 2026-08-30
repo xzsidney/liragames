@@ -1,28 +1,26 @@
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans">
-    <!-- Header -->
-    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800">
-      <div class="flex items-center space-x-4">
-        <router-link to="/familia/sala" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors">
-          ➔
-        </router-link>
+  <div class="min-h-screen bg-gradient-to-b from-[#180309] via-[#0d0a1a] to-[#040e24] text-slate-100 font-sans pb-12">
+    <FamilyNavbar />
+
+    <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-rose-900/60">
         <div>
           <h1 class="text-2xl md:text-3xl font-black text-amber-300 flex items-center space-x-2">
             <span>📋 Quadro de Missões Diárias</span>
           </h1>
-          <p class="text-xs md:text-sm text-slate-400">Cumpra suas tarefas no mundo real e ganhe XP e Ouro para o seu herói!</p>
+          <p class="text-xs md:text-sm text-blue-200">Cumpra suas tarefas no mundo real e ganhe XP e Ouro para o seu herói!</p>
         </div>
-      </div>
 
-      <!-- Personagem Ativo -->
-      <div v-if="activeCharacter" class="flex items-center space-x-3 bg-slate-900 border border-slate-800 px-4 py-2 rounded-2xl">
-        <img :src="activeCharacter.avatarUrl" class="w-10 h-10 rounded-xl object-cover border border-amber-500/40" />
-        <div>
-          <p class="text-xs font-bold text-slate-200">{{ activeCharacter.name }}</p>
-          <p class="text-[11px] text-amber-400 font-semibold">Nv. {{ activeCharacter.level }} • 🪙 {{ activeCharacter.gold }} Ouro</p>
+        <!-- Personagem Ativo -->
+        <div v-if="activeCharacter" class="flex items-center space-x-3 bg-gradient-to-r from-rose-950 to-blue-950 border border-amber-500/40 px-4 py-2 rounded-2xl shadow-lg">
+          <img :src="activeCharacter.avatarUrl" class="w-10 h-10 rounded-xl object-cover border border-amber-400" />
+          <div>
+            <p class="text-xs font-bold text-slate-200">{{ activeCharacter.name }}</p>
+            <p class="text-[11px] text-amber-400 font-semibold">Nv. {{ activeCharacter.level }} • 🪙 {{ activeCharacter.gold }} Ouro</p>
+          </div>
         </div>
       </div>
-    </div>
 
     <!-- Filtros de Categoria -->
     <div class="max-w-5xl mx-auto my-6 flex flex-wrap gap-2">
@@ -98,11 +96,13 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import FamilyNavbar from '../../components/family/FamilyNavbar.vue';
 import { familyApi } from '../../services/familyApi';
 import confetti from 'canvas-confetti';
 

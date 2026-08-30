@@ -1,26 +1,17 @@
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans">
-    <!-- Header -->
-    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800">
-      <div class="flex items-center space-x-4">
-        <router-link to="/familia/sala" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors">
-          ➔
-        </router-link>
+  <div class="min-h-screen bg-gradient-to-b from-[#180309] via-[#0d0a1a] to-[#040e24] text-slate-100 font-sans pb-12">
+    <FamilyNavbar />
+
+    <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-rose-900/60">
         <div>
-          <h1 class="text-2xl md:text-3xl font-black text-purple-400 flex items-center space-x-2">
+          <h1 class="text-2xl md:text-3xl font-black text-amber-300 flex items-center space-x-2">
             <span>👑 Painel dos Pais (Mestre da Família)</span>
           </h1>
-          <p class="text-xs md:text-sm text-slate-400">Gerencie a evolução dos heróis, aprove tarefas com 1 clique e crie novas missões.</p>
+          <p class="text-xs md:text-sm text-blue-200">Gerencie a evolução dos heróis, aprove tarefas com 1 clique e crie novas missões.</p>
         </div>
       </div>
-
-      <router-link
-        to="/mestre"
-        class="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold px-4 py-2 rounded-xl text-slate-300 transition-colors"
-      >
-        🦇 Ir ao GM Studio de Nocturna
-      </router-link>
-    </div>
 
     <!-- Seção 1: Tarefas Pendentes de Aprovação -->
     <section class="max-w-5xl mx-auto my-8">
@@ -190,11 +181,13 @@
         </div>
       </div>
     </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import FamilyNavbar from '../../components/family/FamilyNavbar.vue';
 import { familyApi } from '../../services/familyApi';
 import confetti from 'canvas-confetti';
 

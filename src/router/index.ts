@@ -24,6 +24,11 @@ import FamilyTasksView from '../views/family/FamilyTasksView.vue'
 import FamilyBattleView from '../views/family/FamilyBattleView.vue'
 import FamilyShopView from '../views/family/FamilyShopView.vue'
 import FamilyMasterView from '../views/family/FamilyMasterView.vue'
+import FamilyHeroSheetView from '../views/family/FamilyHeroSheetView.vue'
+import FamilyKingdomRadarView from '../views/family/FamilyKingdomRadarView.vue'
+import FamilyActiveMissionView from '../views/family/FamilyActiveMissionView.vue'
+import FamilyAdventuresView from '../views/family/FamilyAdventuresView.vue'
+import FamilyFeedView from '../views/family/FamilyFeedView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -178,6 +183,36 @@ const routes: Array<RouteRecordRaw> = [
     path: '/familia/mestre',
     name: 'family-master',
     component: FamilyMasterView,
+    meta: { requiresAuth: true, role: 'LIRA' }
+  },
+  {
+    path: '/familia/ficha',
+    name: 'family-hero-sheet',
+    component: FamilyHeroSheetView,
+    meta: { requiresAuth: true, role: 'LIRA' }
+  },
+  {
+    path: '/familia/radar',
+    name: 'family-kingdom-radar',
+    component: FamilyKingdomRadarView,
+    meta: { requiresAuth: true, role: 'LIRA' }
+  },
+  {
+    path: '/familia/missao-ativa',
+    name: 'family-active-mission',
+    component: FamilyActiveMissionView,
+    meta: { requiresAuth: true, role: 'LIRA' }
+  },
+  {
+    path: '/familia/aventuras',
+    name: 'family-adventures',
+    component: FamilyAdventuresView,
+    meta: { requiresAuth: true, role: 'LIRA' }
+  },
+  {
+    path: '/familia/mural',
+    name: 'family-feed',
+    component: FamilyFeedView,
     meta: { requiresAuth: true, role: 'LIRA' }
   }
 ]

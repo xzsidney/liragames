@@ -46,6 +46,16 @@ export const familyApi = {
     return res.json();
   },
 
+  async updateCharacterStats(characterId: string, attribute: string) {
+    const res = await fetch(`${API_URL}/api/family/character/update-stats`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ characterId, attribute }),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
   // Tarefas da Casa
   async getTasks(characterId?: string) {
     const query = characterId ? `?characterId=${characterId}` : '';
@@ -82,6 +92,65 @@ export const familyApi = {
       body: JSON.stringify({ characterId, itemId }),
       credentials: 'omit',
     });
+    return res.json();
+  },
+
+  // Radar da Casa & Vizinhança
+  async getLocations() {
+    const res = await fetch(`${API_URL}/api/family/locations`, { headers: getHeaders(), credentials: 'omit' });
+    return res.json();
+  },
+
+  // Missão Ativa & Foco
+  async startActiveMission(data: { characterId: string; title: string; category?: string; durationMinutes: number; rewardXp?: number; rewardGold?: number }) {
+    const res = await fetch(`${API_URL}/api/family/missions/start`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
+  async getCurrentActiveMission(characterId: string) {
+    const res = await fetch(`${API_URL}/api/family/missions/current?characterId=${characterId}`, { headers: getHeaders(), credentials: 'omit' });
+    return res.json();
+  },
+
+  async completeActiveMission(missionId: string) {
+    const res = await fetch(`${API_URL}/api/family/missions/complete`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ missionId }),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
+  // Contos & Livro-Jogo Solo
+  async getStoryAdventures() {
+    const res = await fetch(`${API_URL}/api/family/stories`, { headers: getHeaders(), credentials: 'omit' });
+    return res.json();
+  },
+
+  async getStoryNode(adventureId: string, nodeId: string) {
+    const res = await fetch(`${API_URL}/api/family/stories/${adventureId}/node/${nodeId}`, { headers: getHeaders(), credentials: 'omit' });
+    return res.json();
+  },
+
+  async executeStoryChoice(characterId: string, choiceId: string) {
+    const res = await fetch(`${API_URL}/api/family/stories/choice`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ characterId, choiceId }),
+      credentials: 'omit',
+    });
+    return res.json();
+  },
+
+  // Mural do Clã & Conquistas
+  async getFamilyFeed() {
+    const res = await fetch(`${API_URL}/api/family/feed`, { headers: getHeaders(), credentials: 'omit' });
     return res.json();
   },
 
