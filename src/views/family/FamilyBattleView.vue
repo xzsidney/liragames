@@ -486,7 +486,7 @@
     </div>
 
     <!-- Modal de Vitória Arcade -->
-    <div v-if="battle?.status === 'VICTORY'" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div v-if="battleState === 'BATTLE' && battle?.status === 'VICTORY'" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <div class="bg-gradient-to-b from-slate-900 via-[#1c1206] to-amber-950 border-2 border-amber-400 p-8 rounded-3xl max-w-md w-full text-center shadow-2xl space-y-5 animate-bounce">
         <div class="text-6xl">🏆</div>
         <h2 class="text-3xl font-black text-amber-300">K.O. - VITÓRIA ÉPICA!</h2>
@@ -505,12 +505,21 @@
           </div>
         </div>
 
-        <button
-          @click="resetToLobby"
-          class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl shadow-amber-500/20 transition-all active:scale-95 cursor-pointer"
-        >
-          Jogar Novamente / Voltar ao Lobby
-        </button>
+        <div class="space-y-2">
+          <button
+            @click="resetToLobby"
+            class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl shadow-amber-500/20 transition-all active:scale-95 cursor-pointer"
+          >
+            ⚔️ Jogar Novamente / Voltar ao Lobby
+          </button>
+
+          <router-link
+            to="/familia/sala"
+            class="block w-full bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-bold py-3 px-6 rounded-2xl text-center text-xs transition-all active:scale-95"
+          >
+            🏠 Voltar ao Salão da Família
+          </router-link>
+        </div>
       </div>
     </div>
 
@@ -822,9 +831,15 @@ function startPartyBattleGroup() {
 
 function resetToLobby() {
   battleState.value = 'LOBBY';
+  battle.value = null;
+  heroTookHit.value = false;
+  monsterHit.value = false;
+  heroSpriteState.value = 'idle';
+  monsterSpriteState.value = 'idle';
   if (activeCharacter.value) {
     createPartyLobby(activeCharacter.value);
   }
+  loadData();
 }
 
 async function loadData() {
