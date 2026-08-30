@@ -128,7 +128,7 @@
                 <div>
                   <button
                     v-if="!isInParty(hero.id)"
-                    @click="addHeroToParty(hero)"
+                    @click="inviteHeroToParty(hero)"
                     class="bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-black text-[11px] px-3 py-1.5 rounded-xl shadow transition-all cursor-pointer"
                   >
                     + Convidar
@@ -342,7 +342,7 @@ import {
   getFamilySocket,
   joinFamilyRoom,
   createPartyLobby,
-  joinPartyLobby,
+  sendPartyInvite,
   startPartyBattle,
   sendFamilyBattleAction,
   activePartyLobby,
@@ -400,8 +400,10 @@ function isInParty(characterId: string) {
   return activePartyLobby.value.some((p: any) => p.characterId === characterId);
 }
 
-function addHeroToParty(hero: any) {
-  joinPartyLobby(hero);
+function inviteHeroToParty(hero: any) {
+  if (!activeCharacter.value) return;
+  sendPartyInvite(activeCharacter.value.name, activeCharacter.value.id, 'O Golem da Bagunça');
+  alert(`📨 Convite de Raid enviado para ${hero.name}! Um alerta foi exibido na tela dele para aceitar.`);
 }
 
 function startRaidBattle() {
