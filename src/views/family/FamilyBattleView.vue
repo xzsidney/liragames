@@ -286,39 +286,47 @@
           <!-- PALCO 2D COM OS SPRITES / AVATARES DOS LUTADORES -->
           <div class="relative w-full h-44 md:h-52 my-auto flex items-end">
             
-            <!-- Herói na Arena 2D -->
+            <!-- Herói Animado com Sprites MUGEN (Kenshin / Classe) -->
             <div
-              class="absolute bottom-2 transition-all duration-500 ease-out flex flex-col items-center"
-              :style="{ left: `${(heroGridPos / 9) * 85 + 4}%` }"
+              class="absolute bottom-1 transition-all duration-500 ease-out flex flex-col items-center z-20"
+              :style="{ left: `${(heroGridPos / 9) * 82 + 3}%` }"
             >
               <!-- Balão de Dano Flutuante -->
               <span v-if="heroTookHit" class="text-xl md:text-2xl font-black text-rose-500 animate-bounce mb-1 drop-shadow-lg">
                 -{{ lastDamageTaken }} HP!
               </span>
 
-              <div :class="['w-16 h-20 md:w-20 md:h-24 rounded-2xl overflow-hidden border-2 border-amber-400 shadow-2xl bg-slate-900 transition-transform duration-300', isMyTurn ? 'animate-pulse scale-105' : '']">
-                <img :src="getDisplayImageUrl(activeCharacter?.avatarUrl)" class="w-full h-full object-cover" />
-              </div>
+              <SpriteFighter
+                character="kenshin"
+                :state="heroSpriteState"
+                :flip="false"
+                :scale="1.35"
+              />
+
               <span class="bg-amber-500 text-slate-950 font-black text-[9px] md:text-[10px] px-2 py-0.5 rounded-full mt-1 shadow">
                 {{ activeCharacter?.name }} [{{ heroGridPos }}]
               </span>
             </div>
 
-            <!-- Monstro na Arena 2D -->
+            <!-- Monstro Animado com Sprites MUGEN (Colossus) -->
             <div
-              class="absolute bottom-2 transition-all duration-500 ease-out flex flex-col items-center"
-              :style="{ left: `${(monsterGridPos / 9) * 85 + 4}%` }"
+              class="absolute bottom-1 transition-all duration-500 ease-out flex flex-col items-center z-20"
+              :style="{ left: `${(monsterGridPos / 9) * 82 + 3}%` }"
             >
               <!-- Balão de Dano Flutuante -->
               <span v-if="monsterHit" class="text-xl md:text-2xl font-black text-yellow-300 animate-bounce mb-1 drop-shadow-lg">
                 HIT!
               </span>
 
-              <div :class="['w-20 h-24 md:w-28 md:h-32 rounded-2xl overflow-hidden border-2 border-rose-500 shadow-2xl bg-slate-900 transition-transform duration-300', monsterHit ? 'scale-90 brightness-150 rotate-3' : '']">
-                <img :src="battle.monsterAvatar || monsterInfo.avatar" class="w-full h-full object-cover" />
-              </div>
+              <SpriteFighter
+                character="colossus"
+                :state="monsterSpriteState"
+                :flip="true"
+                :scale="1.45"
+              />
+
               <span class="bg-rose-600 text-white font-black text-[9px] md:text-[10px] px-2 py-0.5 rounded-full mt-1 shadow">
-                {{ battle.monsterName }} [{{ monsterGridPos }}]
+                Colossus [{{ monsterGridPos }}]
               </span>
             </div>
 
@@ -577,6 +585,7 @@ import {
   sendFamilyBattleAction,
 } from '../../services/familySocket';
 import confetti from 'canvas-confetti';
+import SpriteFighter from '../../components/family/SpriteFighter.vue';
 
 const battle = ref<any>(null);
 const members = ref<any[]>([]);
@@ -587,6 +596,9 @@ const heroTookHit = ref<boolean>(false);
 const lastDamageTaken = ref<number>(15);
 const battleState = ref<'LOBBY' | 'BATTLE'>('LOBBY');
 const showInfirmaryModal = ref<boolean>(false);
+
+const heroSpriteState = ref<'idle' | 'walk' | 'attack' | 'hit'>('idle');
+const monsterSpriteState = ref<'idle' | 'walk' | 'attack' | 'hit'>('idle');
 
 const infirmarySecondsLeft = ref<number>(0);
 let timerInterval: any = null;
@@ -839,8 +851,18 @@ function executeTurnAction(actionType: 'ATTACK' | 'DEFEND') {
     return;
   }
 
-  monsterHit.value = true;
-  setTimeout(() => { monsterHit.value = false; }, 600);
+  if (actionType === 'ATTACK') {
+    heroSpriteState.value = 'attack';
+    setTimeout(() => {
+      heroSpriteState.value = 'idle';
+      monsterHit.value = true;
+      monsterSpriteState.value = 'hit';
+      setTimeout(() => {
+        monsterHit.value = false;
+        monsterSpriteState.value = 'idle';
+      }, 600);
+    }, 400);
+  }
 
   sendFamilyBattleAction(
     battle.value.id,
@@ -859,8 +881,16 @@ function executeTurnSkill(skill: any) {
     return;
   }
 
-  monsterHit.value = true;
-  setTimeout(() => { monsterHit.value = false; }, 600);
+  heroSpriteState.value = 'attack';
+  setTimeout(() => {
+    heroSpriteState.value = 'idle';
+    monsterHit.value = true;
+    monsterSpriteState.value = 'hit';
+    setTimeout(() => {
+      monsterHit.value = false;
+      monsterSpriteState.value = 'idle';
+    }, 600);
+  }, 400);
 
   sendFamilyBattleAction(
     battle.value.id,
@@ -887,6 +917,7 @@ onMounted(() => {
       activeCharacter.value.hpCurrent = 0;
       activeCharacter.value.inInfirmaryUntil = data.inInfirmaryUntil;
       heroTookHit.value = true;
+      heroSpriteState.value = 'hit';
       showInfirmaryModal.value = true;
       updateInfirmaryCountdown();
     }
@@ -906,8 +937,25 @@ onMounted(() => {
   socket.on('family:battle_updated', (data: any) => {
     battle.value = data.battle;
     battleState.value = 'BATTLE';
-    monsterHit.value = true;
-    setTimeout(() => { monsterHit.value = false; }, 500);
+
+    if (data.lastAction) {
+      const act = data.lastAction;
+      if (act.includes('contra-atacou') || act.includes('golpeou') || act.includes('foi atingido')) {
+        monsterSpriteState.value = 'attack';
+        setTimeout(() => {
+          monsterSpriteState.value = 'idle';
+          heroTookHit.value = true;
+          heroSpriteState.value = 'hit';
+          setTimeout(() => {
+            heroTookHit.value = false;
+            heroSpriteState.value = 'idle';
+          }, 600);
+        }, 350);
+      } else if (act.includes('avançou')) {
+        monsterSpriteState.value = 'walk';
+        setTimeout(() => { monsterSpriteState.value = 'idle'; }, 600);
+      }
+    }
 
     if (data.characters) {
       members.value = data.characters;
