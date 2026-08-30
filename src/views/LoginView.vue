@@ -47,7 +47,9 @@ const handleLogin = async () => {
     successMessage.value = 'Login realizado com sucesso! Redirecionando...'
     
     // Redirecionamento por Perfil (Role)
-    if (user && user.role === 'MESTRE') {
+    if (user && user.role === 'LIRA') {
+      router.push('/familia/sala')
+    } else if (user && user.role === 'MESTRE') {
       router.push('/mestre')
     } else {
       router.push('/dashboard')
@@ -77,17 +79,18 @@ const handleRegister = async () => {
 
   try {
     await api.post('/api/auth/register', {
+      name: registerForm.value.name,
       username: registerForm.value.name,
       email: registerForm.value.email,
       password: registerForm.value.password
     })
     
-    successMessage.value = 'Conta criada com sucesso! Você já pode acessar a noite.'
+    successMessage.value = 'Conta criada com sucesso! Você já pode entrar.'
     activeTab.value = 'login' // Muda para a aba de login
     
   } catch (error: any) {
     if (error.response && error.response.data) {
-      errorMessage.value = error.response.data.message || 'Erro ao criar conta. Email pode já estar em uso.'
+      errorMessage.value = error.response.data.message || error.response.data.error || 'Erro ao criar conta.'
     } else {
       errorMessage.value = 'Erro ao conectar com o servidor.'
     }
