@@ -19,18 +19,6 @@ import CharacterActiveMissionView from '../views/CharacterActiveMissionView.vue'
 import CharacterHotelShelterView from '../views/CharacterHotelShelterView.vue'
 import CharacterSewerShelterView from '../views/CharacterSewerShelterView.vue'
 import CharacterHavenView from '../views/CharacterHavenView.vue'
-import FamilyPartyRoomView from '../views/family/FamilyPartyRoomView.vue'
-import FamilyTasksView from '../views/family/FamilyTasksView.vue'
-import FamilyBattleView from '../views/family/FamilyBattleView.vue'
-import FamilyShopView from '../views/family/FamilyShopView.vue'
-import FamilyMasterView from '../views/family/FamilyMasterView.vue'
-import FamilyHeroSheetView from '../views/family/FamilyHeroSheetView.vue'
-import FamilyKingdomRadarView from '../views/family/FamilyKingdomRadarView.vue'
-import FamilyActiveMissionView from '../views/family/FamilyActiveMissionView.vue'
-import FamilyAdventuresView from '../views/family/FamilyAdventuresView.vue'
-import FamilyFeedView from '../views/family/FamilyFeedView.vue'
-import FamilyInfirmaryView from '../views/family/FamilyInfirmaryView.vue'
-import FamilyRaidView from '../views/family/FamilyRaidView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -61,34 +49,45 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true, role: 'MESTRE' }
   },
   {
-    path: '/jogador/vampire',
+    path: '/vampiro',
     name: 'vampire-dashboard',
     component: VampireDashboardView,
     meta: { requiresAuth: true }
   },
   {
-    path: '/jogador/vampire/novo',
-    name: 'vampire-create',
+    path: '/personagem/criar-vampiro',
+    name: 'character-vampire-create',
     component: CharacterVampireCreateView,
     meta: { requiresAuth: true }
   },
-  // NÍVEL DO PERSONAGEM (JOGABILIDADE ATIVA)
   {
     path: '/personagem/hub',
-    name: 'CharacterHub',
+    name: 'character-hub',
     component: CharacterHubView,
     meta: { requiresAuth: true }
   },
   {
     path: '/personagem/radar',
-    name: 'RadarNocturna',
+    name: 'radar-nocturna',
     component: RadarNocturnaView,
     meta: { requiresAuth: true }
   },
   {
-    path: '/personagem/cacada',
-    name: 'CharacterHunting',
-    component: CharacterHuntingView,
+    path: '/personagem/hotel-shelter',
+    name: 'character-hotel-shelter',
+    component: CharacterHotelShelterView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/personagem/sewer-shelter',
+    name: 'character-sewer-shelter',
+    component: CharacterSewerShelterView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/personagem/haven',
+    name: 'character-haven',
+    component: CharacterHavenView,
     meta: { requiresAuth: true }
   },
   {
@@ -98,33 +97,15 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/personagem/abrigo-hotel',
-    name: 'character-hotel-shelter',
-    component: CharacterHotelShelterView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/personagem/abrigo-esgoto',
-    name: 'character-sewer-shelter',
-    component: CharacterSewerShelterView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/personagem/refugio',
-    name: 'character-haven',
-    component: CharacterHavenView,
+    path: '/personagem/cacada',
+    name: 'character-hunting',
+    component: CharacterHuntingView,
     meta: { requiresAuth: true }
   },
   {
     path: '/personagem/ficha',
     name: 'character-sheet',
     component: CharacterSheetView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/personagem/inventario',
-    name: 'character-inventory',
-    component: CharacterInventoryStoreView,
     meta: { requiresAuth: true }
   },
   {
@@ -150,84 +131,6 @@ const routes: Array<RouteRecordRaw> = [
     name: 'character-visual-novel',
     component: CharacterVisualNovelView,
     meta: { requiresAuth: true }
-  },
-  // JOGO DA FAMÍLIA LIRA (MULTIPLAYER REAL-TIME - EXCLUSIVO ROLE LIRA)
-  {
-    path: '/familia',
-    redirect: '/familia/sala',
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/sala',
-    name: 'family-party-room',
-    component: FamilyPartyRoomView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/tarefas',
-    name: 'family-tasks',
-    component: FamilyTasksView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/batalha',
-    name: 'family-battle',
-    component: FamilyBattleView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/loja',
-    name: 'family-shop',
-    component: FamilyShopView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/mestre',
-    name: 'family-master',
-    component: FamilyMasterView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/ficha',
-    name: 'family-hero-sheet',
-    component: FamilyHeroSheetView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/radar',
-    name: 'family-kingdom-radar',
-    component: FamilyKingdomRadarView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/missao-ativa',
-    name: 'family-active-mission',
-    component: FamilyActiveMissionView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/aventuras',
-    name: 'family-adventures',
-    component: FamilyAdventuresView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/mural',
-    name: 'family-feed',
-    component: FamilyFeedView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/enfermaria',
-    name: 'family-infirmary',
-    component: FamilyInfirmaryView,
-    meta: { requiresAuth: true, role: 'LIRA' }
-  },
-  {
-    path: '/familia/raid',
-    name: 'family-raid',
-    component: FamilyRaidView,
-    meta: { requiresAuth: true, role: 'LIRA' }
   }
 ]
 
@@ -259,10 +162,6 @@ router.beforeEach((to) => {
     if (!token || !user) {
       return { name: 'login' }
     }
-    // Rota exclusiva da Família Lira: se não for LIRA, vai para login
-    if (to.meta.role === 'LIRA' && user.role !== 'LIRA') {
-      return { name: 'login' }
-    }
     if (to.meta.role === 'MESTRE' && user.role !== 'MESTRE') {
       return { name: 'dashboard' }
     }
@@ -270,9 +169,7 @@ router.beforeEach((to) => {
 
   // 3. Se já estiver autenticado e tentar acessar login, envia para a sua respectiva tela
   if (to.name === 'login' && token) {
-    if (user && user.role === 'LIRA') {
-      return { name: 'family-party-room' }
-    } else if (user && user.role === 'MESTRE') {
+    if (user && user.role === 'MESTRE') {
       return { name: 'gm-dashboard' }
     } else {
       return { name: 'dashboard' }
@@ -283,4 +180,3 @@ router.beforeEach((to) => {
 })
 
 export default router
-
