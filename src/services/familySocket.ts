@@ -83,6 +83,10 @@ export function acceptPartyInvite(character: any) {
   incomingBattleInvite.value = null;
 }
 
+export function joinPartyLobby(character: any) {
+  acceptPartyInvite(character);
+}
+
 export function leavePartyLobby(characterId: string) {
   const s = getFamilySocket();
   s.emit('family:leave_party_lobby', { characterId });

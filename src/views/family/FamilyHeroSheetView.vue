@@ -490,7 +490,7 @@
             <p class="text-xs font-bold text-slate-300 mb-3">
               Selecione o lutador com animações originais de fliperama para lutar na Arena:
             </p>
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
               
               <!-- Capitão América -->
               <div
@@ -505,6 +505,21 @@
                 </div>
                 <span class="text-xs font-black text-slate-100">Capitão América</span>
                 <span class="text-[9px] text-amber-300 font-bold">MUGEN Arcade</span>
+              </div>
+
+              <!-- Homem-Aranha -->
+              <div
+                @click="selectMugenFighter('spiderman')"
+                :class="[
+                  'p-3 rounded-2xl border flex flex-col items-center justify-center text-center cursor-pointer transition-all hover:scale-105',
+                  hero?.avatarUrl === 'sprite:spiderman' ? 'bg-red-500/20 border-red-400 shadow-lg shadow-red-500/20' : 'bg-slate-950/80 border-slate-800 hover:border-slate-600'
+                ]"
+              >
+                <div class="w-16 h-16 rounded-xl overflow-hidden mb-2 bg-slate-900 border border-slate-700 flex items-center justify-center">
+                  <img src="/sprites/spiderman/0-0.png" class="h-full object-contain" style="image-rendering: pixelated;" />
+                </div>
+                <span class="text-xs font-black text-slate-100">Homem-Aranha</span>
+                <span class="text-[9px] text-red-400 font-bold">MUGEN Arcade</span>
               </div>
 
               <!-- Kenshin Himura -->

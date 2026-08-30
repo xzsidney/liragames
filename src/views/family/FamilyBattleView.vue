@@ -414,50 +414,80 @@
               </div>
             </div>
 
-            <!-- FASE 2: AÇÕES DE COMBATE / HABILIDADES COM ALCANCE -->
+            <!-- FASE 2: AÇÕES DE COMBATE / GOLPES MUGEN & HABILIDADES -->
             <div class="space-y-3">
-              <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300 block">
-                2. Execute o Golpe ou Habilidade:
-              </span>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300 block">
+                  2. Escolha o Golpe ou Habilidade:
+                </span>
+                <span class="text-[11px] font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded-lg border border-amber-500/30">
+                  Distância: {{ currentDistance }} {{ currentDistance === 1 ? 'Casa (Lado a Lado)' : 'Casas' }}
+                </span>
+              </div>
 
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
                 
-                <!-- Ataque Físico Básico -->
+                <!-- 1. Soco / Golpe Rápido -->
                 <button
-                  :disabled="!isMyTurn || (activeCharacter?.characterClass !== 'ARQUEIRO' && currentDistance > 1)"
-                  @click="executeTurnAction('ATTACK')"
-                  class="bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3 px-3 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-rose-500/40"
+                  :disabled="!isMyTurn || currentDistance > 1"
+                  @click="executeMugenAttack('LIGHT')"
+                  class="bg-gradient-to-r from-orange-700 to-amber-600 hover:from-orange-600 hover:to-amber-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs py-2.5 px-2 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-orange-500/40"
                 >
-                  <span class="text-2xl">⚔️</span>
-                  <span>Ataque Básico</span>
-                  <span v-if="activeCharacter?.characterClass !== 'ARQUEIRO' && currentDistance > 1" class="text-[9px] text-amber-300">Requer Lado a Lado</span>
-                  <span v-else class="text-[9px] text-rose-200">Golpe Físico</span>
+                  <span class="text-xl">👊</span>
+                  <span>Golpe Rápido</span>
+                  <span v-if="currentDistance > 1" class="text-[9px] text-amber-200">Requer Lado a Lado</span>
+                  <span v-else class="text-[9px] text-orange-200 font-bold">1x Dano Físico</span>
                 </button>
 
-                <!-- Habilidades Equipadas da Build da Classe -->
+                <!-- 2. Golpe Forte / Escudo Pesado -->
+                <button
+                  :disabled="!isMyTurn || currentDistance > 1"
+                  @click="executeMugenAttack('HEAVY')"
+                  class="bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs py-2.5 px-2 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-rose-500/40"
+                >
+                  <span class="text-xl">💥</span>
+                  <span>Golpe Forte</span>
+                  <span v-if="currentDistance > 1" class="text-[9px] text-amber-200">Requer Lado a Lado</span>
+                  <span v-else class="text-[9px] text-rose-200 font-bold">1.5x Dano Crítico</span>
+                </button>
+
+                <!-- 3. Disparo / Teia / Ataque à Distância -->
+                <button
+                  :disabled="!isMyTurn || currentDistance < 2"
+                  @click="executeMugenAttack('RANGED')"
+                  class="bg-gradient-to-r from-teal-700 to-emerald-600 hover:from-teal-600 hover:to-emerald-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs py-2.5 px-2 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-teal-400/40"
+                >
+                  <span class="text-xl">🕸️</span>
+                  <span>Ataque à Distância</span>
+                  <span v-if="currentDistance < 2" class="text-[9px] text-teal-200">Requer Distância (2+)</span>
+                  <span v-else class="text-[9px] text-emerald-200 font-bold">Projétil / Teia / Tiro</span>
+                </button>
+
+                <!-- 4. Postura Defensiva -->
+                <button
+                  :disabled="!isMyTurn"
+                  @click="executeTurnAction('DEFEND')"
+                  class="bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs py-2.5 px-2 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-blue-400/40"
+                >
+                  <span class="text-xl">🛡️</span>
+                  <span>Defender</span>
+                  <span class="text-[9px] text-blue-200 font-bold">-50% Dano +5 MP</span>
+                </button>
+
+                <!-- 5. Habilidades Equipadas da Build da Classe -->
                 <button
                   v-for="skill in equippedSkills"
                   :key="skill.id"
                   :disabled="!isMyTurn || isSkillOutOfRange(skill)"
                   @click="executeTurnSkill(skill)"
-                  class="bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 disabled:opacity-30 disabled:cursor-not-allowed text-slate-950 font-black text-xs md:text-sm py-3 px-3 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-amber-300"
+                  class="bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 disabled:opacity-30 disabled:cursor-not-allowed text-slate-950 font-black text-xs py-2.5 px-2 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-amber-300 col-span-2 md:col-span-2"
                 >
-                  <span class="text-2xl">{{ skill.icon || '🔥' }}</span>
-                  <span class="truncate max-w-[120px]">{{ skill.name }}</span>
+                  <span class="text-xl">{{ skill.icon || '🔥' }}</span>
+                  <span class="truncate max-w-[180px]">{{ skill.name }}</span>
                   <span v-if="isSkillOutOfRange(skill)" class="text-[9px] text-red-950 font-bold">Muito Longe (Lado a Lado)</span>
-                  <span v-else class="text-[9px] text-slate-900 font-bold">Custo: {{ skill.costMp }} MP</span>
+                  <span v-else class="text-[9px] text-slate-900 font-bold">Magia Especial • {{ skill.costMp }} MP</span>
                 </button>
 
-                <!-- Postura Defensiva -->
-                <button
-                  :disabled="!isMyTurn"
-                  @click="executeTurnAction('DEFEND')"
-                  class="bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3 px-3 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-blue-400/40"
-                >
-                  <span class="text-2xl">🛡️</span>
-                  <span>Defender</span>
-                  <span class="text-[9px] text-blue-200">Reduz Dano</span>
-                </button>
               </div>
             </div>
 
@@ -866,6 +896,76 @@ async function loadData() {
     }
   } catch (error) {
     console.error('Erro ao carregar batalha:', error);
+  }
+}
+
+function executeMugenAttack(type: 'LIGHT' | 'HEAVY' | 'RANGED') {
+  if (!battle.value || !activeCharacter.value) return;
+  if (isHeroInInfirmary.value) {
+    showInfirmaryModal.value = true;
+    return;
+  }
+
+  if (type === 'LIGHT') {
+    heroSpriteState.value = 'attackLight';
+    setTimeout(() => {
+      heroSpriteState.value = 'idle';
+      monsterHit.value = true;
+      monsterSpriteState.value = 'hit';
+      setTimeout(() => {
+        monsterHit.value = false;
+        monsterSpriteState.value = 'idle';
+      }, 500);
+    }, 350);
+
+    sendFamilyBattleAction(
+      battle.value.id,
+      activeCharacter.value.id,
+      'ATTACK',
+      'Golpe Rápido',
+      undefined,
+      'STAY'
+    );
+  } else if (type === 'HEAVY') {
+    heroSpriteState.value = 'attackHeavy';
+    setTimeout(() => {
+      heroSpriteState.value = 'idle';
+      monsterHit.value = true;
+      monsterSpriteState.value = 'hit';
+      setTimeout(() => {
+        monsterHit.value = false;
+        monsterSpriteState.value = 'idle';
+      }, 600);
+    }, 450);
+
+    sendFamilyBattleAction(
+      battle.value.id,
+      activeCharacter.value.id,
+      'ATTACK',
+      'Golpe Forte',
+      undefined,
+      'STAY'
+    );
+  } else if (type === 'RANGED') {
+    heroSpriteState.value = 'special';
+    setTimeout(() => {
+      heroSpriteState.value = 'idle';
+      monsterHit.value = true;
+      monsterSpriteState.value = 'hit';
+      setTimeout(() => {
+        monsterHit.value = false;
+        monsterSpriteState.value = 'idle';
+      }, 600);
+    }, 550);
+
+    sendFamilyBattleAction(
+      battle.value.id,
+      activeCharacter.value.id,
+      'SKILL',
+      'Disparo à Distância',
+      'ranged_move',
+      'STAY'
+    );
   }
 }
 

@@ -30,6 +30,7 @@ import FamilyActiveMissionView from '../views/family/FamilyActiveMissionView.vue
 import FamilyAdventuresView from '../views/family/FamilyAdventuresView.vue'
 import FamilyFeedView from '../views/family/FamilyFeedView.vue'
 import FamilyInfirmaryView from '../views/family/FamilyInfirmaryView.vue'
+import FamilyRaidView from '../views/family/FamilyRaidView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -220,6 +221,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/familia/enfermaria',
     name: 'family-infirmary',
     component: FamilyInfirmaryView,
+    meta: { requiresAuth: true, role: 'LIRA' }
+  },
+  {
+    path: '/familia/raid',
+    name: 'family-raid',
+    component: FamilyRaidView,
     meta: { requiresAuth: true, role: 'LIRA' }
   }
 ]
