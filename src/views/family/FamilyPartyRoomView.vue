@@ -1,5 +1,39 @@
 <template>
   <div class="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans selection:bg-amber-500 selection:text-slate-950 relative overflow-hidden">
+    <!-- Modal de Convite de Batalha Recebido em Tempo Real -->
+    <transition name="slide-down">
+      <div 
+        v-if="incomingBattleInvite && incomingBattleInvite.leaderId !== activeCharacter?.id"
+        class="fixed top-6 left-1/2 -translate-x-1/2 z-50 max-w-lg w-full px-4"
+      >
+        <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 border-2 border-purple-400 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-bounce">
+          <div class="flex items-center space-x-3">
+            <span class="text-3xl">⚔️</span>
+            <div>
+              <p class="text-xs font-extrabold uppercase tracking-wider text-purple-300">Convite de Batalha!</p>
+              <p class="text-sm font-bold text-slate-100">
+                <strong>{{ incomingBattleInvite.leaderName }}</strong> te chamou para enfrentar <em>{{ incomingBattleInvite.monsterName }}</em>!
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button
+              @click="acceptInviteAndGo"
+              class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition-all active:scale-95"
+            >
+              Aceitar!
+            </button>
+            <button
+              @click="incomingBattleInvite = null"
+              class="text-slate-400 hover:text-slate-200 text-xs px-2 py-1"
+            >
+              Recusar
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
     <!-- Emojis Flutuantes em Tempo Real -->
     <div class="fixed inset-0 pointer-events-none z-50 overflow-hidden">
       <transition-group name="float-up">
@@ -292,11 +326,28 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { familyApi } from '../../services/familyApi';
-import { joinFamilyRoom, sendFamilyReaction, floatingReactions, familyAlerts, onlineFamilyMembers } from '../../services/familySocket';
+import { 
+  joinFamilyRoom, 
+  sendFamilyReaction, 
+  floatingReactions, 
+  familyAlerts, 
+  onlineFamilyMembers,
+  incomingBattleInvite,
+  acceptPartyInvite
+} from '../../services/familySocket';
 
+const router = useRouter();
 const members = ref<any[]>([]);
 const selectedCharacterId = ref<string>('');
+
+function acceptInviteAndGo() {
+  if (activeCharacter.value) {
+    acceptPartyInvite(activeCharacter.value);
+    router.push('/familia/batalha');
+  }
+}
 
 const activeCharacter = computed(() => {
   return members.value.find(m => m.id === selectedCharacterId.value) || members.value[0];

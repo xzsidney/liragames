@@ -1,6 +1,41 @@
 <template>
   <div class="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans relative overflow-hidden">
-    <!-- Header -->
+    
+    <!-- Modal / Toast de Convite de Batalha Recebido -->
+    <transition name="slide-down">
+      <div 
+        v-if="incomingBattleInvite && incomingBattleInvite.leaderId !== activeCharacter?.id"
+        class="fixed top-6 left-1/2 -translate-x-1/2 z-50 max-w-lg w-full px-4"
+      >
+        <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 border-2 border-purple-400 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-bounce">
+          <div class="flex items-center space-x-3">
+            <span class="text-3xl">⚔️</span>
+            <div>
+              <p class="text-xs font-extrabold uppercase tracking-wider text-purple-300">Convite de Batalha!</p>
+              <p class="text-sm font-bold text-slate-100">
+                <strong>{{ incomingBattleInvite.leaderName }}</strong> te chamou para enfrentar <em>{{ incomingBattleInvite.monsterName }}</em>!
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button
+              @click="acceptInvite"
+              class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition-all active:scale-95"
+            >
+              Aceitar!
+            </button>
+            <button
+              @click="incomingBattleInvite = null"
+              class="text-slate-400 hover:text-slate-200 text-xs px-2 py-1"
+            >
+              Recusar
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Header Principal -->
     <div class="max-w-5xl mx-auto flex items-center justify-between pb-6 border-b border-slate-800">
       <div class="flex items-center space-x-4">
         <router-link to="/familia/sala" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors">
@@ -10,18 +45,171 @@
           <h1 class="text-2xl md:text-3xl font-black text-rose-400 flex items-center space-x-2">
             <span>⚔️ Arena de Batalha da Família</span>
           </h1>
-          <p class="text-xs md:text-sm text-slate-400">Combate cooperativo em turnos sincronizado ao vivo!</p>
+          <p class="text-xs md:text-sm text-slate-400">Jogue Solo ou convide os membros online para lutar em grupo!</p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-2 bg-rose-500/10 border border-rose-500/30 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-300">
-        <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-        <span>Ao Vivo</span>
+      <div class="flex items-center space-x-3">
+        <!-- Indicador de Herói Ativo -->
+        <div v-if="activeCharacter" class="flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
+          <img :src="activeCharacter.avatarUrl" class="w-6 h-6 rounded-lg object-cover" />
+          <span class="font-bold text-amber-300">{{ activeCharacter.name }}</span>
+        </div>
+        <div class="flex items-center space-x-2 bg-rose-500/10 border border-rose-500/30 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-300">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          <span>Ao Vivo</span>
+        </div>
       </div>
     </div>
 
-    <!-- Arena Central -->
-    <div v-if="battle" class="max-w-5xl mx-auto my-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- ========================================================================= -->
+    <!-- ESTADO 1: LOBBY DE FORMAÇÃO DO GRUPO (ANTES DE INICIAR A LUTA) -->
+    <!-- ========================================================================= -->
+    <div v-if="battleState === 'LOBBY'" class="max-w-5xl mx-auto my-8 space-y-6">
+      
+      <!-- Card de Apresentação do Chefe -->
+      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-rose-950/40 border-2 border-rose-500/40 rounded-3xl p-6 text-center relative overflow-hidden shadow-2xl">
+        <div class="w-28 h-28 md:w-36 md:h-36 mx-auto rounded-3xl overflow-hidden border-4 border-rose-500 shadow-2xl shadow-rose-500/30 mb-4 bg-slate-800">
+          <img :src="monsterInfo.avatar" :alt="monsterInfo.name" class="w-full h-full object-cover" />
+        </div>
+        <span class="text-xs font-extrabold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20 mb-2 inline-block">
+          Chefe da Masmorra
+        </span>
+        <h2 class="text-2xl md:text-3xl font-black text-slate-100">{{ monsterInfo.name }}</h2>
+        <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">{{ monsterInfo.description }}</p>
+      </div>
+
+      <!-- Área de Formação de Grupo -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Coluna 1: Membros no Grupo Atual -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-black text-slate-200 flex items-center space-x-2">
+                <span>🛡️ Heróis Prontos para a Luta:</span>
+              </h3>
+              <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                {{ activePartyLobby.length }} no Grupo
+              </span>
+            </div>
+
+            <!-- Lista de Heróis no Lobby -->
+            <div class="space-y-2 mb-4">
+              <div
+                v-for="p in activePartyLobby"
+                :key="p.characterId"
+                class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-800"
+              >
+                <div class="flex items-center space-x-3">
+                  <img :src="p.avatarUrl" class="w-10 h-10 rounded-xl object-cover border border-amber-400/60" />
+                  <div>
+                    <p class="text-xs font-bold text-slate-100">{{ p.name }}</p>
+                    <p class="text-[10px] text-amber-400 font-semibold">{{ p.characterClass }}</p>
+                  </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                  <span v-if="p.isLeader" class="text-[10px] font-black uppercase text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-500/30">
+                    👑 Líder
+                  </span>
+                  <span v-else class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                    ✅ Confirmado
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botões de Início -->
+          <div class="space-y-2 pt-4 border-t border-slate-800">
+            <!-- Iniciar Batalha Solo -->
+            <button
+              @click="startSoloBattle"
+              class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs md:text-sm py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all active:scale-95"
+            >
+              <span>🚀</span>
+              <span>Iniciar Batalha Solo (Apenas Eu)</span>
+            </button>
+
+            <!-- Iniciar com o Grupo -->
+            <button
+              :disabled="activePartyLobby.length === 0"
+              @click="startPartyBattleGroup"
+              class="w-full bg-gradient-to-r from-rose-600 via-red-500 to-rose-600 hover:from-rose-500 hover:to-red-400 text-white font-black text-xs md:text-sm py-3.5 px-4 rounded-xl shadow-lg shadow-rose-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
+            >
+              <span>⚔️</span>
+              <span>Iniciar Combate com o Grupo ({{ activePartyLobby.length }} Heróis)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Coluna 2: Membros Online na Casa & Convidar -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-black text-slate-200 flex items-center space-x-2">
+                <span>🟢 Membros Online Agora:</span>
+              </h3>
+              <span class="text-xs text-slate-400">Total: {{ members.length }}</span>
+            </div>
+
+            <div class="space-y-2 mb-4">
+              <div
+                v-for="m in members"
+                :key="m.id"
+                class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-800"
+              >
+                <div class="flex items-center space-x-3">
+                  <div class="relative">
+                    <img :src="m.avatarUrl" class="w-10 h-10 rounded-xl object-cover border border-slate-700" />
+                    <span 
+                      :class="[
+                        'absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-slate-900',
+                        isMemberOnline(m.id) ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'
+                      ]"
+                    ></span>
+                  </div>
+                  <div>
+                    <p class="text-xs font-bold text-slate-200">{{ m.name }}</p>
+                    <p class="text-[10px] text-slate-400">
+                      {{ isMemberOnline(m.id) ? 'Online no App' : 'Descansando' }}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <span v-if="isInParty(m.id)" class="text-[10px] font-bold text-amber-300 bg-amber-500/10 px-2 py-1 rounded-lg">
+                    No Grupo
+                  </span>
+                  <span v-else-if="isMemberOnline(m.id)" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg">
+                    Disponível
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botão para Convidar Todos Online -->
+          <div class="pt-4 border-t border-slate-800">
+            <button
+              @click="inviteOnlineMembers"
+              class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs md:text-sm py-3.5 px-4 rounded-xl shadow-lg shadow-purple-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
+            >
+              <span>📢</span>
+              <span>Convidar Membros Online para o Grupo</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- ESTADO 2: ARENA DE BATALHA EM ANDAMENTO -->
+    <!-- ========================================================================= -->
+    <div v-else-if="battle && battleState === 'BATTLE'" class="max-w-5xl mx-auto my-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
       
       <!-- Coluna da Esquerda / Centro: Chefe & Ações de Turno -->
       <div class="lg:col-span-2 space-y-6">
@@ -74,7 +262,7 @@
             👉 É SUA VEZ DE JOGAR!
           </div>
           <div v-else class="text-xs text-slate-400 font-medium">
-            Aguardando jogada do irmão/pais...
+            Aguardando jogada do herói/monstro...
           </div>
         </div>
 
@@ -127,19 +315,21 @@
 
       </div>
 
-      <!-- Coluna da Direita: Os Heróis & Diário de Batalha ao Vivo -->
+      <!-- Coluna da Direita: Os Heróis Participantes & Diário de Batalha -->
       <div class="space-y-6">
         
-        <!-- Status da Equipe da Família -->
+        <!-- Status da Equipe da Batalha -->
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4">
-          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
-            <span>🛡️ A Família em Batalha</span>
-            <span>7 Heróis</span>
-          </h4>
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+              🛡️ Heróis na Batalha
+            </h4>
+            <span class="text-xs font-bold text-amber-400">{{ activeParticipants.length }} Participante(s)</span>
+          </div>
 
           <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
             <div
-              v-for="m in members"
+              v-for="m in activeParticipants"
               :key="m.id"
               :class="[
                 'flex items-center justify-between p-2 rounded-xl border text-xs',
@@ -189,9 +379,9 @@
     <div v-if="battle?.status === 'VICTORY'" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <div class="bg-gradient-to-b from-slate-900 to-amber-950 border-2 border-amber-400 p-8 rounded-3xl max-w-md w-full text-center shadow-2xl animate-bounce">
         <div class="text-6xl mb-4">🏆</div>
-        <h2 class="text-3xl font-black text-amber-300 mb-2">VITÓRIA DA FAMÍLIA!</h2>
+        <h2 class="text-3xl font-black text-amber-300 mb-2">VITÓRIA CONQUISTADA!</h2>
         <p class="text-sm text-slate-300 mb-6">
-          Vocês se uniram e derrotaram <strong>{{ battle.monsterName }}</strong> com maestria!
+          O temível <strong>{{ battle.monsterName }}</strong> foi derrotado!
         </p>
 
         <div class="bg-slate-950/80 p-4 rounded-2xl border border-amber-500/30 mb-6 flex justify-around">
@@ -205,27 +395,60 @@
           </div>
         </div>
 
-        <router-link
-          to="/familia/sala"
-          class="inline-block w-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black py-3 px-6 rounded-2xl shadow-xl shadow-amber-500/20"
+        <button
+          @click="resetToLobby"
+          class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black py-3 px-6 rounded-2xl shadow-xl shadow-amber-500/20 transition-all active:scale-95"
         >
-          Voltar ao Salão da Família
-        </router-link>
+          Jogar Novamente / Voltar ao Lobby
+        </button>
       </div>
     </div>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted } from 'vue';
 import { familyApi } from '../../services/familyApi';
-import { getFamilySocket, sendFamilyBattleAction, joinFamilyRoom } from '../../services/familySocket';
+import { 
+  getFamilySocket, 
+  sendFamilyBattleAction, 
+  joinFamilyRoom, 
+  createPartyLobby, 
+  sendPartyInvite, 
+  acceptPartyInvite, 
+  startPartyBattle,
+  activePartyLobby, 
+  incomingBattleInvite, 
+  onlineFamilyMembers 
+} from '../../services/familySocket';
 import confetti from 'canvas-confetti';
 
 const battle = ref<any>(null);
 const members = ref<any[]>([]);
 const activeCharacter = ref<any>(null);
 const monsterHit = ref<boolean>(false);
+const battleState = ref<'LOBBY' | 'BATTLE'>('LOBBY');
+
+const monsterInfo = {
+  name: 'O Golem da Bagunça',
+  avatar: 'https://images.unsplash.com/photo-1563089145-599997674d42?w=500&auto=format&fit=crop&q=60',
+  description: 'Criatura colossal feita de brinquedos fora do lugar e roupas espalhadas pelo quarto. Reúna seus irmãos ou lute sozinho para vencê-lo!',
+};
+
+function isMemberOnline(characterId: string) {
+  return onlineFamilyMembers.value.some(m => m.characterId === characterId);
+}
+
+function isInParty(characterId: string) {
+  return activePartyLobby.value.some(p => p.characterId === characterId);
+}
+
+const activeParticipants = computed(() => {
+  if (!battle.value || !Array.isArray(battle.value.currentTurnOrder)) return members.value;
+  const ids = battle.value.currentTurnOrder.filter((id: string) => id !== 'MONSTER');
+  return members.value.filter(m => ids.includes(m.id));
+});
 
 const currentTurnHeroId = computed(() => {
   if (!battle.value || !Array.isArray(battle.value.currentTurnOrder)) return null;
@@ -244,8 +467,41 @@ const isMyTurn = computed(() => {
 });
 
 function formatLog(log: string) {
-  return log
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-amber-300">$1</strong>');
+  return log.replace(/\*\*(.*?)\*\*/g, '<strong class="text-amber-300">$1</strong>');
+}
+
+function inviteOnlineMembers() {
+  if (!activeCharacter.value) return;
+  sendPartyInvite(activeCharacter.value.name, activeCharacter.value.id, monsterInfo.name);
+  alert('📢 Convite de batalha enviado para todos os membros online na casa!');
+}
+
+function acceptInvite() {
+  if (!activeCharacter.value) return;
+  acceptPartyInvite(activeCharacter.value);
+}
+
+function startSoloBattle() {
+  if (!activeCharacter.value) return;
+  const soloParty = [{
+    characterId: activeCharacter.value.id,
+    name: activeCharacter.value.name,
+    characterClass: activeCharacter.value.characterClass,
+    avatarUrl: activeCharacter.value.avatarUrl,
+    isLeader: true,
+  }];
+  startPartyBattle(soloParty, true);
+}
+
+function startPartyBattleGroup() {
+  startPartyBattle(activePartyLobby.value, false);
+}
+
+function resetToLobby() {
+  battleState.value = 'LOBBY';
+  if (activeCharacter.value) {
+    createPartyLobby(activeCharacter.value);
+  }
 }
 
 async function loadData() {
@@ -257,13 +513,9 @@ async function loadData() {
       activeCharacter.value = members.value.find((m: any) => m.id === savedCharId) || members.value[0];
     }
 
-    const battleRes = await familyApi.getActiveBattle();
-    if (battleRes.success) {
-      battle.value = battleRes.battle;
-    }
-
     if (activeCharacter.value) {
       joinFamilyRoom(activeCharacter.value.id, activeCharacter.value.name);
+      createPartyLobby(activeCharacter.value);
     }
   } catch (error) {
     console.error('Erro ao carregar batalha:', error);
@@ -283,6 +535,12 @@ onMounted(() => {
   loadData();
 
   const socket = getFamilySocket();
+
+  socket.on('family:battle_party_started', (data: any) => {
+    battle.value = data.battle;
+    battleState.value = 'BATTLE';
+  });
+
   socket.on('family:battle_updated', (data: any) => {
     battle.value = data.battle;
     monsterHit.value = true;
@@ -302,7 +560,18 @@ onMounted(() => {
 
 onUnmounted(() => {
   const socket = getFamilySocket();
+  socket.off('family:battle_party_started');
   socket.off('family:battle_updated');
   socket.off('family:battle_victory');
 });
 </script>
+
+<style scoped>
+.slide-down-enter-active, .slide-down-leave-active {
+  transition: all 0.4s ease;
+}
+.slide-down-enter-from, .slide-down-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -20px);
+}
+</style>
