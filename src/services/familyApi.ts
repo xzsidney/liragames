@@ -4,9 +4,6 @@ export function getDisplayImageUrl(url?: string | null): string {
   if (!url) return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500';
   if (url.startsWith('sprite:')) {
     const key = url.replace('sprite:', '').toLowerCase();
-    if (key === 'capamerica') return '/sprites/capamerica/0-0.png';
-    if (key === 'kenshin') return '/sprites/kenshin/ken000.png';
-    if (key === 'colossus') return '/sprites/colossus/col045.png';
     return `/sprites/${key}/0-0.png`;
   }
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:') || url.startsWith('/sprites/')) {

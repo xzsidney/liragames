@@ -516,7 +516,7 @@
                 ]"
               >
                 <div class="w-16 h-16 rounded-xl overflow-hidden mb-2 bg-slate-900 border border-slate-700 flex items-center justify-center">
-                  <img src="/sprites/kenshin/ken000.png" class="h-full object-contain" style="image-rendering: pixelated;" />
+                  <img src="/sprites/kenshin/0-0.png" class="h-full object-contain" style="image-rendering: pixelated;" />
                 </div>
                 <span class="text-xs font-black text-slate-100">Kenshin Himura</span>
                 <span class="text-[9px] text-amber-300 font-bold">MUGEN Arcade</span>
@@ -531,7 +531,7 @@
                 ]"
               >
                 <div class="w-16 h-16 rounded-xl overflow-hidden mb-2 bg-slate-900 border border-slate-700 flex items-center justify-center">
-                  <img src="/sprites/colossus/col045.png" class="h-full object-contain" style="image-rendering: pixelated;" />
+                  <img src="/sprites/colossus/0-0.png" class="h-full object-contain" style="image-rendering: pixelated;" />
                 </div>
                 <span class="text-xs font-black text-slate-100">Colossus</span>
                 <span class="text-[9px] text-amber-300 font-bold">MUGEN Arcade</span>

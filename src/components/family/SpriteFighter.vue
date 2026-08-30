@@ -55,16 +55,37 @@ const animations: Record<string, Record<string, string[]>> = {
     ]
   },
   colossus: {
-    idle: [45, 46, 47, 48, 49, 50, 51, 52, 53, 54].map(f => `col${String(f).padStart(3, '0')}.png`),
-    walk: [20, 21, 22, 23, 24, 25].map(f => `col${String(f).padStart(3, '0')}.png`),
-    attack: [200, 201, 202, 203, 204, 205, 206, 207, 208].map(f => `col${String(f).padStart(3, '0')}.png`),
-    hit: [340, 341, 342, 343].map(f => `col${String(f).padStart(3, '0')}.png`),
+    idle: [
+      '0-0.png', '0-1.png', '0-2.png', '0-3.png', '0-4.png', '0-5.png',
+      '0-6.png', '0-7.png', '0-8.png', '0-9.png', '0-10.png', '0-11.png',
+      '0-12.png', '0-13.png', '0-14.png', '0-15.png'
+    ],
+    walk: [
+      '20-0.png', '20-1.png', '20-2.png', '20-3.png', '20-4.png', '20-5.png',
+      '20-6.png', '20-7.png', '20-8.png', '20-9.png', '20-10.png'
+    ],
+    attack: [
+      '200-0.png', '200-1.png', '200-2.png', '200-3.png', '200-4.png', '200-5.png',
+      '200-6.png', '200-7.png'
+    ],
+    hit: [
+      '5000-0.png', '5000-1.png', '5000-2.png', '5000-3.png'
+    ]
   },
   kenshin: {
-    idle: [0, 1, 2, 3, 4, 5].map(f => `ken${String(f).padStart(3, '0')}.png`),
-    walk: [20, 21, 22, 23, 24, 25].map(f => `ken${String(f).padStart(3, '0')}.png`),
-    attack: [40, 41, 42, 43, 44, 45, 46, 47, 48].map(f => `ken${String(f).padStart(3, '0')}.png`),
-    hit: [100, 101, 102, 103].map(f => `ken${String(f).padStart(3, '0')}.png`),
+    idle: [
+      '0-0.png', '0-1.png', '0-2.png', '0-3.png', '0-4.png'
+    ],
+    walk: [
+      '20-0.png', '20-1.png', '20-2.png', '20-3.png', '20-4.png', '20-5.png'
+    ],
+    attack: [
+      '200-0.png', '200-1.png', '210-0.png', '210-1.png', '210-2.png', '210-3.png',
+      '220-0.png', '220-1.png', '220-2.png'
+    ],
+    hit: [
+      '5000-0.png', '5000-10.png', '5000-20.png', '5000-21.png'
+    ]
   },
 };
 
