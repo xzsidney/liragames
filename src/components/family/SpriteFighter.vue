@@ -1,31 +1,18 @@
 <template>
   <div 
+    ref="pixiContainer"
     class="sprite-fighter relative select-none pointer-events-none flex items-end justify-center"
     :style="{
-      width: `${frameWidth * scale}px`,
-      height: `${frameHeight * scale}px`,
+      width: `${canvasWidth}px`,
+      height: `${canvasHeight}px`,
+      filter: state === 'hit' ? 'brightness(1.8) drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))' : 'drop-shadow(0 4px 12px rgba(0,0,0,0.6))'
     }"
-  >
-    <img
-      v-if="currentFrameUrl"
-      :src="currentFrameUrl"
-      :alt="character"
-      :class="[
-        'sprite-image object-contain transition-transform duration-100',
-        flip ? '-scale-x-100' : 'scale-x-100'
-      ]"
-      :style="{
-        width: '100%',
-        height: '100%',
-        imageRendering: 'pixelated',
-        filter: state === 'hit' ? 'brightness(1.8) drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))' : 'drop-shadow(0 4px 12px rgba(0,0,0,0.6))'
-      }"
-    />
-  </div>
+  ></div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { Application, Assets, AnimatedSprite, Texture } from 'pixi.js';
 
 const props = withDefaults(
   defineProps<{
@@ -36,15 +23,17 @@ const props = withDefaults(
   }>(),
   {
     flip: false,
-    scale: 1.4,
+    scale: 1.35,
   }
 );
 
-const currentFrameIndex = ref<number>(0);
-let animationTimer: any = null;
+const pixiContainer = ref<HTMLDivElement | null>(null);
+let app: Application | null = null;
+let currentAnimSprite: AnimatedSprite | null = null;
+const loadedTexturesCache: Record<string, Texture> = {};
 
-const frameWidth = computed(() => (props.character === 'colossus' ? 140 : 110));
-const frameHeight = computed(() => (props.character === 'colossus' ? 160 : 130));
+const canvasWidth = computed(() => (props.character === 'colossus' ? 180 : 150) * (props.scale || 1.35));
+const canvasHeight = computed(() => (props.character === 'colossus' ? 200 : 170) * (props.scale || 1.35));
 
 // Mapeamento de sequências de frames extraídos do MUGEN
 const animations: Record<string, Record<string, number[]>> = {
@@ -75,53 +64,100 @@ const activeFrames = computed<number[]>(() => {
   return charAnims[props.state] || charAnims.idle;
 });
 
-const currentFrameUrl = computed<string>(() => {
+async function loadTexture(url: string): Promise<Texture> {
+  if (loadedTexturesCache[url]) {
+    return loadedTexturesCache[url];
+  }
+  try {
+    const tex = await Assets.load(url);
+    loadedTexturesCache[url] = tex;
+    return tex;
+  } catch (e) {
+    console.error(`Erro ao carregar textura Pixi: ${url}`, e);
+    return Texture.WHITE;
+  }
+}
+
+async function renderPixiAnimation() {
+  if (!app || !app.stage) return;
+
   const frames = activeFrames.value;
-  if (!frames || frames.length === 0) return '';
-  const frameNum = frames[currentFrameIndex.value % frames.length];
+  if (!frames || frames.length === 0) return;
+
   const prefix = props.character === 'colossus' ? 'col' : 'ken';
-  const padded = String(frameNum).padStart(3, '0');
-  return `/sprites/${props.character}/${prefix}${padded}.png`;
-});
+  const urls = frames.map(f => `/sprites/${props.character}/${prefix}${String(f).padStart(3, '0')}.png`);
 
-function startAnimation() {
-  if (animationTimer) clearInterval(animationTimer);
-  currentFrameIndex.value = 0;
+  const textures: Texture[] = [];
+  for (const url of urls) {
+    const tex = await loadTexture(url);
+    textures.push(tex);
+  }
 
-  // Velocidade da animação (10 FPS no idle/walk, 14 FPS no attack)
-  const fps = props.state === 'attack' ? 70 : 100;
+  if (!app || !app.stage) return;
 
-  animationTimer = setInterval(() => {
-    const frames = activeFrames.value;
-    if (frames.length > 0) {
-      if (props.state === 'attack' || props.state === 'hit') {
-        // Ações pontuais rodam uma vez ou em loop controlado
-        currentFrameIndex.value = (currentFrameIndex.value + 1) % frames.length;
-      } else {
-        currentFrameIndex.value = (currentFrameIndex.value + 1) % frames.length;
-      }
-    }
-  }, fps);
+  if (currentAnimSprite) {
+    app.stage.removeChild(currentAnimSprite);
+    currentAnimSprite.destroy();
+    currentAnimSprite = null;
+  }
+
+  const anim = new AnimatedSprite(textures);
+  anim.animationSpeed = props.state === 'attack' ? 0.22 : 0.12; // Velocidade do Pixi AnimatedSprite
+  anim.anchor.set(0.5, 1.0); // Ponto de ancoragem na base/pés
+
+  // Posição no centro inferior do Canvas Pixi
+  anim.x = canvasWidth.value / 2;
+  anim.y = canvasHeight.value;
+
+  const baseScale = props.scale || 1.35;
+  anim.scale.x = props.flip ? -baseScale : baseScale;
+  anim.scale.y = baseScale;
+
+  anim.play();
+  app.stage.addChild(anim);
+  currentAnimSprite = anim;
 }
 
 watch(
-  () => [props.character, props.state],
+  () => [props.character, props.state, props.flip, props.scale],
   () => {
-    startAnimation();
+    renderPixiAnimation();
   }
 );
 
-onMounted(() => {
-  startAnimation();
+onMounted(async () => {
+  if (!pixiContainer.value) return;
+
+  app = new Application();
+  await app.init({
+    width: canvasWidth.value,
+    height: canvasHeight.value,
+    backgroundAlpha: 0, // Canvas 100% transparente
+    antialias: false,   // Mantém a nitidez do pixel art do MUGEN
+    preference: 'webgl',
+  });
+
+  if (pixiContainer.value && app.canvas) {
+    pixiContainer.value.appendChild(app.canvas);
+  }
+
+  await renderPixiAnimation();
 });
 
 onUnmounted(() => {
-  if (animationTimer) clearInterval(animationTimer);
+  if (currentAnimSprite) {
+    currentAnimSprite.destroy();
+    currentAnimSprite = null;
+  }
+  if (app) {
+    app.destroy(true, { children: true, texture: false });
+    app = null;
+  }
 });
 </script>
 
 <style scoped>
-.sprite-image {
+.sprite-fighter canvas {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
