@@ -313,75 +313,6 @@
       </div>
     </section>
 
-    <!-- Lista de Todos os Heróis da Família no Salão (Para Inspecionar e Conectar) -->
-    <section class="max-w-6xl mx-auto my-8">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 flex items-center space-x-2">
-          <span>👥 Heróis da Família Lira no Salão:</span>
-        </h3>
-        <span class="text-xs text-slate-500">Clique em qualquer herói para inspecionar</span>
-      </div>
-
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-        <div
-          v-for="member in members"
-          :key="member.id"
-          @click="inspectMember(member)"
-          :class="[
-            'bg-slate-900 border rounded-2xl p-3 text-center cursor-pointer transition-all duration-200 hover:-translate-y-1',
-            member.id === activeCharacter?.id ? 'border-amber-400 shadow-lg shadow-amber-500/20 bg-slate-850 ring-2 ring-amber-500/30' : 'border-slate-800 hover:border-slate-700'
-          ]"
-        >
-          <div class="relative w-16 h-16 mx-auto mb-2">
-            <img :src="member.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=500'" :alt="member.name" class="w-full h-full object-cover rounded-xl border border-slate-700" />
-            <span 
-              :class="[
-                'absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-slate-900',
-                isOnline(member.id) ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'
-              ]"
-              :title="isOnline(member.id) ? 'Online Agora' : 'Descansando'"
-            ></span>
-          </div>
-          <h5 class="text-xs font-bold text-slate-200 truncate">{{ member.name }}</h5>
-          <p class="text-[10px] text-amber-400 font-semibold">{{ member.characterClass }}</p>
-          <div class="mt-2 text-[10px] text-slate-400 bg-slate-950 py-0.5 rounded border border-slate-800/80">
-            Nv. {{ member.level }} • 🪙 {{ member.gold }}
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Modal de Inspeção de Outro Herói -->
-    <div v-if="inspectingCharacter" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-slate-900 border border-slate-700 p-6 rounded-3xl max-w-sm w-full space-y-4 text-center shadow-2xl relative">
-        <button @click="inspectingCharacter = null" class="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
-        
-        <div class="w-20 h-20 mx-auto rounded-2xl overflow-hidden border-2 border-amber-400 shadow">
-          <img :src="inspectingCharacter.avatarUrl" class="w-full h-full object-cover" />
-        </div>
-        
-        <div>
-          <h3 class="text-lg font-black text-amber-300">{{ inspectingCharacter.name }}</h3>
-          <p class="text-xs text-slate-400">{{ inspectingCharacter.characterClass }} • {{ inspectingCharacter.title }}</p>
-          <p class="text-xs font-bold text-amber-400 mt-1">Nível {{ inspectingCharacter.level }} • 🪙 {{ inspectingCharacter.gold }} Ouro</p>
-        </div>
-
-        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-left space-y-1">
-          <p><strong class="text-rose-400">❤️ Vida:</strong> {{ inspectingCharacter.hpCurrent }}/{{ inspectingCharacter.hpMax }}</p>
-          <p><strong class="text-sky-400">💧 Mana:</strong> {{ inspectingCharacter.mpCurrent }}/{{ inspectingCharacter.mpMax }}</p>
-          <p><strong class="text-slate-300">🗡️ Arma:</strong> {{ inspectingCharacter.equippedWeapon }}</p>
-          <p><strong class="text-slate-300">🛡️ Armadura:</strong> {{ inspectingCharacter.equippedArmor }}</p>
-        </div>
-
-        <button
-          @click="inspectingCharacter = null"
-          class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2.5 rounded-xl"
-        >
-          Fechar
-        </button>
-      </div>
-    </div>
-
     <!-- Modal de Criar Herói da Família -->
     <div v-if="showClaimModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <div class="bg-slate-900 border-2 border-amber-500/40 p-6 md:p-8 rounded-3xl max-w-lg w-full space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -471,7 +402,6 @@ import {
   sendFamilyReaction, 
   floatingReactions, 
   familyAlerts, 
-  onlineFamilyMembers,
   incomingBattleInvite,
   acceptPartyInvite
 } from '../../services/familySocket';
@@ -480,7 +410,6 @@ const router = useRouter();
 const members = ref<any[]>([]);
 const myCharacters = ref<any[]>([]);
 const selectedCharacterId = ref<string>('');
-const inspectingCharacter = ref<any | null>(null);
 const showClaimModal = ref<boolean>(false);
 
 const avatarOptions = [
@@ -524,10 +453,6 @@ const reactionButtons = [
   { emoji: '⭐', label: 'Super Estrela!', text: 'Arrasou!' },
 ];
 
-function isOnline(characterId: string) {
-  return onlineFamilyMembers.value.some(m => m.characterId === characterId);
-}
-
 function sendReaction(emoji: string, text: string) {
   if (activeCharacter.value) {
     sendFamilyReaction(activeCharacter.value.id, activeCharacter.value.name, emoji, text);
@@ -541,14 +466,6 @@ function logout() {
   localStorage.removeItem('lira_user');
   localStorage.removeItem('token');
   router.push('/login');
-}
-
-function inspectMember(member: any) {
-  if (myCharacters.value.some(m => m.id === member.id)) {
-    selectCharacter(member.id);
-  } else {
-    inspectingCharacter.value = member;
-  }
 }
 
 function selectCharacter(id: string) {
