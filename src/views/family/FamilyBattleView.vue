@@ -1,19 +1,20 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-[#180309] via-[#0d0a1a] to-[#040e24] text-slate-100 font-sans relative overflow-hidden pb-12">
+  <div class="min-h-screen bg-gradient-to-b from-[#140207] via-[#090614] to-[#020817] text-slate-100 font-sans relative overflow-hidden pb-12">
     <FamilyNavbar />
 
-    <div class="p-4 md:p-8">
+    <div class="p-3 md:p-6 max-w-6xl mx-auto space-y-6">
+      
       <!-- Modal / Toast de Convite de Batalha Recebido -->
       <transition name="slide-down">
         <div 
           v-if="incomingBattleInvite && incomingBattleInvite.leaderId !== activeCharacter?.id"
           class="fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-lg w-full px-4"
         >
-          <div class="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 border-2 border-purple-400 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-bounce">
+          <div class="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 border-2 border-amber-400 p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-bounce">
             <div class="flex items-center space-x-3">
               <span class="text-3xl">⚔️</span>
               <div>
-                <p class="text-xs font-extrabold uppercase tracking-wider text-purple-300">Convite de Batalha!</p>
+                <p class="text-xs font-extrabold uppercase tracking-wider text-amber-300">Convite de Batalha!</p>
                 <p class="text-sm font-bold text-slate-100">
                   <strong>{{ incomingBattleInvite.leaderName }}</strong> te chamou para enfrentar <em>{{ incomingBattleInvite.monsterName }}</em>!
                 </p>
@@ -22,13 +23,13 @@
             <div class="flex items-center space-x-2">
               <button
                 @click="acceptInvite"
-                class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition-all active:scale-95"
+                class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition-all active:scale-95 cursor-pointer"
               >
                 Aceitar!
               </button>
               <button
                 @click="incomingBattleInvite = null"
-                class="text-slate-400 hover:text-slate-200 text-xs px-2 py-1"
+                class="text-slate-400 hover:text-slate-200 text-xs px-2 py-1 cursor-pointer"
               >
                 Recusar
               </button>
@@ -37,400 +38,468 @@
         </div>
       </transition>
 
-      <!-- Header Principal -->
-      <div class="max-w-5xl mx-auto flex items-center justify-between pb-6 border-b border-rose-900/60">
-        <div class="flex items-center space-x-4">
+      <!-- ========================================================================= -->
+      <!-- ESTADO 1: LOBBY DE FORMAÇÃO DO GRUPO (ANTES DE INICIAR A LUTA) -->
+      <!-- ========================================================================= -->
+      <div v-if="battleState === 'LOBBY'" class="space-y-6">
+        
+        <div class="flex items-center justify-between pb-4 border-b border-rose-900/60">
           <div>
             <h1 class="text-2xl md:text-3xl font-black text-rose-400 flex items-center space-x-2">
-            <span>⚔️ Arena de Batalha da Família</span>
-          </h1>
-          <p class="text-xs md:text-sm text-slate-400">Jogue Solo ou convide os membros online para lutar em grupo!</p>
+              <span>⚔️ Arena Arcade da Família Lira</span>
+            </h1>
+            <p class="text-xs md:text-sm text-slate-400">Jogue Solo ou convide os membros online para lutar em grupo no Grid Tático!</p>
+          </div>
+          <div class="flex items-center space-x-2 bg-rose-500/10 border border-rose-500/30 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-300">
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+            <span>Lobby Aberto</span>
+          </div>
         </div>
-      </div>
 
-      <div class="flex items-center space-x-3">
-        <!-- Indicador de Herói Ativo -->
-        <div v-if="activeCharacter" class="flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
-          <img :src="activeCharacter.avatarUrl" class="w-6 h-6 rounded-lg object-cover" />
-          <span class="font-bold text-amber-300">{{ activeCharacter.name }}</span>
+        <!-- Card de Apresentação do Chefe -->
+        <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-rose-950/40 border-2 border-rose-500/40 rounded-3xl p-6 text-center relative overflow-hidden shadow-2xl">
+          <div class="w-28 h-28 md:w-36 md:h-36 mx-auto rounded-3xl overflow-hidden border-4 border-rose-500 shadow-2xl shadow-rose-500/30 mb-4 bg-slate-800">
+            <img :src="monsterInfo.avatar" :alt="monsterInfo.name" class="w-full h-full object-cover" />
+          </div>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20 mb-2 inline-block">
+            Chefe da Masmorra
+          </span>
+          <h2 class="text-2xl md:text-3xl font-black text-slate-100">{{ monsterInfo.name }}</h2>
+          <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">{{ monsterInfo.description }}</p>
         </div>
-        <div class="flex items-center space-x-2 bg-rose-500/10 border border-rose-500/30 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-300">
-          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-          <span>Ao Vivo</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- ========================================================================= -->
-    <!-- ESTADO 1: LOBBY DE FORMAÇÃO DO GRUPO (ANTES DE INICIAR A LUTA) -->
-    <!-- ========================================================================= -->
-    <div v-if="battleState === 'LOBBY'" class="max-w-5xl mx-auto my-8 space-y-6">
-      
-      <!-- Card de Apresentação do Chefe -->
-      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-rose-950/40 border-2 border-rose-500/40 rounded-3xl p-6 text-center relative overflow-hidden shadow-2xl">
-        <div class="w-28 h-28 md:w-36 md:h-36 mx-auto rounded-3xl overflow-hidden border-4 border-rose-500 shadow-2xl shadow-rose-500/30 mb-4 bg-slate-800">
-          <img :src="monsterInfo.avatar" :alt="monsterInfo.name" class="w-full h-full object-cover" />
-        </div>
-        <span class="text-xs font-extrabold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20 mb-2 inline-block">
-          Chefe da Masmorra
-        </span>
-        <h2 class="text-2xl md:text-3xl font-black text-slate-100">{{ monsterInfo.name }}</h2>
-        <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">{{ monsterInfo.description }}</p>
-      </div>
+        <!-- Área de Formação de Grupo -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Heróis no Lobby -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-black text-slate-200">🛡️ Heróis no Grupo:</h3>
+                <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                  {{ activePartyLobby.length }} no Grupo
+                </span>
+              </div>
 
-      <!-- Área de Formação de Grupo -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <!-- Coluna 1: Membros no Grupo Atual -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-base font-black text-slate-200 flex items-center space-x-2">
-                <span>🛡️ Heróis Prontos para a Luta:</span>
-              </h3>
-              <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                {{ activePartyLobby.length }} no Grupo
-              </span>
-            </div>
-
-            <!-- Lista de Heróis no Lobby -->
-            <div class="space-y-2 mb-4">
-              <div
-                v-for="p in activePartyLobby"
-                :key="p.characterId"
-                class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-800"
-              >
-                <div class="flex items-center space-x-3">
-                  <img :src="p.avatarUrl" class="w-10 h-10 rounded-xl object-cover border border-amber-400/60" />
-                  <div>
-                    <p class="text-xs font-bold text-slate-100">{{ p.name }}</p>
-                    <p class="text-[10px] text-amber-400 font-semibold">{{ p.characterClass }}</p>
+              <div class="space-y-2 mb-4">
+                <div
+                  v-for="p in activePartyLobby"
+                  :key="p.characterId"
+                  class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-800"
+                >
+                  <div class="flex items-center space-x-3">
+                    <img :src="getDisplayImageUrl(p.avatarUrl)" class="w-10 h-10 rounded-xl object-cover border border-amber-400/60" />
+                    <div>
+                      <p class="text-xs font-bold text-slate-100">{{ p.name }}</p>
+                      <p class="text-[10px] text-amber-400 font-semibold">{{ p.characterClass }}</p>
+                    </div>
                   </div>
-                </div>
-
-                <div class="flex items-center space-x-2">
                   <span v-if="p.isLeader" class="text-[10px] font-black uppercase text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-500/30">
                     👑 Líder
                   </span>
-                  <span v-else class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                    ✅ Confirmado
-                  </span>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Botões de Início -->
-          <div class="space-y-2 pt-4 border-t border-slate-800">
-            <!-- Iniciar Batalha Solo -->
-            <button
-              @click="startSoloBattle"
-              class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs md:text-sm py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all active:scale-95"
-            >
-              <span>🚀</span>
-              <span>Iniciar Batalha Solo (Apenas Eu)</span>
-            </button>
-
-            <!-- Iniciar com o Grupo -->
-            <button
-              :disabled="activePartyLobby.length === 0"
-              @click="startPartyBattleGroup"
-              class="w-full bg-gradient-to-r from-rose-600 via-red-500 to-rose-600 hover:from-rose-500 hover:to-red-400 text-white font-black text-xs md:text-sm py-3.5 px-4 rounded-xl shadow-lg shadow-rose-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
-            >
-              <span>⚔️</span>
-              <span>Iniciar Combate com o Grupo ({{ activePartyLobby.length }} Heróis)</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Coluna 2: Membros Online na Casa & Convidar -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-base font-black text-slate-200 flex items-center space-x-2">
-                <span>🟢 Membros Online Agora:</span>
-              </h3>
-              <span class="text-xs text-slate-400">Total: {{ members.length }}</span>
-            </div>
-
-            <div class="space-y-2 mb-4">
-              <div
-                v-for="m in members"
-                :key="m.id"
-                class="flex items-center justify-between bg-slate-950 p-3 rounded-2xl border border-slate-800"
+            <!-- Botões de Início -->
+            <div class="space-y-3 pt-4 border-t border-slate-800">
+              <button
+                @click="startSoloBattle"
+                class="w-full bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white font-black py-3.5 px-6 rounded-2xl shadow-xl shadow-rose-600/30 transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer flex items-center justify-center space-x-2"
               >
-                <div class="flex items-center space-x-3">
-                  <div class="relative">
-                    <img :src="m.avatarUrl" class="w-10 h-10 rounded-xl object-cover border border-slate-700" />
-                    <span 
-                      :class="[
-                        'absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-slate-900',
-                        isMemberOnline(m.id) ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'
-                      ]"
-                    ></span>
-                  </div>
-                  <div>
-                    <p class="text-xs font-bold text-slate-200">{{ m.name }}</p>
-                    <p class="text-[10px] text-slate-400">
-                      {{ isMemberOnline(m.id) ? 'Online no App' : 'Descansando' }}
-                    </p>
-                  </div>
-                </div>
+                <span class="text-xl">⚔️</span>
+                <span>Iniciar Batalha 2D Solo (Posição 3 vs 6)</span>
+              </button>
 
-                <div>
-                  <span v-if="isInParty(m.id)" class="text-[10px] font-bold text-amber-300 bg-amber-500/10 px-2 py-1 rounded-lg">
-                    No Grupo
-                  </span>
-                  <span v-else-if="isMemberOnline(m.id)" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg">
-                    Disponível
-                  </span>
-                </div>
-              </div>
+              <button
+                v-if="activePartyLobby.length > 1"
+                @click="startPartyBattleGroup"
+                class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black py-3 px-6 rounded-2xl shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer flex items-center justify-center space-x-2"
+              >
+                <span class="text-lg">🛡️</span>
+                <span>Iniciar com Todos do Grupo ({{ activePartyLobby.length }} Heróis)</span>
+              </button>
             </div>
           </div>
 
-          <!-- Botão para Convidar Todos Online -->
-          <div class="pt-4 border-t border-slate-800">
+          <!-- Membros da Casa Conectados -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-black text-slate-200">👨‍👩‍👧‍👦 Membros Online na Casa:</h3>
+                <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                  {{ onlineFamilyMembers.length }} Online
+                </span>
+              </div>
+
+              <div class="space-y-2 max-h-52 overflow-y-auto pr-1">
+                <div
+                  v-for="m in members"
+                  :key="m.id"
+                  class="flex items-center justify-between bg-slate-950 p-2.5 rounded-2xl border border-slate-800/80"
+                >
+                  <div class="flex items-center space-x-3">
+                    <div class="relative">
+                      <img :src="getDisplayImageUrl(m.avatarUrl)" class="w-9 h-9 rounded-xl object-cover border border-slate-700" />
+                      <span
+                        v-if="isMemberOnline(m.id)"
+                        class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-slate-950 rounded-full"
+                      ></span>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold text-slate-200">{{ m.name }}</p>
+                      <p class="text-[10px] text-slate-400">{{ m.characterClass }} • Nv. {{ m.level }}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span v-if="isInParty(m.id)" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                      No Grupo
+                    </span>
+                    <span v-else-if="isMemberOnline(m.id)" class="text-[10px] font-bold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full">
+                      Online
+                    </span>
+                    <span v-else class="text-[10px] text-slate-500">
+                      Offline
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <button
               @click="inviteOnlineMembers"
-              class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs md:text-sm py-3.5 px-4 rounded-xl shadow-lg shadow-purple-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
+              class="w-full mt-4 bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 text-white font-black text-xs py-3 px-4 rounded-2xl shadow-lg transition-all active:scale-95 cursor-pointer"
             >
-              <span>📢</span>
-              <span>Convidar Membros Online para o Grupo</span>
+              📢 Enviar Convite para Todos os Online
             </button>
           </div>
         </div>
 
       </div>
 
-    </div>
+      <!-- ========================================================================= -->
+      <!-- ESTADO 2: ARENA DE LUTA 2D ESTILO MUGEN (COM GRID DE 10 POSIÇÕES) -->
+      <!-- ========================================================================= -->
+      <div v-else-if="battleState === 'BATTLE' && battle" class="space-y-6">
 
-    <!-- ========================================================================= -->
-    <!-- ESTADO 2: ARENA DE BATALHA EM ANDAMENTO -->
-    <!-- ========================================================================= -->
-    <div v-else-if="battle && battleState === 'BATTLE'" class="max-w-5xl mx-auto my-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Coluna da Esquerda / Centro: Chefe & Ações de Turno -->
-      <div class="lg:col-span-2 space-y-6">
-        
-        <!-- Card do Chefe Monstruoso -->
-        <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-rose-950/40 border-2 border-rose-500/40 rounded-3xl p-6 shadow-2xl relative overflow-hidden text-center">
-          <div class="flex items-center justify-between mb-2">
-            <div class="text-xs font-bold uppercase tracking-widest text-rose-400 bg-rose-500/10 inline-block px-3 py-1 rounded-full border border-rose-500/20">
-              {{ battle.title }}
+        <!-- 1. HUD SUPERIOR ESTILO MUGEN / JOGO DE LUTA ARCADE -->
+        <div class="bg-slate-950/95 border-2 border-amber-500/60 rounded-3xl p-3 md:p-5 shadow-2xl relative overflow-hidden backdrop-blur-md">
+          
+          <div class="grid grid-cols-12 gap-2 md:gap-4 items-center">
+            
+            <!-- PLAYER 1: HERÓI (LADO ESQUERDO) -->
+            <div class="col-span-5 flex items-center space-x-2 md:space-x-4">
+              <!-- Avatar Chanfrado Arcade -->
+              <div class="relative shrink-0">
+                <div class="w-14 h-14 md:w-20 md:h-20 rounded-2xl overflow-hidden border-2 md:border-4 border-amber-400 shadow-xl bg-slate-900 transform -skew-x-6">
+                  <img :src="getDisplayImageUrl(activeCharacter?.avatarUrl)" class="w-full h-full object-cover transform skew-x-6 scale-110" />
+                </div>
+                <span class="absolute -bottom-1.5 -left-1 bg-amber-400 text-slate-950 text-[9px] md:text-[10px] font-black px-1.5 py-0.5 rounded shadow">
+                  P1
+                </span>
+              </div>
+
+              <!-- Barras de HP e MP Player 1 -->
+              <div class="flex-1 space-y-1">
+                <div class="flex items-center justify-between text-xs font-black">
+                  <span class="text-amber-300 truncate max-w-[120px] md:max-w-none">{{ activeCharacter?.name }}</span>
+                  <span class="text-rose-400 font-mono text-[10px] md:text-xs">{{ activeCharacter?.hpCurrent }}/{{ activeCharacter?.hpMax }} HP</span>
+                </div>
+
+                <!-- Barra de Vida HP Chanfrada Estilo MUGEN -->
+                <div class="w-full bg-slate-900 h-4 md:h-6 rounded-lg border-2 border-amber-400/80 p-0.5 overflow-hidden transform -skew-x-12 shadow-inner">
+                  <div
+                    class="h-full bg-gradient-to-r from-emerald-500 via-yellow-400 to-emerald-400 rounded-sm transition-all duration-500 shadow-md shadow-emerald-500/50"
+                    :style="{ width: `${Math.min(100, Math.max(0, ((activeCharacter?.hpCurrent || 0) / (activeCharacter?.hpMax || 1)) * 100))}%` }"
+                  ></div>
+                </div>
+
+                <!-- Barra de Mana / Especial -->
+                <div class="w-full bg-slate-900 h-2 md:h-2.5 rounded-md border border-sky-400/60 p-0.5 overflow-hidden transform -skew-x-12">
+                  <div
+                    class="h-full bg-gradient-to-r from-blue-600 to-sky-400 rounded-sm transition-all duration-300"
+                    :style="{ width: `${Math.min(100, Math.max(0, ((activeCharacter?.mpCurrent || 0) / (activeCharacter?.mpMax || 1)) * 100))}%` }"
+                  ></div>
+                </div>
+              </div>
             </div>
-            <button
-              @click="resetToLobby"
-              class="text-xs text-slate-400 hover:text-slate-200 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700"
-            >
-              ⚙️ Voltar ao Lobby
-            </button>
-          </div>
 
-          <!-- Avatar do Chefe com Animação -->
-          <div class="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-3xl overflow-hidden border-4 border-rose-500 shadow-2xl shadow-rose-500/30 mb-4 bg-slate-800 relative">
-            <img :src="battle.monsterAvatar" :alt="battle.monsterName" class="w-full h-full object-cover" />
-            <div v-if="monsterHit" class="absolute inset-0 bg-red-600/60 flex items-center justify-center animate-ping text-3xl font-black text-white">
-              💥
-            </div>
-          </div>
-
-          <h2 class="text-2xl md:text-3xl font-black text-slate-100">{{ battle.monsterName }}</h2>
-          <p class="text-xs text-slate-400 mb-4">Ataque: {{ battle.monsterAttack }} • Defesa: {{ battle.monsterDefense }}</p>
-
-          <!-- Barra de Vida do Chefe -->
-          <div class="max-w-md mx-auto space-y-1.5">
-            <div class="flex justify-between text-xs font-bold">
-              <span class="text-rose-400">Vida do Monstro</span>
-              <span class="text-slate-200">{{ battle.monsterHpCurrent }} / {{ battle.monsterHpMax }} HP</span>
-            </div>
-            <div class="w-full bg-slate-950 h-4 rounded-full border border-rose-500/40 p-0.5 overflow-hidden">
-              <div 
-                class="bg-gradient-to-r from-rose-600 to-red-400 h-full rounded-full transition-all duration-500"
-                :style="{ width: `${Math.max(0, (battle.monsterHpCurrent / battle.monsterHpMax) * 100)}%` }"
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Indicador de Turno Ativo -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <span class="text-2xl">⏳</span>
-            <div>
-              <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">Turno Atual:</p>
-              <p class="text-sm md:text-base font-black text-amber-300">
-                {{ currentTurnHeroName }}
-              </p>
-            </div>
-          </div>
-
-          <div v-if="isMyTurn" class="bg-emerald-500 text-slate-950 text-xs font-extrabold px-3 py-1.5 rounded-xl animate-bounce shadow-lg shadow-emerald-500/20">
-            👉 É SUA VEZ DE JOGAR!
-          </div>
-          <div v-else class="text-xs text-slate-400 font-medium">
-            Aguardando jogada do herói/monstro...
-          </div>
-        </div>
-
-        <!-- Painel de Comandos de Batalha -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-4">
-          <!-- Alerta se o Herói estiver na Enfermaria -->
-          <div v-if="isHeroInInfirmary" class="bg-rose-950/80 border border-rose-600/80 rounded-2xl p-4 text-center space-y-2">
-            <p class="text-xs md:text-sm font-black text-rose-300">
-              🚑 Seu herói está na Enfermaria (0 HP) e não pode lutar no momento!
-            </p>
-            <router-link to="/familia/ficha" class="inline-block text-xs font-black text-amber-300 underline hover:text-amber-200">
-              Ir para a Ficha receber alta ou aguardar recuperação ➔
-            </router-link>
-          </div>
-
-          <div v-else>
-            <div class="flex items-center justify-between mb-3">
-              <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">
-                Ações de Combate (Classe: <span class="text-amber-300">{{ activeCharacter?.characterClass }}</span>):
-              </h4>
-              <span class="text-[11px] text-sky-400 font-bold">
-                💧 Mana: {{ activeCharacter?.mpCurrent }}/{{ activeCharacter?.mpMax }} MP
+            <!-- CENTRO: EMBLEMA VS / ROUND ARCADE -->
+            <div class="col-span-2 text-center flex flex-col items-center justify-center">
+              <div class="w-10 h-10 md:w-14 md:h-14 rounded-full bg-gradient-to-tr from-amber-500 via-red-600 to-yellow-400 p-0.5 border-2 border-yellow-200 shadow-xl shadow-red-600/40 flex items-center justify-center animate-pulse">
+                <span class="text-sm md:text-xl font-black italic tracking-tighter text-slate-950">VS</span>
+              </div>
+              <span class="text-[9px] md:text-[10px] font-black uppercase text-amber-300 mt-1 tracking-wider">
+                {{ isMyTurn ? 'SUA VEZ!' : 'VEZ DO CHEFE' }}
               </span>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <!-- Ataque Físico Básico -->
-              <button
-                :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
-                @click="executeAction('ATTACK')"
-                class="bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3.5 px-3 rounded-2xl shadow-lg shadow-rose-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
-              >
-                <span class="text-2xl">⚔️</span>
-                <span>Ataque Básico</span>
-                <span class="text-[10px] text-rose-200">Custo: 0 MP</span>
-              </button>
+            <!-- PLAYER 2: MONSTRO / BOSS (LADO DIREITO ESPELHADO) -->
+            <div class="col-span-5 flex items-center justify-end space-x-2 md:space-x-4 flex-row-reverse">
+              <!-- Avatar Chanfrado Arcade do Boss -->
+              <div class="relative shrink-0">
+                <div class="w-14 h-14 md:w-20 md:h-20 rounded-2xl overflow-hidden border-2 md:border-4 border-rose-500 shadow-xl bg-slate-900 transform skew-x-6">
+                  <img :src="battle.monsterAvatar || monsterInfo.avatar" class="w-full h-full object-cover transform -skew-x-6 scale-110" />
+                </div>
+                <span class="absolute -bottom-1.5 -right-1 bg-rose-600 text-white text-[9px] md:text-[10px] font-black px-1.5 py-0.5 rounded shadow">
+                  BOSS
+                </span>
+              </div>
 
-              <!-- Habilidades Equipadas da Build da Classe -->
-              <template v-if="equippedSkills.length > 0">
+              <!-- Barras de HP Boss -->
+              <div class="flex-1 space-y-1 text-right">
+                <div class="flex items-center justify-between text-xs font-black flex-row-reverse">
+                  <span class="text-rose-400 truncate max-w-[120px] md:max-w-none">{{ battle.monsterName }}</span>
+                  <span class="text-rose-400 font-mono text-[10px] md:text-xs">{{ battle.monsterHpCurrent }}/{{ battle.monsterHpMax }} HP</span>
+                </div>
+
+                <!-- Barra de Vida HP Chanfrada Invertida -->
+                <div class="w-full bg-slate-900 h-4 md:h-6 rounded-lg border-2 border-rose-500/80 p-0.5 overflow-hidden transform skew-x-12 shadow-inner">
+                  <div
+                    class="h-full bg-gradient-to-r from-rose-600 via-red-500 to-amber-500 rounded-sm transition-all duration-500 ml-auto shadow-md shadow-rose-500/50"
+                    :style="{ width: `${Math.min(100, Math.max(0, (battle.monsterHpCurrent / battle.monsterHpMax) * 100))}%` }"
+                  ></div>
+                </div>
+
+                <p class="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase">Ataque: {{ battle.monsterAttack }} • Defesa: {{ battle.monsterDefense }}</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 2. CENÁRIO DE LUTA 2D COM O GRID DE 10 POSIÇÕES NO SOLO -->
+        <div class="bg-gradient-to-b from-[#1b0816] via-[#100c24] to-[#0a1226] border-2 border-amber-500/40 rounded-3xl p-4 md:p-6 shadow-2xl relative overflow-hidden min-h-[320px] md:min-h-[380px] flex flex-col justify-between">
+          
+          <!-- Elementos de Fundo da Masmorra -->
+          <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#e11d48_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+
+          <!-- Indicador Central de Distância -->
+          <div class="text-center relative z-10 pt-2">
+            <span class="bg-slate-950/80 border border-amber-400/50 px-4 py-1 rounded-full text-xs font-black text-amber-300 shadow-md">
+              📏 Distância Tática: <strong class="text-white font-mono text-sm">{{ currentDistance }} Casas</strong> 
+              <span v-if="currentDistance === 1" class="text-rose-400 ml-1.5 font-bold">(⚔️ No Alcance Corpo a Corpo!)</span>
+              <span v-else class="text-sky-300 ml-1.5 font-bold">(🏹 No Alcance de Longa Distância)</span>
+            </span>
+          </div>
+
+          <!-- PALCO 2D COM OS SPRITES / AVATARES DOS LUTADORES -->
+          <div class="relative w-full h-44 md:h-52 my-auto flex items-end">
+            
+            <!-- Herói na Arena 2D -->
+            <div
+              class="absolute bottom-2 transition-all duration-500 ease-out flex flex-col items-center"
+              :style="{ left: `${(heroGridPos / 9) * 85 + 4}%` }"
+            >
+              <!-- Balão de Dano Flutuante -->
+              <span v-if="heroTookHit" class="text-xl md:text-2xl font-black text-rose-500 animate-bounce mb-1 drop-shadow-lg">
+                -{{ lastDamageTaken }} HP!
+              </span>
+
+              <div :class="['w-16 h-20 md:w-20 md:h-24 rounded-2xl overflow-hidden border-2 border-amber-400 shadow-2xl bg-slate-900 transition-transform duration-300', isMyTurn ? 'animate-pulse scale-105' : '']">
+                <img :src="getDisplayImageUrl(activeCharacter?.avatarUrl)" class="w-full h-full object-cover" />
+              </div>
+              <span class="bg-amber-500 text-slate-950 font-black text-[9px] md:text-[10px] px-2 py-0.5 rounded-full mt-1 shadow">
+                {{ activeCharacter?.name }} [{{ heroGridPos }}]
+              </span>
+            </div>
+
+            <!-- Monstro na Arena 2D -->
+            <div
+              class="absolute bottom-2 transition-all duration-500 ease-out flex flex-col items-center"
+              :style="{ left: `${(monsterGridPos / 9) * 85 + 4}%` }"
+            >
+              <!-- Balão de Dano Flutuante -->
+              <span v-if="monsterHit" class="text-xl md:text-2xl font-black text-yellow-300 animate-bounce mb-1 drop-shadow-lg">
+                HIT!
+              </span>
+
+              <div :class="['w-20 h-24 md:w-28 md:h-32 rounded-2xl overflow-hidden border-2 border-rose-500 shadow-2xl bg-slate-900 transition-transform duration-300', monsterHit ? 'scale-90 brightness-150 rotate-3' : '']">
+                <img :src="battle.monsterAvatar || monsterInfo.avatar" class="w-full h-full object-cover" />
+              </div>
+              <span class="bg-rose-600 text-white font-black text-[9px] md:text-[10px] px-2 py-0.5 rounded-full mt-1 shadow">
+                {{ battle.monsterName }} [{{ monsterGridPos }}]
+              </span>
+            </div>
+
+          </div>
+
+          <!-- O GRID TÁTICO DE 10 POSIÇÕES NO SOLO (0 A 9) -->
+          <div class="relative z-10 pt-4 border-t-2 border-amber-500/40">
+            <p class="text-[10px] text-amber-300 font-extrabold uppercase tracking-widest text-center mb-2">
+              GRID TÁTICO DE SOLO (10 CASAS)
+            </p>
+            <div class="grid grid-cols-10 gap-1 md:gap-2">
+              <div
+                v-for="idx in 10"
+                :key="idx - 1"
+                :class="[
+                  'h-10 md:h-12 rounded-xl border flex flex-col items-center justify-center transition-all font-mono font-bold text-xs',
+                  heroGridPos === (idx - 1)
+                    ? 'bg-amber-500/30 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/30 scale-105'
+                    : monsterGridPos === (idx - 1)
+                    ? 'bg-rose-600/30 border-rose-500 text-rose-300 shadow-lg shadow-rose-600/30 scale-105'
+                    : 'bg-slate-950/70 border-slate-800 text-slate-400'
+                ]"
+              >
+                <span class="text-xs md:text-sm font-black">{{ idx - 1 }}</span>
+                <span v-if="heroGridPos === (idx - 1)" class="text-[8px] text-amber-300 font-sans font-black leading-none">HERÓI</span>
+                <span v-else-if="monsterGridPos === (idx - 1)" class="text-[8px] text-rose-400 font-sans font-black leading-none">CHEFE</span>
+                <span v-else-if="idx - 1 === 3" class="text-[7px] text-slate-500 leading-none">Início A</span>
+                <span v-else-if="idx - 1 === 6" class="text-[7px] text-slate-500 leading-none">Início B</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 3. PAINEL DE CONTROLE TÁTICO (FASE 1: MOVIMENTO + FASE 2: ATAQUE) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Estação de Comandos do Herói (Colunas 1 e 2) -->
+          <div class="lg:col-span-2 bg-slate-950/90 border-2 border-amber-500/50 rounded-3xl p-5 md:p-6 space-y-6 shadow-2xl">
+            
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 class="text-base font-black text-amber-300 flex items-center space-x-2">
+                <span>🎮 Painel de Ações do Turno</span>
+              </h3>
+              <span :class="['text-xs font-black px-3 py-1 rounded-full border', isMyTurn ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 animate-pulse' : 'bg-slate-800 text-slate-400 border-slate-700']">
+                {{ isMyTurn ? '⚡ SEU TURNO DE ATUAR' : '⏳ AGUARDANDO TURNO DO CHEFE' }}
+              </span>
+            </div>
+
+            <!-- FASE 1: AÇÃO DE MOVIMENTAÇÃO NO GRID -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300 flex items-center space-x-1">
+                  <span>1. Escolha a Movimentação Tática:</span>
+                </span>
+                <span class="text-xs font-mono font-bold text-amber-400">Posição Atual: [{{ heroGridPos }}]</span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 md:gap-3">
+                <!-- Recuar -->
+                <button
+                  :disabled="!isMyTurn || heroGridPos <= 0"
+                  @click="selectedMove = 'LEFT'"
+                  :class="[
+                    'py-2.5 px-3 rounded-2xl border font-bold text-xs md:text-sm flex flex-col items-center justify-center transition-all cursor-pointer',
+                    selectedMove === 'LEFT' ? 'bg-blue-600 border-sky-300 text-white shadow-lg shadow-blue-500/30' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed'
+                  ]"
+                >
+                  <span class="text-base">◀ Recuar</span>
+                  <span class="text-[10px] text-slate-400">Casa [{{ Math.max(0, heroGridPos - 1) }}]</span>
+                </button>
+
+                <!-- Manter Posição -->
+                <button
+                  :disabled="!isMyTurn"
+                  @click="selectedMove = 'STAY'"
+                  :class="[
+                    'py-2.5 px-3 rounded-2xl border font-bold text-xs md:text-sm flex flex-col items-center justify-center transition-all cursor-pointer',
+                    selectedMove === 'STAY' ? 'bg-amber-500 border-amber-300 text-slate-950 font-black shadow-lg shadow-amber-500/30' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed'
+                  ]"
+                >
+                  <span class="text-base">🛑 Manter</span>
+                  <span class="text-[10px] text-slate-400">Ficar no [{{ heroGridPos }}]</span>
+                </button>
+
+                <!-- Avançar -->
+                <button
+                  :disabled="!isMyTurn || heroGridPos + 1 >= monsterGridPos"
+                  @click="selectedMove = 'RIGHT'"
+                  :class="[
+                    'py-2.5 px-3 rounded-2xl border font-bold text-xs md:text-sm flex flex-col items-center justify-center transition-all cursor-pointer',
+                    selectedMove === 'RIGHT' ? 'bg-rose-600 border-rose-300 text-white shadow-lg shadow-rose-600/30' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed'
+                  ]"
+                >
+                  <span class="text-base">Avançar ▶</span>
+                  <span class="text-[10px] text-slate-400">Casa [{{ Math.min(monsterGridPos - 1, heroGridPos + 1) }}]</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- FASE 2: AÇÕES DE COMBATE / HABILIDADES COM ALCANCE -->
+            <div class="space-y-3">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300 block">
+                2. Execute o Golpe ou Habilidade:
+              </span>
+
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                
+                <!-- Ataque Físico Básico -->
+                <button
+                  :disabled="!isMyTurn || (activeCharacter?.characterClass !== 'ARQUEIRO' && currentDistanceAfterMove > 1)"
+                  @click="executeTurnAction('ATTACK')"
+                  class="bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3 px-3 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-rose-500/40"
+                >
+                  <span class="text-2xl">⚔️</span>
+                  <span>Ataque Básico</span>
+                  <span v-if="activeCharacter?.characterClass !== 'ARQUEIRO' && currentDistanceAfterMove > 1" class="text-[9px] text-amber-300">Requer Lado a Lado</span>
+                  <span v-else class="text-[9px] text-rose-200">Golpe Físico</span>
+                </button>
+
+                <!-- Habilidades Equipadas da Build da Classe -->
                 <button
                   v-for="skill in equippedSkills"
                   :key="skill.id"
-                  :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS' || (activeCharacter && activeCharacter.mpCurrent < skill.costMp)"
-                  @click="executeSkillAction(skill)"
-                  class="bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-xs md:text-sm py-3.5 px-3 rounded-2xl shadow-lg shadow-amber-500/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
+                  :disabled="!isMyTurn || isSkillOutOfRange(skill)"
+                  @click="executeTurnSkill(skill)"
+                  class="bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 disabled:opacity-30 disabled:cursor-not-allowed text-slate-950 font-black text-xs md:text-sm py-3 px-3 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-amber-300"
                 >
-                  <span class="text-2xl">{{ skill.icon }}</span>
-                  <span class="truncate max-w-full">{{ skill.name }}</span>
-                  <span class="text-[10px] text-slate-900 font-bold">💧 {{ skill.costMp }} MP • Poder {{ skill.power }}</span>
+                  <span class="text-2xl">{{ skill.icon || '🔥' }}</span>
+                  <span class="truncate max-w-[120px]">{{ skill.name }}</span>
+                  <span v-if="isSkillOutOfRange(skill)" class="text-[9px] text-red-950 font-bold">Muito Longe (Lado a Lado)</span>
+                  <span v-else class="text-[9px] text-slate-900 font-bold">Custo: {{ skill.costMp }} MP</span>
                 </button>
-              </template>
 
-              <!-- Fallback se não tiver nenhuma equipada ainda -->
-              <template v-else>
+                <!-- Postura Defensiva -->
                 <button
-                  :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
-                  @click="executeAction('SKILL')"
-                  class="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-xs md:text-sm py-3.5 px-3 rounded-2xl shadow-lg shadow-amber-500/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
+                  :disabled="!isMyTurn"
+                  @click="executeTurnAction('DEFEND')"
+                  class="bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3 px-3 rounded-2xl shadow-lg flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer border border-blue-400/40"
                 >
-                  <span class="text-2xl">🔥</span>
-                  <span>Poder Especial</span>
-                  <span class="text-[10px] text-slate-900">Custo: 10 MP</span>
+                  <span class="text-2xl">🛡️</span>
+                  <span>Defender</span>
+                  <span class="text-[9px] text-blue-200">Reduz Dano</span>
                 </button>
-
-                <button
-                  :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
-                  @click="executeAction('HEAL')"
-                  class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3.5 px-3 rounded-2xl shadow-lg shadow-emerald-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
-                >
-                  <span class="text-2xl">✨</span>
-                  <span>Bênção de Luz</span>
-                  <span class="text-[10px] text-emerald-200">Cura Coletiva</span>
-                </button>
-              </template>
-
-              <!-- Defender -->
-              <button
-                :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
-                @click="executeAction('DEFEND')"
-                class="bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-3.5 px-3 rounded-2xl shadow-lg shadow-indigo-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
-              >
-                <span class="text-2xl">🛡️</span>
-                <span>Postura de Defesa</span>
-                <span class="text-[10px] text-blue-200">Reduz Dano</span>
-              </button>
+              </div>
             </div>
+
           </div>
-        </div>
 
-      </div>
-
-      <!-- Coluna da Direita: Os Heróis Participantes & Diário de Batalha -->
-      <div class="space-y-6">
-        
-        <!-- Status da Equipe da Batalha -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4">
-          <div class="flex items-center justify-between mb-3">
-            <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">
-              🛡️ Heróis na Batalha
+          <!-- Diário de Combate em Tempo Real (Coluna 3) -->
+          <div class="bg-slate-950/90 border border-slate-800 rounded-3xl p-4 flex flex-col h-[380px]">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-300 mb-2 flex items-center space-x-2">
+              <span>📜 Diário de Combate Arcade</span>
             </h4>
-            <span class="text-xs font-bold text-amber-400">{{ activeParticipants.length }} Participante(s)</span>
-          </div>
 
-          <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
-            <div
-              v-for="m in activeParticipants"
-              :key="m.id"
-              :class="[
-                'flex items-center justify-between p-2 rounded-xl border text-xs',
-                m.id === activeCharacter?.id ? 'bg-amber-500/10 border-amber-500/40' : 'bg-slate-950 border-slate-800'
-              ]"
-            >
-              <div class="flex items-center space-x-2">
-                <img :src="getDisplayImageUrl(m.avatarUrl)" class="w-8 h-8 rounded-lg object-cover border border-slate-700" />
-                <div>
-                  <p class="font-bold text-slate-200">{{ m.name }}</p>
-                  <p class="text-[10px] text-amber-400">{{ m.characterClass }} • Nv. {{ m.level }}</p>
-                </div>
-              </div>
-
-              <!-- HP Bar mini -->
-              <div class="text-right w-20">
-                <span class="text-[10px] font-bold text-rose-400">{{ m.hpCurrent }}/{{ m.hpMax }} HP</span>
-                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                  <div class="bg-rose-500 h-full rounded-full" :style="{ width: `${(m.hpCurrent / m.hpMax) * 100}%` }"></div>
-                </div>
-              </div>
+            <div class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
+              <div
+                v-for="(log, idx) in formattedBattleLogs"
+                :key="idx"
+                class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed text-slate-300"
+                v-html="formatLog(log)"
+              ></div>
             </div>
           </div>
-        </div>
 
-        <!-- Diário de Batalha em Tempo Real -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 flex flex-col h-72">
-          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2 flex items-center space-x-2">
-            <span>📜 Diário de Combate</span>
-          </h4>
-
-          <div class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
-            <div
-              v-for="(log, idx) in formattedBattleLogs"
-              :key="idx"
-              class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed text-slate-300"
-              v-html="formatLog(log)"
-            ></div>
-          </div>
         </div>
 
       </div>
 
     </div>
 
-    <!-- Modal de Vitória Épica -->
-    <div v-if="battle?.status === 'VICTORY'" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div class="bg-gradient-to-b from-slate-900 to-amber-950 border-2 border-amber-400 p-8 rounded-3xl max-w-md w-full text-center shadow-2xl animate-bounce">
-        <div class="text-6xl mb-4">🏆</div>
-        <h2 class="text-3xl font-black text-amber-300 mb-2">VITÓRIA CONQUISTADA!</h2>
-        <p class="text-sm text-slate-300 mb-6">
-          O temível <strong>{{ battle.monsterName }}</strong> foi derrotado!
+    <!-- Modal de Vitória Arcade -->
+    <div v-if="battle?.status === 'VICTORY'" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div class="bg-gradient-to-b from-slate-900 via-[#1c1206] to-amber-950 border-2 border-amber-400 p-8 rounded-3xl max-w-md w-full text-center shadow-2xl space-y-5 animate-bounce">
+        <div class="text-6xl">🏆</div>
+        <h2 class="text-3xl font-black text-amber-300">K.O. - VITÓRIA ÉPICA!</h2>
+        <p class="text-sm text-slate-300">
+          O temível <strong>{{ battle.monsterName }}</strong> foi derrotado no Grid Arcade!
         </p>
 
-        <div class="bg-slate-950/80 p-4 rounded-2xl border border-amber-500/30 mb-6 flex justify-around">
+        <div class="bg-slate-950/80 p-4 rounded-2xl border border-amber-500/30 flex justify-around">
           <div>
             <p class="text-xs text-slate-400">Recompensa</p>
             <p class="text-lg font-black text-amber-400">+{{ battle.rewardXp }} XP</p>
@@ -443,7 +512,7 @@
 
         <button
           @click="resetToLobby"
-          class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black py-3 px-6 rounded-2xl shadow-xl shadow-amber-500/20 transition-all active:scale-95"
+          class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl shadow-amber-500/20 transition-all active:scale-95 cursor-pointer"
         >
           Jogar Novamente / Voltar ao Lobby
         </button>
@@ -475,7 +544,7 @@
         <div class="space-y-3 pt-2">
           <!-- Botão de Alta Médica -->
           <button
-            v-if="infirmarySecondsLeft <= 0"
+            v-if="infirmarySecondsLeft <= 0 || activeCharacter?.isParent"
             @click="recoverFromInfirmary"
             class="w-full bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl transition-all active:scale-95 cursor-pointer"
           >
@@ -484,10 +553,10 @@
 
           <div class="flex items-center space-x-3">
             <router-link
-              to="/familia/ficha"
+              to="/familia/enfermaria"
               class="flex-1 bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 text-white font-black text-xs py-3 px-4 rounded-xl text-center shadow transition-all active:scale-95"
             >
-              🛡️ Ver Ficha do Herói
+              🏥 Abrir Ala da Enfermaria
             </router-link>
 
             <router-link
@@ -501,25 +570,24 @@
       </div>
     </div>
 
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import FamilyNavbar from '../../components/family/FamilyNavbar.vue';
 import { familyApi, getDisplayImageUrl } from '../../services/familyApi';
-import { 
-  getFamilySocket, 
-  sendFamilyBattleAction, 
-  joinFamilyRoom, 
-  createPartyLobby, 
-  sendPartyInvite, 
-  acceptPartyInvite, 
+import {
+  getFamilySocket,
+  onlineFamilyMembers,
+  activePartyLobby,
+  incomingBattleInvite,
+  joinFamilyRoom,
+  createPartyLobby,
+  sendPartyInvite,
+  acceptPartyInvite,
   startPartyBattle,
-  activePartyLobby, 
-  incomingBattleInvite, 
-  onlineFamilyMembers 
+  sendFamilyBattleAction,
 } from '../../services/familySocket';
 import confetti from 'canvas-confetti';
 
@@ -528,11 +596,20 @@ const members = ref<any[]>([]);
 const activeCharacter = ref<any>(null);
 const equippedSkills = ref<any[]>([]);
 const monsterHit = ref<boolean>(false);
+const heroTookHit = ref<boolean>(false);
+const lastDamageTaken = ref<number>(15);
 const battleState = ref<'LOBBY' | 'BATTLE'>('LOBBY');
 const showInfirmaryModal = ref<boolean>(false);
+const selectedMove = ref<'LEFT' | 'RIGHT' | 'STAY'>('STAY');
 
 const infirmarySecondsLeft = ref<number>(0);
 let timerInterval: any = null;
+
+const monsterInfo = {
+  name: 'O Golem da Bagunça',
+  avatar: 'https://images.unsplash.com/photo-1563089145-599997674d42?w=500&auto=format&fit=crop&q=60',
+  description: 'Criatura colossal feita de brinquedos fora do lugar e roupas espalhadas pelo quarto. Reúna seus irmãos ou lute sozinho para vencê-lo!',
+};
 
 const isHeroInInfirmary = computed(() => {
   if (!activeCharacter.value) return false;
@@ -577,11 +654,44 @@ async function recoverFromInfirmary() {
   }
 }
 
-const monsterInfo = {
-  name: 'O Golem da Bagunça',
-  avatar: 'https://images.unsplash.com/photo-1563089145-599997674d42?w=500&auto=format&fit=crop&q=60',
-  description: 'Criatura colossal feita de brinquedos fora do lugar e roupas espalhadas pelo quarto. Reúna seus irmãos ou lute sozinho para vencê-lo!',
-};
+// Posições no Grid de 10 Casas (0 a 9)
+const heroGridPos = computed<number>(() => {
+  if (!battle.value?.gridPositions || !activeCharacter.value) return 3;
+  const p = battle.value.gridPositions;
+  return p[activeCharacter.value.id] !== undefined ? Number(p[activeCharacter.value.id]) : 3;
+});
+
+const monsterGridPos = computed<number>(() => {
+  if (!battle.value?.gridPositions) return 6;
+  const p = battle.value.gridPositions;
+  return p.monster !== undefined ? Number(p.monster) : 6;
+});
+
+const currentDistance = computed<number>(() => {
+  return Math.abs(monsterGridPos.value - heroGridPos.value);
+});
+
+const currentDistanceAfterMove = computed<number>(() => {
+  let simulatedHeroPos = heroGridPos.value;
+  if (selectedMove.value === 'LEFT') {
+    simulatedHeroPos = Math.max(0, simulatedHeroPos - 1);
+  } else if (selectedMove.value === 'RIGHT') {
+    simulatedHeroPos = Math.min(monsterGridPos.value - 1, simulatedHeroPos + 1);
+  }
+  return Math.abs(monsterGridPos.value - simulatedHeroPos);
+});
+
+function isSkillOutOfRange(skill: any) {
+  if (!skill) return false;
+  const isRanged = skill.effectType?.includes('RANGED') || activeCharacter.value?.characterClass === 'ARQUEIRO';
+  const isHeal = skill.effectType?.includes('HEAL') || activeCharacter.value?.characterClass === 'CURANDEIRA';
+  const isMagic = skill.effectType?.includes('MAGIC') || activeCharacter.value?.characterClass === 'MAGO';
+
+  if (isRanged || isHeal || isMagic || skill.effectType === 'SHIELD') {
+    return false;
+  }
+  return currentDistanceAfterMove.value > 1;
+}
 
 function isMemberOnline(characterId: string) {
   return onlineFamilyMembers.value.some(m => m.characterId === characterId);
@@ -619,26 +729,11 @@ const formattedBattleLogs = computed<string[]>(() => {
   return [];
 });
 
-const activeParticipants = computed(() => {
-  const turns = normalizedTurnOrder.value;
-  const ids = turns.filter((id: string) => id !== 'MONSTER');
-  if (ids.length === 0) return members.value;
-  return members.value.filter(m => ids.includes(m.id));
-});
-
 const currentTurnHeroId = computed(() => {
   const turns = normalizedTurnOrder.value;
   if (turns.length === 0) return activeCharacter.value?.id || null;
   const idx = (battle.value?.activeTurnIndex ?? 0) % turns.length;
   return turns[idx];
-});
-
-const currentTurnHeroName = computed(() => {
-  const heroId = currentTurnHeroId.value;
-  if (!heroId) return activeCharacter.value?.name || 'Seu Herói';
-  if (heroId === 'MONSTER') return `🐲 ${battle.value?.monsterName || 'Monstro'}`;
-  const h = members.value.find(m => m.id === heroId);
-  return h ? `🧙‍♂️ ${h.name} (${h.characterClass})` : (activeCharacter.value?.name || 'Seu Herói');
 });
 
 const isMyTurn = computed(() => {
@@ -648,12 +743,10 @@ const isMyTurn = computed(() => {
   const heroId = currentTurnHeroId.value;
   if (heroId === 'MONSTER') return false;
   
-  // Se for Solo (só tem 1 herói no combate), é sempre a vez dele!
   const activeHeroes = turns.filter(id => id !== 'MONSTER');
   if (activeHeroes.length === 1 && activeHeroes[0] === activeCharacter.value.id) {
     return true;
   }
-  
   return heroId === activeCharacter.value.id;
 });
 
@@ -707,6 +800,7 @@ function startPartyBattleGroup() {
 
 function resetToLobby() {
   battleState.value = 'LOBBY';
+  selectedMove.value = 'STAY';
   if (activeCharacter.value) {
     createPartyLobby(activeCharacter.value);
   }
@@ -726,7 +820,6 @@ async function loadData() {
       joinFamilyRoom(activeCharacter.value.id, activeCharacter.value.name);
       createPartyLobby(activeCharacter.value);
 
-      // Carrega as habilidades equipadas da build de combate do herói
       const treeRes = await familyApi.getSkillTree(activeCharacter.value.id);
       if (treeRes.success) {
         equippedSkills.value = treeRes.skills.filter((s: any) => treeRes.equippedSkillIds.includes(s.id));
@@ -737,7 +830,7 @@ async function loadData() {
   }
 }
 
-function executeAction(actionType: 'ATTACK' | 'SKILL' | 'DEFEND' | 'HEAL') {
+function executeTurnAction(actionType: 'ATTACK' | 'DEFEND') {
   if (!battle.value || !activeCharacter.value) return;
   if (isHeroInInfirmary.value) {
     showInfirmaryModal.value = true;
@@ -747,10 +840,19 @@ function executeAction(actionType: 'ATTACK' | 'SKILL' | 'DEFEND' | 'HEAL') {
   monsterHit.value = true;
   setTimeout(() => { monsterHit.value = false; }, 600);
 
-  sendFamilyBattleAction(battle.value.id, activeCharacter.value.id, actionType);
+  sendFamilyBattleAction(
+    battle.value.id,
+    activeCharacter.value.id,
+    actionType,
+    undefined,
+    undefined,
+    selectedMove.value
+  );
+
+  selectedMove.value = 'STAY';
 }
 
-function executeSkillAction(skill: any) {
+function executeTurnSkill(skill: any) {
   if (!battle.value || !activeCharacter.value) return;
   if (isHeroInInfirmary.value) {
     showInfirmaryModal.value = true;
@@ -760,7 +862,16 @@ function executeSkillAction(skill: any) {
   monsterHit.value = true;
   setTimeout(() => { monsterHit.value = false; }, 600);
 
-  sendFamilyBattleAction(battle.value.id, activeCharacter.value.id, 'SKILL', skill.name, skill.id);
+  sendFamilyBattleAction(
+    battle.value.id,
+    activeCharacter.value.id,
+    'SKILL',
+    skill.name,
+    skill.id,
+    selectedMove.value
+  );
+
+  selectedMove.value = 'STAY';
 }
 
 onMounted(() => {
@@ -769,10 +880,15 @@ onMounted(() => {
 
   const socket = getFamilySocket();
 
+  socket.on('family:action_error', (data: any) => {
+    alert(data.message || 'Ação inválida!');
+  });
+
   socket.on('family:hero_knocked_out', (data: any) => {
     if (activeCharacter.value && data.characterId === activeCharacter.value.id) {
       activeCharacter.value.hpCurrent = 0;
       activeCharacter.value.inInfirmaryUntil = data.inInfirmaryUntil;
+      heroTookHit.value = true;
       showInfirmaryModal.value = true;
       updateInfirmaryCountdown();
     }
@@ -820,6 +936,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (timerInterval) clearInterval(timerInterval);
   const socket = getFamilySocket();
+  socket.off('family:action_error');
   socket.off('family:hero_knocked_out');
   socket.off('family:battle_party_started');
   socket.off('family:battle_updated');
