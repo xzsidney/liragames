@@ -216,8 +216,16 @@
         
         <!-- Card do Chefe Monstruoso -->
         <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-rose-950/40 border-2 border-rose-500/40 rounded-3xl p-6 shadow-2xl relative overflow-hidden text-center">
-          <div class="text-xs font-bold uppercase tracking-widest text-rose-400 bg-rose-500/10 inline-block px-3 py-1 rounded-full border border-rose-500/20 mb-3">
-            {{ battle.title }}
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-xs font-bold uppercase tracking-widest text-rose-400 bg-rose-500/10 inline-block px-3 py-1 rounded-full border border-rose-500/20">
+              {{ battle.title }}
+            </div>
+            <button
+              @click="resetToLobby"
+              class="text-xs text-slate-400 hover:text-slate-200 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700"
+            >
+              ⚙️ Voltar ao Lobby
+            </button>
           </div>
 
           <!-- Avatar do Chefe com Animação -->
@@ -240,7 +248,7 @@
             <div class="w-full bg-slate-950 h-4 rounded-full border border-rose-500/40 p-0.5 overflow-hidden">
               <div 
                 class="bg-gradient-to-r from-rose-600 to-red-400 h-full rounded-full transition-all duration-500"
-                :style="{ width: `${(battle.monsterHpCurrent / battle.monsterHpMax) * 100}%` }"
+                :style="{ width: `${Math.max(0, (battle.monsterHpCurrent / battle.monsterHpMax) * 100)}%` }"
               ></div>
             </div>
           </div>
@@ -275,7 +283,7 @@
             <button
               :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
               @click="executeAction('ATTACK')"
-              class="bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-rose-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95"
+              class="bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-rose-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
             >
               <span class="text-2xl">🗡️</span>
               <span>Ataque Físico</span>
@@ -285,7 +293,7 @@
             <button
               :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
               @click="executeAction('SKILL')"
-              class="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-amber-500/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95"
+              class="bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-amber-500/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
             >
               <span class="text-2xl">🔥</span>
               <span>Magia Especial</span>
@@ -295,7 +303,7 @@
             <button
               :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
               @click="executeAction('HEAL')"
-              class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-emerald-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95"
+              class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-emerald-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
             >
               <span class="text-2xl">✨</span>
               <span>Cura Coletiva</span>
@@ -305,7 +313,7 @@
             <button
               :disabled="!isMyTurn || battle.status !== 'IN_PROGRESS'"
               @click="executeAction('DEFEND')"
-              class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-indigo-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95"
+              class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs md:text-sm py-4 px-3 rounded-2xl shadow-lg shadow-indigo-600/20 flex flex-col items-center justify-center space-y-1 transition-all active:scale-95 cursor-pointer"
             >
               <span class="text-2xl">🛡️</span>
               <span>Defender</span>
@@ -363,7 +371,7 @@
 
           <div class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs">
             <div
-              v-for="(log, idx) in battle.battleLogs"
+              v-for="(log, idx) in formattedBattleLogs"
               :key="idx"
               class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed text-slate-300"
               v-html="formatLog(log)"
@@ -444,29 +452,74 @@ function isInParty(characterId: string) {
   return activePartyLobby.value.some(p => p.characterId === characterId);
 }
 
+const normalizedTurnOrder = computed<string[]>(() => {
+  if (!battle.value || !battle.value.currentTurnOrder) return [];
+  if (Array.isArray(battle.value.currentTurnOrder)) return battle.value.currentTurnOrder;
+  if (typeof battle.value.currentTurnOrder === 'string') {
+    try {
+      const parsed = JSON.parse(battle.value.currentTurnOrder);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  return [];
+});
+
+const formattedBattleLogs = computed<string[]>(() => {
+  if (!battle.value || !battle.value.battleLogs) return [];
+  if (Array.isArray(battle.value.battleLogs)) return battle.value.battleLogs;
+  if (typeof battle.value.battleLogs === 'string') {
+    try {
+      const parsed = JSON.parse(battle.value.battleLogs);
+      return Array.isArray(parsed) ? parsed : [battle.value.battleLogs];
+    } catch (e) {
+      return [battle.value.battleLogs];
+    }
+  }
+  return [];
+});
+
 const activeParticipants = computed(() => {
-  if (!battle.value || !Array.isArray(battle.value.currentTurnOrder)) return members.value;
-  const ids = battle.value.currentTurnOrder.filter((id: string) => id !== 'MONSTER');
+  const turns = normalizedTurnOrder.value;
+  const ids = turns.filter((id: string) => id !== 'MONSTER');
+  if (ids.length === 0) return members.value;
   return members.value.filter(m => ids.includes(m.id));
 });
 
 const currentTurnHeroId = computed(() => {
-  if (!battle.value || !Array.isArray(battle.value.currentTurnOrder)) return null;
-  return battle.value.currentTurnOrder[battle.value.activeTurnIndex];
+  const turns = normalizedTurnOrder.value;
+  if (turns.length === 0) return activeCharacter.value?.id || null;
+  const idx = (battle.value?.activeTurnIndex ?? 0) % turns.length;
+  return turns[idx];
 });
 
 const currentTurnHeroName = computed(() => {
-  if (!currentTurnHeroId.value) return 'Aguardando...';
-  if (currentTurnHeroId.value === 'MONSTER') return `🐲 ${battle.value?.monsterName || 'Monstro'}`;
-  const h = members.value.find(m => m.id === currentTurnHeroId.value);
-  return h ? `🧙‍♂️ ${h.name} (${h.characterClass})` : 'Herói';
+  const heroId = currentTurnHeroId.value;
+  if (!heroId) return activeCharacter.value?.name || 'Seu Herói';
+  if (heroId === 'MONSTER') return `🐲 ${battle.value?.monsterName || 'Monstro'}`;
+  const h = members.value.find(m => m.id === heroId);
+  return h ? `🧙‍♂️ ${h.name} (${h.characterClass})` : (activeCharacter.value?.name || 'Seu Herói');
 });
 
 const isMyTurn = computed(() => {
-  return activeCharacter.value && currentTurnHeroId.value === activeCharacter.value.id;
+  if (!activeCharacter.value) return false;
+  const turns = normalizedTurnOrder.value;
+  if (turns.length === 0) return true;
+  const heroId = currentTurnHeroId.value;
+  if (heroId === 'MONSTER') return false;
+  
+  // Se for Solo (só tem 1 herói no combate), é sempre a vez dele!
+  const activeHeroes = turns.filter(id => id !== 'MONSTER');
+  if (activeHeroes.length === 1 && activeHeroes[0] === activeCharacter.value.id) {
+    return true;
+  }
+  
+  return heroId === activeCharacter.value.id;
 });
 
 function formatLog(log: string) {
+  if (typeof log !== 'string') return '';
   return log.replace(/\*\*(.*?)\*\*/g, '<strong class="text-amber-300">$1</strong>');
 }
 
@@ -543,6 +596,7 @@ onMounted(() => {
 
   socket.on('family:battle_updated', (data: any) => {
     battle.value = data.battle;
+    battleState.value = 'BATTLE';
     monsterHit.value = true;
     setTimeout(() => { monsterHit.value = false; }, 500);
   });
