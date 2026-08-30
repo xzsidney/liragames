@@ -68,7 +68,7 @@ export const familyApi = {
   async uploadAvatar(file: File) {
     const formData = new FormData();
     formData.append('avatar', file);
-    formData.append('folder', 'family');
+    formData.append('folder', 'characters');
     const token = sessionStorage.getItem('lira_token') || localStorage.getItem('lira_token') || localStorage.getItem('token');
     const res = await fetch(`${API_URL}/api/upload`, {
       method: 'POST',
